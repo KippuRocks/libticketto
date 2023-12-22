@@ -1,0 +1,34 @@
+{
+  "name": "ticketto",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Let's applications connect with Ticketto Protocol to emit, sell, resell, and transfer event tickets",
+  "main": "index.js",
+  "workspaces": [
+    "lib"
+  ],
+  "scripts": {
+    "test": "node --loader=ts-node/esm test/mod.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/kippurocks/libticketto.git"
+  },
+  "keywords": [
+    "ticketto",
+    "nft",
+    "tickets",
+    "events",
+    "kippu"
+  ],
+  "author": "Pablo Dorado <hola@pablodorado.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kippurocks/libticketto/issues"
+  },
+  "homepage": "https://github.com/kippurocks/libticketto#readme",
+  "devDependencies": {
+    "tsc": "^2.0.4",
+    "ts-node": "^10.9.2"
+  }
+}
