@@ -1,0 +1,8 @@
+{
+  "name": "@kippurocks/ticketto",
+  "version": "1.0.0",
+  "description": "Library to wrap ticketto protocol",
+  "main": "mod.js",
+  "type": "module",
+  "author": "Pablo Andrés Dorado Suárez <hola@pablodorado.com>"
+}
