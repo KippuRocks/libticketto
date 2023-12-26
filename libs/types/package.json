@@ -1,20 +1,26 @@
 {
-  "name": "@kippurocks/ticketto",
+  "name": "@ticketto/types",
   "version": "1.0.0",
-  "private": true,
-  "description": "Let's applications connect with Ticketto Protocol to emit, sell, resell, and transfer event tickets",
+  "description": "A collection of some types the ticketto protocol uses",
+  "type": "module",
   "author": {
     "name": "Pablo Andrés Dorado Suárez",
     "email": "hola@pablodorado.com",
     "url": "https://pablodorado.com"
   },
   "license": "MIT",
-  "workspaces": [
-    "libs/protocol",
-    "libs/types"
-  ],
+  "types": "./src/types.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/types.d.ts"
+    },
+    "./*": {
+      "types": "./src/*.d.ts"
+    }
+  },
   "scripts": {
-    "test": "node --loader=ts-node/esm test/mod.ts"
+    "prepack": "npm run build",
+    "build": "tsc -p tsconfig.types.json"
   },
   "repository": {
     "type": "git",
@@ -30,9 +36,5 @@
     "tickets",
     "events",
     "kippu"
-  ],
-  "devDependencies": {
-    "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
-  }
+  ]
 }
