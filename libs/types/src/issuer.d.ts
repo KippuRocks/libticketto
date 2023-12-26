@@ -1,4 +1,4 @@
-import type { AccountId } from "./primitives.d.ts";
+import type { AccountId } from "./account.js";
 
 export type Issuer = {
   accountId: AccountId;

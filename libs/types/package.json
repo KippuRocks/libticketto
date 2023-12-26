@@ -9,18 +9,14 @@
     "url": "https://pablodorado.com"
   },
   "license": "MIT",
-  "types": "./src/types.d.ts",
+  "types": "src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/types.d.ts"
+      "types": "./src/index.d.ts"
     },
     "./*": {
       "types": "./src/*.d.ts"
     }
-  },
-  "scripts": {
-    "prepack": "npm run build",
-    "build": "tsc -p tsconfig.types.json"
   },
   "repository": {
     "type": "git",

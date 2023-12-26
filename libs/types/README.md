@@ -1,6 +1,6 @@
 # Ticketto types
 
-A collection of some types the ticketto protocol uses.
+A collection of some types the Ticketto protocol uses.
 
 ## Usage
 
@@ -31,14 +31,6 @@ Alternatively, you can build the NPM package from source.
 ### Build from Source
 
 The [current source code](https://github.com/kippurocks/ticketto) is always available on GitHub.
-
-```sh
-npm -w 
-```
-
-See our building documentation for more information.
-
-
 
 ## License
 

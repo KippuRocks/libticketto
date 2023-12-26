@@ -1,5 +1,3 @@
-export type AccountId = string;
-
 export type Balance = number;
 export type AssetId = number;
 
