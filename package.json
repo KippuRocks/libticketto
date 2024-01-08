@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "workspaces": [
+    "examples/*",
     "libs/protocol",
     "libs/types"
   ],
@@ -32,6 +33,7 @@
     "kippu"
   ],
   "devDependencies": {
+    "@tsconfig/node-lts": "^20.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
