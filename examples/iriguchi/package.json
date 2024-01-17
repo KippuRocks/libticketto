@@ -1,0 +1,17 @@
+{
+  "name": "@kippurocks/iriguchi",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node --loader ts-node/esm index.ts",
+    "dev": "node --watch --loader ts-node/esm index.ts",
+    "checkin": "node --loader ts-node/esm bin/do-checkin.ts"
+  },
+  "dependencies": {
+    "@kippurocks/examples_common": "^1.0.0",
+    "@polkadot/api": "^10.11.2",
+    "@polkadot/types": "^10.11.2",
+    "@ticketto/types": "^1.0.1",
+    "hash-wasm": "^4.11.0"
+  }
+}

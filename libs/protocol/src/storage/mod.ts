@@ -1,5 +1,5 @@
-import { CID } from "@ticketto/types/storage";
-import { FileLike } from "@ticketto/types/primitives";
+import type { CID } from "@ticketto/types/storage";
+import type { FileLike } from "@ticketto/types/primitives";
 import { IPFS } from "./ipfs.js";
 
 export function get(ipfs: IPFS, cid: CID) {
