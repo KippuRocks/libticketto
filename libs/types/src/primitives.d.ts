@@ -1,9 +1,12 @@
+export type Timestamp = number;
+
+export type BlockNumber = number;
 export type Balance = number;
 export type AssetId = number;
 
 export type AssetCode = string;
 
-export type DateRange = [EpochTimeStamp, EpochTimeStamp];
+export type DateRange = [Timestamp, Timestamp];
 
 export type FileLike = FileLocation | FileContent;
 export type FileLocation = string | URL;

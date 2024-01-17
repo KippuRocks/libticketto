@@ -1,13 +1,15 @@
 import type { DateRange, FileLike } from "./primitives.d.ts";
 import type { LineItemPrice } from "./product.d.ts";
 
+export type EventId = number;
+
 /**
  * A single instance of a gathering (either single-dated or multi-dated)
  * that issues tickets for attendees to participate in.
  */
 export type Event = {
   /** An unique identifier of the event */
-  id: number;
+  id: EventId;
   /** The name that identifies the event */
   name: string;
   /** A brief description used for the reader to get a glance of what
@@ -22,6 +24,11 @@ export type Event = {
   /** A list of possible classes of tickets. Each ticket class
    * is a template that will be used to issue an instance */
   ticketClasses: EventTicketClass[];
+  /**
+   * The maximum capacity for an event, indicates how many ticket
+   * instances can be issued for it.
+   */
+  capacity: number;
 };
 
 /**
@@ -29,6 +36,8 @@ export type Event = {
  * to an event.
  */
 export type EventTicketClass = {
+  /** Unique identifier of the class */
+  eventId: EventId;
   /** Unique identifier of the class */
   id: string;
   /** A descriptive message for users to understand what this class
@@ -45,4 +54,9 @@ export type EventTicketClass = {
   /** A range of dates for when this class of ticket can be sold.
    * By default, is calculated based on the event's dates */
   sellingDates?: DateRange;
+  /**
+   * The maxmimum number of ticket instances that can be issued for
+   * this class. Cannot be greater than the capacity of the event.
+   */
+  maxIssuance?: number;
 };
