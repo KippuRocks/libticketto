@@ -1,5 +1,5 @@
 import type { AccountId } from "./account.d.ts";
-import type { DateRange, FileLike } from "./primitives.d.ts";
+import type { DateRange, FileLocation } from "./primitives.d.ts";
 import type { LineItemPrice } from "./product.d.ts";
 
 export type EventId = number;
@@ -8,7 +8,7 @@ export type EventId = number;
  * A single instance of a gathering (either single-dated or multi-dated)
  * that issues tickets for attendees to participate in.
  */
-export type Event = {
+export type Event<FileLike = FileLocation> = {
   /** An unique identifier of the event */
   id: EventId;
   /**

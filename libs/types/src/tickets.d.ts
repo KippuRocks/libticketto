@@ -1,10 +1,10 @@
 import type { EventId } from "./events.d.ts";
-import type { Timestamp } from "./primitives.d.ts";
+import type { FileLocation, Timestamp } from "./primitives.d.ts";
 import type { LineItem } from "./product.d.ts";
 
 export type TicketId = number;
 
-export type Ticket = {
+export type Ticket<FileLike = FileLocation> = {
   /**
    * A unique identifier for the ticket
    */
@@ -28,7 +28,7 @@ export type Ticket = {
   /**
    * An image of the ticket art
    */
-  ticketArt: string | URL;
+  ticketArt: FileLike;
   /**
    * A list of possible attendances for the ticket
    */
