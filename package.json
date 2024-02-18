@@ -11,8 +11,7 @@
   "license": "MIT",
   "workspaces": [
     "examples/*",
-    "libs/protocol",
-    "libs/types"
+    "libs/*"
   ],
   "scripts": {
     "test": "node --loader=ts-node/esm test/mod.ts"
