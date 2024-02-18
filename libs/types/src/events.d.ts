@@ -1,3 +1,4 @@
+import type { AccountId } from "./account.d.ts";
 import type { DateRange, FileLike } from "./primitives.d.ts";
 import type { LineItemPrice } from "./product.d.ts";
 
@@ -10,6 +11,10 @@ export type EventId = number;
 export type Event = {
   /** An unique identifier of the event */
   id: EventId;
+  /**
+   * The account that owns the events
+   */
+  owner: AccountId;
   /** The name that identifies the event */
   name: string;
   /** A brief description used for the reader to get a glance of what
@@ -21,9 +26,15 @@ export type Event = {
    * one for an event of one day. Multiple ranges are defined for
    * multi-day events. */
   dates: DateRange[];
+  /**
+   * The date range for the next available date of the event. In the case
+   * of single day events, this will always return the range of the event
+   * date.
+   */
+  readonly date: DateRange;
   /** A list of possible classes of tickets. Each ticket class
    * is a template that will be used to issue an instance */
-  ticketClasses: EventTicketClass[];
+  ticketClasses?: EventTicketClass[];
   /**
    * The maximum capacity for an event, indicates how many ticket
    * instances can be issued for it.

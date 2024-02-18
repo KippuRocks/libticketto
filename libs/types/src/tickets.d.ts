@@ -12,7 +12,11 @@ export type Ticket = {
   /**
    * The identifier for the ticket event
    */
-  eventId: EventId;
+  issuer: EventId;
+  /**
+   * The account that owns the ticket
+   */
+  owner: AccountId;
   /**
    * A SEO-friendly name for the ticket, available on indexers
    */
@@ -24,7 +28,7 @@ export type Ticket = {
   /**
    * An image of the ticket art
    */
-  image: string | URL;
+  ticketArt: string | URL;
   /**
    * A list of possible attendances for the ticket
    */
@@ -36,33 +40,36 @@ export type Ticket = {
   /**
    * The attendance policy for the ticket
    */
-  attedancePolicy: AttendancePolicy;
+  attedancePolicy?: AttendancePolicy;
   /**
    * The restrictions associated to the ticket
    */
-  restrictions: TicketRestrictions;
+  restrictions?: TicketRestrictions;
 };
 
-export type AttendancePolicy = {
-  type: AttendancePolicyType.Single;
-} | {
-  type: AttendancePolicyType.Multiple;
-  max: number;
-  until: Timestamp;
-} | {
-  type: AttendancePolicyType.Unlimited,
-  until: Timestamp;
-};
+export type AttendancePolicy =
+  | {
+      type: AttendancePolicyType.Single;
+    }
+  | {
+      type: AttendancePolicyType.Multiple;
+      max: number;
+      until: Timestamp;
+    }
+  | {
+      type: AttendancePolicyType.Unlimited;
+      until: Timestamp;
+    };
 
 export enum AttendancePolicyType {
-  Single = 'Single',
-  Multiple = 'Multiple',
-  Unlimited = 'Unlimited'
-};
+  Single = "Single",
+  Multiple = "Multiple",
+  Unlimited = "Unlimited",
+}
 
 export type TicketRestrictions = {
   /** Determines if a ticket is not for resale (i.e. exclusive events, scolarships) */
   cannotResale: boolean;
   /** Determines if a ticket is not able to be transfered to other accounts (i.e. scolarships) */
-  cannotTransfer: boolean
+  cannotTransfer: boolean;
 };
