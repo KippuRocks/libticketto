@@ -15,7 +15,7 @@ export interface TicketsStorage {
    * @param issuer The {@link EventId} of the event that issues the ticket.
    * @param id The {@link TicketId} of a ticket.
    */
-  get(issuer: EventId, id: TicketId): Promise<Ticket>;
+  get(issuer: EventId, id: TicketId): Promise<Ticket | undefined>;
 
   /**
    * Returns the payload to request an attendance.

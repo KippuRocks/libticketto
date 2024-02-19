@@ -17,5 +17,5 @@ export interface EventsStorage {
    * Returns the details of the event.
    * @param id The {@link EventId} of the event to be fetched
    */
-  get(id: EventId): Promise<Event>;
+  get(id: EventId): Promise<Event | undefined>;
 }
