@@ -1,9 +1,9 @@
 import type { AccountId, Event, EventId } from "@ticketto/types";
 
 /**
- * A list of possible transactions to interact with tickets.
+ * Calls to interact with events module.
  */
-export interface TicketsCalls {
+export interface EventsCalls {
   /**
    * Creates a new event, to be owned by `owner`
    * @param owner The {@link AccountId} associated to the owner of the event.
@@ -24,7 +24,7 @@ export interface TicketsCalls {
   /**
    * Sets the ownership on another account.
    * @param event The event to be created
-   * @throws An error if the signer of the command
+   * @throws An error if the signer of the command is not the owner of the event
    */
   transferOwner(id: EventId, newOwner: Omit<Event, "id">): Promise<void>;
 }
