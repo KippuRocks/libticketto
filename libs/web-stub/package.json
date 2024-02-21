@@ -1,0 +1,55 @@
+{
+  "name": "@ticketto/web-stub",
+  "version": "1.0.0",
+  "description": "A stub-based, web-scoped implementation of The Ticketto Protocol",
+  "type": "module",
+  "author": {
+    "name": "Pablo Andrés Dorado Suárez",
+    "email": "hola@pablodorado.com",
+    "url": "https://pablodorado.com"
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test --loader ts-node/esm test/index.ts"
+  },
+  "main": "src/index.ts",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./src/index.ts",
+      "import": "./src/index.ts",
+      "types": "./src/index.d.ts"
+    },
+    "./*": {
+      "require": "./src/*.ts",
+      "import": "./src/*.ts",
+      "types": "./src/*.d.ts"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/kippurocks/libticketto.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kippurocks/libticketto/issues"
+  },
+  "dependencies": {
+    "@ticketto/protocol": "^1.0.0",
+    "@ticketto/types": "^1.1.2",
+    "idb": "^8.0.0",
+    "inversify": "^6.0.2",
+    "reflect-metadata": "^0.2.1"
+  },
+  "homepage": "https://github.com/kippurocks/libticketto#readme",
+  "keywords": [
+    "ticketto",
+    "nft",
+    "tickets",
+    "events",
+    "kippu"
+  ],
+  "devDependencies": {
+    "indexeddbshim": "^13.0.0",
+    "ts-node": "^10.9.2"
+  }
+}

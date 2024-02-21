@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "reflect-metadata",
+      "node"
+    ],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+    ],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+  }
+}
