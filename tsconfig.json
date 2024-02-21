@@ -5,6 +5,11 @@
     "moduleResolution": "NodeNext",
     "declaration": true,
     "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "types": [
+      "reflect-metadata"
+    ],
   },
   "exclude": [
     "node_modules",
