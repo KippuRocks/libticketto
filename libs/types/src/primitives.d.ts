@@ -1,3 +1,5 @@
+export type Get<T> = () => T;
+
 export type Timestamp = number;
 
 export type BlockNumber = number;
