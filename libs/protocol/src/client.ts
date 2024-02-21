@@ -1,7 +1,9 @@
+import { AccountId, Get } from "@ticketto/types";
+
 import type { EventsModule } from "./events/index.js";
 import type { TicketsModule } from "./tickets/index.js";
 
-export interface TickettoRuntime<Config> {
+export interface TickettoConsumer<Config = ClientConfig> {
   build(config?: Config): Promise<TickettoClient>;
 }
 
@@ -21,3 +23,13 @@ export type TickettoClient = {
    */
   readonly tickets: TicketsModule;
 };
+
+export type ClientConfig = {
+  accountProvider?: ClientAccountProvider;
+  consumerSettings?: unknown;
+};
+
+export interface ClientAccountProvider {
+  getAccountId?: Get<AccountId>;
+  sign(payload: Uint8Array): Uint8Array;
+}

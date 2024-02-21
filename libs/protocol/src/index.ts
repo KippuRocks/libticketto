@@ -2,22 +2,26 @@ export type * from "./events/index.js";
 export type * from "./tickets/index.js";
 export type * from "./client.js";
 
-import type { TickettoClient, TickettoRuntime } from "./client.js";
+import type {
+  ClientConfig,
+  TickettoClient,
+  TickettoConsumer,
+} from "./client.js";
 
-interface ConstructorOf<Config, Runtime = TickettoRuntime<Config>> {
-  new (config?: Config): Runtime;
+interface ConstructorOf<Config, Consumer = TickettoConsumer<Config>> {
+  new (...params: any[]): Consumer;
 }
 
-export class TickettoClientBuilder<Config> {
-  private backendConstructor?: ConstructorOf<Config>;
+export class TickettoClientBuilder<Config = ClientConfig> {
+  private consumerLike?: ConstructorOf<Config> | TickettoConsumer<Config>;
   private config?: Config;
 
   constructor() {}
 
-  withBackend(
-    constructor: ConstructorOf<Config>
+  withConsumer(
+    consumer: ConstructorOf<Config> | TickettoConsumer<Config>
   ): TickettoClientBuilder<Config> {
-    this.backendConstructor = constructor;
+    this.consumerLike = consumer;
     return this;
   }
 
@@ -26,12 +30,28 @@ export class TickettoClientBuilder<Config> {
     return this;
   }
 
+  isConstructorOf(
+    consumerLike: unknown
+  ): consumerLike is ConstructorOf<Config> {
+    return (
+      typeof consumerLike === "function" &&
+      consumerLike?.constructor !== undefined
+    );
+  }
+
   build(): Promise<TickettoClient> {
-    let BackendConstructor = this.backendConstructor;
-    if (!BackendConstructor) {
+    if (this.consumerLike === undefined) {
       throw new Error("InvalidArgument: Missing `backend`");
     }
 
-    return new BackendConstructor().build(this.config);
+    let consumer: TickettoConsumer<Config>;
+    if (this.isConstructorOf(this.consumerLike)) {
+      let ConsumerConstructor = this.consumerLike;
+      consumer = new ConsumerConstructor();
+    } else {
+      consumer = this.consumerLike;
+    }
+
+    return consumer.build(this.config);
   }
 }
