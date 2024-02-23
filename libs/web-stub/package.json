@@ -1,6 +1,6 @@
 {
   "name": "@ticketto/web-stub",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A stub-based, web-scoped implementation of The Ticketto Protocol",
   "type": "module",
   "author": {
@@ -10,20 +10,20 @@
   },
   "license": "MIT",
   "scripts": {
+    "build": "tsc",
+    "prepack": "npm run build",
     "test": "node --test --loader ts-node/esm test/index.ts"
   },
   "main": "src/index.ts",
   "types": "src/index.d.ts",
   "exports": {
     ".": {
-      "require": "./src/index.ts",
-      "import": "./src/index.ts",
-      "types": "./src/index.d.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     },
     "./*": {
-      "require": "./src/*.ts",
-      "import": "./src/*.ts",
-      "types": "./src/*.d.ts"
+      "import": "./dist/*.js",
+      "types": "./dist/*.d.ts"
     }
   },
   "repository": {

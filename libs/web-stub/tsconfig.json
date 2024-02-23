@@ -1,15 +1,24 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "moduleDetection": "force",
+    "outDir": "dist",
     "types": [
       "reflect-metadata",
       "node"
     ],
     "lib": [
+      "ES2022",
       "DOM",
       "DOM.Iterable",
     ],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-  }
+    "skipLibCheck": true,
+    "strict": true,
+  },
+  "include": [
+    "src/*"
+  ]
 }
