@@ -4,7 +4,7 @@ import { WebStubEventsCalls, WebStubEventsStorage } from "../events.js";
 import { WebStubTicketsCalls, WebStubTicketsStorage } from "../tickets.js";
 
 import { ClientAccountProvider } from "@ticketto/protocol";
-import { openDB, type IDBPDatabase } from "idb";
+import { IDBPTransaction, StoreNames, openDB, type IDBPDatabase } from "idb";
 import {
   StubConsumerSettings,
   TickettoDBSchema,
@@ -20,7 +20,7 @@ export class Stub {
       .bind<Get<AccountId>>("Get<AccountId>")
       .toConstantValue(
         accountProvider?.getAccountId ??
-          (() => "5Fh3tNPUUKtApDZ6rJ2sDgcC5Z6pVVyAzKeE1dnqowLqWEvw")
+          (() => "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG")
       );
   }
 
@@ -47,7 +47,7 @@ export class Stub {
     genesisConfig: StubGenesisConfig
   ): Promise<IDBPDatabase<TickettoDBSchema>> {
     const database = await openDB<TickettoDBSchema>(name, undefined, {
-      upgrade(db) {
+      upgrade: (db, _, __, tx) => {
         const accountsStore = db.createObjectStore("accounts", {
           keyPath: "id",
         });
@@ -60,47 +60,41 @@ export class Stub {
         eventsStore.createIndex("owner", "owner");
 
         const ticketsStore = db.createObjectStore("tickets", {
-          keyPath: ["owner", "issuer", "id"],
+          keyPath: ["issuer", "id"],
         });
-        ticketsStore.createIndex("owner", "owner");
         ticketsStore.createIndex("ownerIssuer", ["owner", "issuer"]);
-        ticketsStore.createIndex("issuerId", ["issuer", "id"]);
-        ticketsStore.createIndex("id", ["owner", "issuer", "id"]);
+        ticketsStore.createIndex("owner", "owner");
+
+        db.createObjectStore("migrations", {
+          keyPath: "id",
+        });
+
+        this.initializeStorage(tx, genesisConfig);
       },
     });
-
-    await this.initializeStorage(database, genesisConfig);
 
     return database;
   }
 
-  async initializeStorage(
-    database: IDBPDatabase<TickettoDBSchema>,
+  initializeStorage(
+    tx: IDBPTransaction<
+      TickettoDBSchema,
+      ArrayLike<StoreNames<TickettoDBSchema>>,
+      "versionchange"
+    >,
     genesisConfig: StubGenesisConfig
   ) {
-    const accountsTx = database.transaction("accounts", "readwrite");
-    await Promise.all([
-      ...(genesisConfig?.accounts ?? []).map((account) =>
-        accountsTx.store.put(account)
-      ),
-      accountsTx.done,
-    ]);
+    const accountsStore = tx.objectStore("accounts");
+    const accounts = genesisConfig?.accounts ?? [];
+    accounts.map((account) => accountsStore.put(account));
 
-    const eventsTx = database.transaction("events", "readwrite");
-    await Promise.all([
-      ...(genesisConfig?.events ?? []).map((event) =>
-        eventsTx.store.put(event)
-      ),
-      eventsTx.done,
-    ]);
+    const eventsStore = tx.objectStore("events");
+    const events = genesisConfig?.events ?? [];
+    events.map((event) => eventsStore.put(event));
 
-    const ticketsTx = database.transaction("tickets", "readwrite");
-    await Promise.all([
-      ...(genesisConfig?.tickets ?? []).map((ticket) =>
-        ticketsTx.store.put(ticket)
-      ),
-      ticketsTx.done,
-    ]);
+    const ticketsStore = tx.objectStore("tickets");
+    const tickets = genesisConfig?.tickets ?? [];
+    tickets.map((ticket) => ticketsStore.put(ticket));
   }
 
   get<T>(serviceIdentifier: interfaces.ServiceIdentifier<T>): T {

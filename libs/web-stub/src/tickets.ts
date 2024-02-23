@@ -24,7 +24,7 @@ export class WebStubTicketsStorage implements TicketsStorage {
   }
 
   get(eventId: EventId, ticketId: TicketId): Promise<Ticket | undefined> {
-    return this.db.getFromIndex("tickets", "issuerId", [eventId, ticketId]);
+    return this.db.get("tickets", [eventId, ticketId]);
   }
 
   async attendanceRequest(issuer: EventId, id: TicketId): Promise<Uint8Array> {
@@ -50,8 +50,11 @@ export class WebStubTicketsStorage implements TicketsStorage {
 
 @injectable()
 export class WebStubTicketsCalls implements TicketsCalls {
-  @inject("Get<AccountId>") private accountId?: AccountId;
-  @inject(WebStubTicketsStorage) private storage?: WebStubTicketsStorage;
+  constructor(
+    @inject("TickettoDB") private db: IDBPDatabase,
+    @inject("Get<AccountId>") private getAccountId: Get<AccountId>,
+    @inject(WebStubTicketsStorage) private storage: WebStubTicketsStorage
+  ) {}
 
   issue(
     issuer: number,
@@ -73,7 +76,7 @@ export class WebStubTicketsCalls implements TicketsCalls {
       throw new Error("RuntimeError: TicketNotFound");
     }
 
-    if (ticket.owner !== this.accountId) {
+    if (ticket.owner !== this.getAccountId()) {
       throw new Error("RuntimeError: NotOwner");
     }
 
@@ -82,6 +85,7 @@ export class WebStubTicketsCalls implements TicketsCalls {
     }
 
     ticket.owner = receiver;
+    await this.db.put("tickets", ticket);
   }
 
   async sell(issuer: EventId, id: TicketId): Promise<void> {

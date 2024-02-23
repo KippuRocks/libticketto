@@ -19,7 +19,7 @@ export class WebStubEventsStorage implements EventsStorage {
   async ticketHolderOf(ticketHolder: AccountId): Promise<Event[]> {
     const eventsIds = await this.db
       .getAllKeysFromIndex("tickets", "owner", ticketHolder)
-      .then((ids) => ids.map(([_, eventId, __]) => eventId))
+      .then((ids) => ids.map(([eventId, _]) => eventId))
       .then((eventIds) => [...new Set(eventIds)]);
 
     return Promise.all(

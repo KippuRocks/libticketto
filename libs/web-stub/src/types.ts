@@ -1,4 +1,11 @@
-import { AccountId, Event, EventId, Ticket, TicketId } from "@ticketto/types";
+import {
+  AccountId,
+  Event,
+  EventId,
+  Ticket,
+  TicketId,
+  Timestamp,
+} from "@ticketto/types";
 
 import { DBSchema } from "idb";
 
@@ -27,13 +34,16 @@ export interface TickettoDBSchema extends DBSchema {
     indexes: { id: EventId; owner: AccountId };
   };
   tickets: {
-    key: [AccountId, EventId, TicketId];
+    key: [EventId, TicketId];
     value: Ticket;
     indexes: {
+      id: [EventId, TicketId];
       owner: AccountId;
       ownerIssuer: [AccountId, EventId];
-      issuerId: [EventId, TicketId];
-      id: [AccountId, EventId, TicketId];
     };
+  };
+  migrations: {
+    key: Timestamp;
+    value: { id: Timestamp; name: string };
   };
 }
