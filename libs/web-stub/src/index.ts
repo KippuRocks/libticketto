@@ -19,6 +19,7 @@ export class TickettoWebStubConsumer implements TickettoConsumer {
     await this.stub.build(config?.consumerSettings as StubConsumerSettings);
 
     return {
+      accountProvider: this.stub.accountProvider!,
       events: {
         calls: this.stub.get(WebStubEventsCalls),
         query: this.stub.get(WebStubEventsStorage),

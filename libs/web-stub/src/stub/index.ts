@@ -13,6 +13,14 @@ import {
 import defaultMock from "./default-mock.js";
 
 export class Stub {
+  #accountProvider: ClientAccountProvider = {
+    getAccountId() {
+      return "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG";
+    },
+    sign(payload) {
+      return payload;
+    },
+  };
   #container = new Container();
 
   set accountProvider(accountProvider: ClientAccountProvider | undefined) {
@@ -22,6 +30,10 @@ export class Stub {
         accountProvider?.getAccountId ??
           (() => "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG")
       );
+  }
+
+  get accountProvider() {
+    return this.#accountProvider;
   }
 
   async build({
