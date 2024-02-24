@@ -14,6 +14,10 @@ export interface TickettoConsumer<Config = ClientConfig> {
  */
 export type TickettoClient = {
   /**
+   * Account provider: allows handling access to the client's account provider
+   */
+  readonly acccountProvider: ClientAccountProvider;
+  /**
    * Events module: allows managing and getting access to events
    */
   readonly events: EventsModule;
