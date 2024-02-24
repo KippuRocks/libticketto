@@ -16,7 +16,7 @@ export type TickettoClient = {
   /**
    * Account provider: allows handling access to the client's account provider
    */
-  readonly acccountProvider: ClientAccountProvider;
+  readonly accountProvider: ClientAccountProvider;
   /**
    * Events module: allows managing and getting access to events
    */
