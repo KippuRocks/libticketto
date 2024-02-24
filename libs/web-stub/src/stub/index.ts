@@ -14,9 +14,6 @@ import defaultMock from "./default-mock.js";
 
 export class Stub {
   #accountProvider: ClientAccountProvider = {
-    getAccountId() {
-      return "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG";
-    },
     sign(payload) {
       return payload;
     },
@@ -24,10 +21,14 @@ export class Stub {
   #container = new Container();
 
   set accountProvider(accountProvider: ClientAccountProvider | undefined) {
+    if (accountProvider !== undefined) {
+      this.#accountProvider = accountProvider;
+    }
+
     this.#container
       .bind<Get<AccountId>>("Get<AccountId>")
       .toConstantValue(
-        accountProvider?.getAccountId ??
+        this.#accountProvider.getAccountId ??
           (() => "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG")
       );
   }
