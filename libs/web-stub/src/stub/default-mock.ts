@@ -1,6 +1,24 @@
 import { StubGenesisConfig } from "../types.js";
 
 export default {
+  accounts: [
+    {
+      id: "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG",
+      identity: {
+        legalName: "Alice",
+        email: "alice@example.com",
+      },
+      balance: 0,
+    },
+    {
+      id: "5HVoCpiwRWMZCmM8ituz46JVGAzvAjqsHrGkdhqrDUD4NW6o",
+      identity: {
+        legalName: "Bob",
+        email: "bob@example.com",
+      },
+      balance: 0,
+    },
+  ],
   events: [
     {
       id: 1,
@@ -30,7 +48,7 @@ export default {
       owner: "5Fh3tNPUUKtApDZ6rJ2sDgcC5Z6pVVyAzKeE1dnqowLqWEvw",
       name: "Paula Garcés - Laura Villalobos - Martin Arc - BT.MKR",
       description:
-        'Main (Misa de 12):\nPaula Garcés\nLaura Villalobos\nMartin Arc\nBT.MKR\n\nAfter (Secret Location) Showcase Pulse Rythm:\nPuerto Moiseline\n\nSpecial Guest:\nMeteo (Cadencia)\n\n\n<iframe width="640" height="450" src="https://www.youtube.com/embed/ctX9y31pW4o" title="EXCLUSIVE 113 PAULA GARCES ¡¡ para ValeraUnderMusic, un set emotivo.no complaciente y exquisito ¡¡¡" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
+        'Main (Misa de 12):\n\nPaula Garcés\n\nLaura Villalobos\n\nMartin Arc\n\nBT.MKR\n\n\nAfter (Secret Location) Showcase Pulse Rythm:\nPuerto Moiseline\n\nSpecial Guest:\nMeteo (Cadencia)\n\n\n<iframe style="width: 100%" src="https://www.youtube.com/embed/ctX9y31pW4o" title="EXCLUSIVE 113 PAULA GARCES ¡¡ para ValeraUnderMusic, un set emotivo.no complaciente y exquisito ¡¡¡" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
       banner: "https://wild-presenta.com/wp-content/uploads/2024/01/FLYER.jpg",
       capacity: 20000,
       dates: [[1714937600000, 1714952000000]],

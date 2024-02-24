@@ -9,7 +9,11 @@ import {
 
 import { DBSchema } from "idb";
 
-export type Account = { id: AccountId; balance: number };
+export type Account = {
+  id: AccountId;
+  identity: { legalName: string; email: string };
+  balance: number;
+};
 
 export type StubConsumerSettings = {
   databaseName?: string;
