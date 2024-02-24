@@ -10,8 +10,8 @@ export default {
       banner:
         "https://wild-presenta.com/wp-content/uploads/2023/07/MITU-ASTRATOURTUNJA19AGOSTO.jpg",
       capacity: 10_000,
-      dates: [[1709762400, 1709776800]],
-      date: [1709762400, 1709776800],
+      dates: [[1709762400000, 1709776800000]],
+      date: [1709762400000, 1709776800000],
     },
     {
       id: 2,
@@ -22,8 +22,8 @@ export default {
       banner:
         "https://wild-presenta.com/wp-content/uploads/2023/07/Copia-de-FINAL.jpg",
       capacity: 15_000,
-      dates: [[1712345600, 1712360000]],
-      date: [1712345600, 1712360000],
+      dates: [[1712345600000, 1712360000000]],
+      date: [1712345600000, 1712360000000],
     },
     {
       id: 3,
@@ -33,8 +33,8 @@ export default {
         'Main (Misa de 12):\nPaula Garcés\nLaura Villalobos\nMartin Arc\nBT.MKR\n\nAfter (Secret Location) Showcase Pulse Rythm:\nPuerto Moiseline\n\nSpecial Guest:\nMeteo (Cadencia)\n\n\n<iframe width="640" height="450" src="https://www.youtube.com/embed/ctX9y31pW4o" title="EXCLUSIVE 113 PAULA GARCES ¡¡ para ValeraUnderMusic, un set emotivo.no complaciente y exquisito ¡¡¡" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
       banner: "https://wild-presenta.com/wp-content/uploads/2024/01/FLYER.jpg",
       capacity: 20000,
-      dates: [[1714937600, 1714952000]],
-      date: [1714937600, 1714952000],
+      dates: [[1714937600000, 1714952000000]],
+      date: [1714937600000, 1714952000000],
     },
   ],
   tickets: [
