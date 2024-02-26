@@ -1,5 +1,6 @@
 import { AccountId, Get } from "@ticketto/types";
 
+import type { DirectoryModule } from "./directory/index.js";
 import type { EventsModule } from "./events/index.js";
 import type { TicketsModule } from "./tickets/index.js";
 
@@ -17,6 +18,11 @@ export type TickettoClient = {
    * Account provider: allows handling access to the client's account provider
    */
   readonly accountProvider: ClientAccountProvider;
+
+  /**
+   * Directory module: allows managing and fetching lists of accounts
+   */
+  readonly directory: DirectoryModule;
   /**
    * Events module: allows managing and getting access to events
    */
@@ -29,11 +35,11 @@ export type TickettoClient = {
 };
 
 export type ClientConfig = {
-  accountProvider?: ClientAccountProvider;
+  accountProvider: ClientAccountProvider;
   consumerSettings?: unknown;
 };
 
 export interface ClientAccountProvider {
-  getAccountId?: Get<AccountId>;
-  sign(payload: Uint8Array): Uint8Array;
+  getAccountId: Get<AccountId>;
+  sign(payload: Uint8Array): Promise<Uint8Array>;
 }

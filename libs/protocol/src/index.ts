@@ -1,3 +1,4 @@
+export type * from "./directory/index.js";
 export type * from "./events/index.js";
 export type * from "./tickets/index.js";
 export type * from "./client.js";
