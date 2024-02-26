@@ -1,4 +1,4 @@
-import { AccountId, Event, Get } from "@ticketto/types";
+import { AccountId, Get } from "@ticketto/types";
 import { Container, interfaces } from "inversify";
 import { WebStubEventsCalls, WebStubEventsStorage } from "../events.js";
 import { WebStubTicketsCalls, WebStubTicketsStorage } from "../tickets.js";
@@ -11,26 +11,32 @@ import {
   StubGenesisConfig,
 } from "../types.js";
 import defaultMock from "./default-mock.js";
+import {
+  WebStubDirectoryCalls,
+  WebStubDirectoryStorage,
+} from "../directory.js";
 
 export class Stub {
   #accountProvider: ClientAccountProvider = {
-    sign(payload) {
-      return payload;
+    getAccountId() {
+      throw new Error("NotImplemented");
+    },
+    async sign() {
+      throw new Error("NotImplemented");
     },
   };
   #container = new Container();
 
-  set accountProvider(accountProvider: ClientAccountProvider | undefined) {
+  withAccountProvider(accountProvider: ClientAccountProvider) {
     if (accountProvider !== undefined) {
       this.#accountProvider = accountProvider;
     }
 
     this.#container
       .bind<Get<AccountId>>("Get<AccountId>")
-      .toConstantValue(
-        this.#accountProvider.getAccountId ??
-          (() => "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG")
-      );
+      .toConstantValue(this.#accountProvider.getAccountId);
+
+    return this;
   }
 
   get accountProvider() {
@@ -49,6 +55,8 @@ export class Stub {
       .bind<IDBPDatabase<TickettoDBSchema>>("TickettoDB")
       .toConstantValue(database);
 
+    this.#container.bind(WebStubDirectoryCalls).to(WebStubDirectoryCalls);
+    this.#container.bind(WebStubDirectoryStorage).to(WebStubDirectoryStorage);
     this.#container.bind(WebStubEventsCalls).to(WebStubEventsCalls);
     this.#container.bind(WebStubEventsStorage).to(WebStubEventsStorage);
     this.#container.bind(WebStubTicketsCalls).to(WebStubTicketsCalls);
@@ -65,6 +73,9 @@ export class Stub {
           keyPath: "id",
         });
         accountsStore.createIndex("id", "id");
+        accountsStore.createIndex("display", "identity.display");
+        accountsStore.createIndex("phone", "identity.phone");
+        accountsStore.createIndex("email", "identity.email");
 
         const eventsStore = db.createObjectStore("events", {
           keyPath: "id",

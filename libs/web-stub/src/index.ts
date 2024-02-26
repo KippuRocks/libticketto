@@ -3,6 +3,7 @@ import type {
   TickettoClient,
   TickettoConsumer,
 } from "@ticketto/protocol";
+import { WebStubDirectoryCalls, WebStubDirectoryStorage } from "./directory.js";
 import { WebStubEventsCalls, WebStubEventsStorage } from "./events.js";
 import { WebStubTicketsCalls, WebStubTicketsStorage } from "./tickets.js";
 
@@ -14,12 +15,17 @@ import { injectable } from "inversify";
 export class TickettoWebStubConsumer implements TickettoConsumer {
   constructor(private stub: Stub = new Stub()) {}
 
-  async build(config?: ClientConfig): Promise<TickettoClient> {
-    this.stub.accountProvider = config?.accountProvider;
-    await this.stub.build(config?.consumerSettings as StubConsumerSettings);
+  async build(config: ClientConfig): Promise<TickettoClient> {
+    await this.stub
+      .withAccountProvider(config.accountProvider)
+      .build(config.consumerSettings as StubConsumerSettings | undefined);
 
     return {
       accountProvider: this.stub.accountProvider!,
+      directory: {
+        calls: this.stub.get(WebStubDirectoryCalls),
+        query: this.stub.get(WebStubDirectoryStorage),
+      },
       events: {
         calls: this.stub.get(WebStubEventsCalls),
         query: this.stub.get(WebStubEventsStorage),

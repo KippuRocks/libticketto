@@ -11,18 +11,18 @@ describe("tickets::storage", () => {
     return await new TickettoClientBuilder()
       .withConsumer(TickettoWebStubConsumer)
       .withConfig({
-        ...(accountId !== undefined
-          ? {
-              accountProvider: {
-                getAccountId() {
-                  return accountId;
-                },
-                sign(payload) {
-                  return payload;
-                },
-              },
+        accountProvider: {
+          getAccountId() {
+            if (accountId === undefined) {
+              throw new Error("AccountIdNotProvided");
             }
-          : {}),
+
+            return accountId;
+          },
+          async sign(payload) {
+            return payload;
+          },
+        },
         consumerSettings: {
           databaseName: t.name,
         } as StubConsumerSettings,
@@ -38,13 +38,13 @@ describe("tickets::storage", () => {
         "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG"
       );
       assert.deepEqual(tickets.length, 3);
-      const [mitu] = tickets;
+      const [, mitu] = tickets;
       assert.deepEqual(mitu.name, "Mitú");
 
       tickets = await client.tickets.query.ticketHolderOf(
         "5HVoCpiwRWMZCmM8ituz46JVGAzvAjqsHrGkdhqrDUD4NW6o"
       );
-      assert.deepEqual(tickets.length, 2);
+      assert.deepEqual(tickets.length, 3);
     });
   });
 
@@ -56,7 +56,7 @@ describe("tickets::storage", () => {
 
     it("returns an event if key is found", async (t) => {
       let client = await getClient(t);
-      let ticket = await client.tickets.query.get(1, 1);
+      let ticket = await client.tickets.query.get(2, 1);
       assert(ticket?.name === "Mitú");
     });
   });

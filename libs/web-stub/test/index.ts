@@ -5,11 +5,13 @@ import test, { describe } from "node:test";
 import { TickettoClientBuilder } from "@ticketto/protocol";
 import { TickettoWebStubConsumer } from "../src/index.js";
 import assert from "node:assert";
+import { defaultConfig } from "./defaultConfig.js";
 
 describe("TickettoWebStubConsumer", () => {
   test("building works", async () => {
     let client = await new TickettoClientBuilder()
       .withConsumer(TickettoWebStubConsumer)
+      .withConfig(defaultConfig)
       .build();
 
     assert.ok(client);
@@ -18,6 +20,7 @@ describe("TickettoWebStubConsumer", () => {
   test("data persists between builds", async () => {
     let client = await new TickettoClientBuilder()
       .withConsumer(TickettoWebStubConsumer)
+      .withConfig(defaultConfig)
       .build();
 
     await client.tickets.calls.transfer(
@@ -33,16 +36,18 @@ describe("TickettoWebStubConsumer", () => {
 
     client = await new TickettoClientBuilder()
       .withConsumer(TickettoWebStubConsumer)
+      .withConfig(defaultConfig)
       .build();
 
-    let mitu = await client.tickets.query.get(1, 1);
+    let duaLipa = await client.tickets.query.get(1, 1);
 
     assert.equal(
-      mitu!.owner,
+      duaLipa!.owner,
       "5HVoCpiwRWMZCmM8ituz46JVGAzvAjqsHrGkdhqrDUD4NW6o"
     );
   });
 });
 
+await import("./directory.js");
 await import("./events.js");
 await import("./tickets.js");

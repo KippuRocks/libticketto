@@ -1,4 +1,5 @@
 import {
+  Account,
   AccountId,
   Event,
   EventId,
@@ -8,12 +9,6 @@ import {
 } from "@ticketto/types";
 
 import { DBSchema } from "idb";
-
-export type Account = {
-  id: AccountId;
-  identity: { legalName: string; email: string };
-  balance: number;
-};
 
 export type StubConsumerSettings = {
   databaseName?: string;
@@ -30,7 +25,7 @@ export interface TickettoDBSchema extends DBSchema {
   accounts: {
     key: AccountId;
     value: Account;
-    indexes: { id: AccountId };
+    indexes: { id: AccountId; display: string; phone: string; email: string };
   };
   events: {
     key: EventId;
