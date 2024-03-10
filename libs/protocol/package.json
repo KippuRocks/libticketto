@@ -11,6 +11,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
+    "docs": "typedoc",
     "prepack": "npm run build"
   },
   "types": "src/index.ts",
