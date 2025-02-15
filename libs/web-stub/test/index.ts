@@ -48,6 +48,7 @@ describe("TickettoWebStubConsumer", () => {
   });
 });
 
+await import("./attendances.js");
 await import("./directory.js");
 await import("./events.js");
 await import("./tickets.js");

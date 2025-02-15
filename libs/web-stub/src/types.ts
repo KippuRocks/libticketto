@@ -9,6 +9,7 @@ import {
 } from "@ticketto/types";
 
 import { DBSchema } from "idb";
+import { TicketAttendance } from "./attendances.js";
 
 export type StubConsumerSettings = {
   databaseName?: string;
@@ -16,6 +17,7 @@ export type StubConsumerSettings = {
 };
 
 export type StubGenesisConfig = {
+  attendances?: TicketAttendance[];
   accounts?: Account[];
   events?: Event[];
   tickets?: Ticket[];
@@ -24,7 +26,10 @@ export type StubGenesisConfig = {
 export interface TickettoDBSchema extends DBSchema {
   attendances: {
     key: [EventId, TicketId];
-    value: Timestamp[];
+    value: TicketAttendance;
+    indexes: {
+      id: [EventId, TicketId];
+    };
   };
   accounts: {
     key: AccountId;

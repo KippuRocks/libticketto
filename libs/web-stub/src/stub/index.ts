@@ -15,6 +15,10 @@ import {
   WebStubDirectoryCalls,
   WebStubDirectoryStorage,
 } from "../directory.js";
+import {
+  WebStubAttendancesCalls,
+  WebStubAttendancesStorage,
+} from "../attendances.js";
 
 export class Stub {
   #accountProvider: ClientAccountProvider = {
@@ -55,6 +59,10 @@ export class Stub {
       .bind<IDBPDatabase<TickettoDBSchema>>("TickettoDB")
       .toConstantValue(database);
 
+    this.#container.bind(WebStubAttendancesCalls).to(WebStubAttendancesCalls);
+    this.#container
+      .bind(WebStubAttendancesStorage)
+      .to(WebStubAttendancesStorage);
     this.#container.bind(WebStubDirectoryCalls).to(WebStubDirectoryCalls);
     this.#container.bind(WebStubDirectoryStorage).to(WebStubDirectoryStorage);
     this.#container.bind(WebStubEventsCalls).to(WebStubEventsCalls);
@@ -69,6 +77,10 @@ export class Stub {
   ): Promise<IDBPDatabase<TickettoDBSchema>> {
     const database = await openDB<TickettoDBSchema>(name, undefined, {
       upgrade: (db, _, __, tx) => {
+        db.createObjectStore("attendances", {
+          keyPath: ["issuer", "id"],
+        });
+
         const accountsStore = db.createObjectStore("accounts", {
           keyPath: "id",
         });
@@ -108,6 +120,12 @@ export class Stub {
     >,
     genesisConfig: StubGenesisConfig
   ) {
+    const attendancesStore = tx.objectStore("attendances");
+    const attendances = genesisConfig?.attendances ?? [];
+    attendances.map((ticketAttendances) =>
+      attendancesStore.put(ticketAttendances)
+    );
+
     const accountsStore = tx.objectStore("accounts");
     const accounts = genesisConfig?.accounts ?? [];
     accounts.map((account) => accountsStore.put(account));

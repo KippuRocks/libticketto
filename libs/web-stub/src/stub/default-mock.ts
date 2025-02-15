@@ -176,4 +176,5 @@ export default {
       },
     },
   ],
+  attendances: [],
 } as StubGenesisConfig;
