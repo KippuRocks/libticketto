@@ -1,5 +1,6 @@
 import { AccountId, Get } from "@ticketto/types";
 
+import type { AttendancesModule } from "./attendances/index.js";
 import type { DirectoryModule } from "./directory/index.js";
 import type { EventsModule } from "./events/index.js";
 import type { TicketsModule } from "./tickets/index.js";
@@ -18,6 +19,11 @@ export type TickettoClient = {
    * Account provider: allows handling access to the client's account provider
    */
   readonly accountProvider: ClientAccountProvider;
+
+  /**
+   * Attendances module: registers the atttendances to an event using a ticket.
+   */
+  readonly attendances: AttendancesModule;
 
   /**
    * Directory module: allows managing and fetching lists of accounts
