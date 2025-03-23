@@ -26,5 +26,5 @@ export interface EventsCalls {
    * @param event The event to be created
    * @throws An error if the signer of the command is not the owner of the event
    */
-  transferOwner(id: EventId, newOwner: Omit<Event, "id">): Promise<void>;
+  transferOwner(id: EventId, newOwner: AccountId): Promise<void>;
 }
