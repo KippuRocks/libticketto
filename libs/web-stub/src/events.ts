@@ -1,10 +1,11 @@
-import { AccountId, Event, EventId, Ticket } from "@ticketto/types";
+import { AccountId, Event, EventId } from "@ticketto/types";
 
 import type { EventsCalls } from "@ticketto/protocol";
 import type { EventsStorage } from "@ticketto/protocol";
 import { injectable, inject } from "inversify";
-import { IDBPDatabase, IDBPIndex } from "idb";
+import { IDBPDatabase } from "idb";
 import { TickettoDBSchema } from "./types.js";
+import { EventQueue } from "./subscriptions.js";
 
 @injectable()
 export class WebStubEventsStorage implements EventsStorage {
@@ -36,13 +37,66 @@ export class WebStubEventsStorage implements EventsStorage {
 export class WebStubEventsCalls implements EventsCalls {
   @inject(WebStubEventsStorage) private storage?: WebStubEventsStorage;
 
-  createEvent(owner: AccountId, event: Omit<Event, "id">): Promise<number> {
-    throw new Error("Method not implemented.");
+  constructor(
+    @inject("TickettoDB") private db: IDBPDatabase<TickettoDBSchema>,
+    private queue: EventQueue
+  ) {}
+
+  private async getEvent(id: EventId) {
+    const event = await this.storage?.get(id);
+
+    if (event === undefined) {
+      throw new Error("EventNotFound");
+    }
+
+    return event;
   }
-  update(id: number, event: Partial<Omit<Event, "id">>): Promise<void> {
-    throw new Error("Method not implemented.");
+
+  async createEvent(
+    owner: AccountId,
+    event: Omit<Event, "id">
+  ): Promise<EventId> {
+    let id = (await this.db.count("events")) + 1;
+
+    await this.db.put("events", {
+      id,
+      ...event,
+      owner,
+    });
+
+    this.queue.depositEvent({
+      type: "EventCreated",
+      id,
+      owner: event.owner,
+    });
+
+    return id;
   }
-  transferOwner(id: number, newOwner: Omit<Event, "id">): Promise<void> {
-    throw new Error("Method not implemented.");
+
+  async update(id: number, update: Partial<Omit<Event, "id">>) {
+    let event = await this.getEvent(id);
+
+    await this.db.put("events", {
+      ...event,
+      ...update,
+    });
+
+    this.queue.depositEvent({
+      type: "EventUpdated",
+      id,
+    });
+  }
+
+  async transferOwner(id: number, newOwner: AccountId) {
+    let event = await this.getEvent(id);
+    event.owner = newOwner;
+
+    await this.db.put("events", event);
+
+    this.queue.depositEvent({
+      type: "EventOwnershipTransferred",
+      id,
+      newOwner,
+    });
   }
 }

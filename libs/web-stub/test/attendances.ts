@@ -1,4 +1,8 @@
-import { TickettoClient, TickettoClientBuilder } from "@ticketto/protocol";
+import {
+  SystemEvent,
+  TickettoClient,
+  TickettoClientBuilder,
+} from "@ticketto/protocol";
 import { describe, it } from "node:test";
 
 import { AccountId } from "@ticketto/types";
@@ -51,11 +55,22 @@ describe("attendances::calls", () => {
         "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG"
       );
 
+      let capturedEvent: SystemEvent | undefined;
+      client.systemEvents.on((event) => (capturedEvent = event));
+
       const call = await createCall(client);
       await client.attendances.calls.submit(call);
 
       const atttendances = await client.attendances.query.attendances(1, 1);
       assert.equal(atttendances.length, 1);
+
+      assert.deepEqual(capturedEvent, {
+        type: "AttendanceMarked",
+        issuer: 1,
+        id: 1,
+        owner: "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG",
+        time: atttendances[0],
+      } as SystemEvent);
     });
 
     it("fails to register an attendance", async (t) => {

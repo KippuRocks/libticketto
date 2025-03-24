@@ -3,6 +3,7 @@ import type { TicketsCalls, TicketsStorage } from "@ticketto/protocol";
 import { inject, injectable } from "inversify";
 import { IDBPDatabase } from "idb";
 import { TickettoDBSchema } from "./types.js";
+import { EventQueue } from "./subscriptions.js";
 
 @injectable()
 export class WebStubTicketsStorage implements TicketsStorage {
@@ -53,50 +54,58 @@ export class WebStubTicketsCalls implements TicketsCalls {
   constructor(
     @inject("TickettoDB") private db: IDBPDatabase,
     @inject("Get<AccountId>") private getAccountId: Get<AccountId>,
-    @inject(WebStubTicketsStorage) private storage: WebStubTicketsStorage
+    private storage: WebStubTicketsStorage,
+    private queue: EventQueue
   ) {}
 
   issue(
-    issuer: number,
-    ticket: Omit<Ticket, "issuer" | "id">,
-    forSale?: boolean,
-    beneficiary?: AccountId
+    _issuer: number,
+    _ticket: Omit<Ticket, "issuer" | "id">,
+    _forSale?: boolean,
+    _beneficiary?: AccountId
   ): Promise<number> {
-    throw new Error("Method not implemented.");
+    throw new Error("MethodNotImplemented.");
   }
 
   async transfer(
     issuer: EventId,
     id: TicketId,
-    receiver: AccountId
+    newOwner: AccountId
   ): Promise<void> {
     let ticket = await this.storage?.get(issuer, id);
 
     if (ticket === undefined) {
-      throw new Error("RuntimeError: TicketNotFound");
+      throw new Error("TicketNotFound");
     }
 
     if (ticket.owner !== this.getAccountId()) {
-      throw new Error("RuntimeError: NotOwner");
+      throw new Error("NotOwner");
     }
 
     if (ticket.restrictions?.cannotTransfer) {
-      throw new Error("RuntimeError: CannotTransfer");
+      throw new Error("CannotTransfer");
     }
 
-    ticket.owner = receiver;
+    ticket.owner = newOwner;
     await this.db.put("tickets", ticket);
+
+    this.queue.depositEvent({
+      type: "TicketTransferred",
+      issuer,
+      id,
+      newOwner,
+    });
   }
 
-  async sell(issuer: EventId, id: TicketId): Promise<void> {
-    throw new Error("Method not implemented.");
+  async sell(_issuer: EventId, _id: TicketId): Promise<void> {
+    throw new Error("MethodNotImplemented.");
   }
 
-  withdrawSell(issuer: EventId, id: TicketId): Promise<void> {
-    throw new Error("Method not implemented.");
+  withdrawSell(_issuer: EventId, _id: TicketId): Promise<void> {
+    throw new Error("MethodNotImplemented.");
   }
 
-  buy(issuer: EventId, id: TicketId): Promise<void> {
-    throw new Error("Method not implemented.");
+  buy(_issuer: EventId, _id: TicketId): Promise<void> {
+    throw new Error("MethodNotImplemented.");
   }
 }

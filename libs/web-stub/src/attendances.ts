@@ -1,9 +1,15 @@
 import { inject, injectable } from "inversify";
 
-import { AttendancesCalls, AttendancesStorage } from "@ticketto/protocol";
+import {
+  AttendancesCalls,
+  AttendancesStorage,
+  TicketsStorage,
+} from "@ticketto/protocol";
 import { EventId, TicketId, Timestamp } from "@ticketto/types";
 import { TickettoDBSchema } from "./types.js";
 import { IDBPDatabase } from "idb";
+import { EventQueue } from "./subscriptions.js";
+import { WebStubTicketsStorage } from "./tickets.js";
 
 @injectable()
 export class WebStubAttendancesStorage implements AttendancesStorage {
@@ -27,6 +33,8 @@ export type TicketAttendance = {
 export class WebStubAttendancesCalls implements AttendancesCalls {
   constructor(
     @inject("TickettoDB") private db: IDBPDatabase<TickettoDBSchema>,
+    private queue: EventQueue,
+    @inject(WebStubTicketsStorage) private tickets: TicketsStorage,
     private storage: WebStubAttendancesStorage
   ) {}
 
@@ -37,11 +45,25 @@ export class WebStubAttendancesCalls implements AttendancesCalls {
     }: { attendance: Omit<TicketAttendance, "attendances"> } =
       JSON.parse(decodedCall);
 
-    let attendances = await this.storage.attendances(issuer, id);
-    if (attendances.length > 0) {
-      throw new Error("InvalidTicket");
+    const ticket = await this.tickets.get(issuer, id);
+    if (ticket === undefined) {
+      throw new Error("TicketNotFound");
     }
 
-    await this.db.put("attendances", { issuer, id, attendances: [Date.now()] });
+    let attendances = await this.storage.attendances(issuer, id);
+    if (attendances.length > 0) {
+      throw new Error("InvalidAttendance");
+    }
+
+    const time = Date.now();
+
+    await this.db.put("attendances", { issuer, id, attendances: [time] });
+    this.queue.depositEvent({
+      type: "AttendanceMarked",
+      issuer: issuer,
+      id,
+      time,
+      owner: ticket.owner,
+    });
   }
 }

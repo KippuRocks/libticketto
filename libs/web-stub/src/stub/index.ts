@@ -19,6 +19,7 @@ import {
   WebStubAttendancesCalls,
   WebStubAttendancesStorage,
 } from "../attendances.js";
+import { EventQueue, WebStubEventSubscribtion } from "../subscriptions.js";
 
 export class Stub {
   #accountProvider: ClientAccountProvider = {
@@ -59,16 +60,18 @@ export class Stub {
       .bind<IDBPDatabase<TickettoDBSchema>>("TickettoDB")
       .toConstantValue(database);
 
-    this.#container.bind(WebStubAttendancesCalls).to(WebStubAttendancesCalls);
-    this.#container
-      .bind(WebStubAttendancesStorage)
-      .to(WebStubAttendancesStorage);
-    this.#container.bind(WebStubDirectoryCalls).to(WebStubDirectoryCalls);
-    this.#container.bind(WebStubDirectoryStorage).to(WebStubDirectoryStorage);
-    this.#container.bind(WebStubEventsCalls).to(WebStubEventsCalls);
-    this.#container.bind(WebStubEventsStorage).to(WebStubEventsStorage);
-    this.#container.bind(WebStubTicketsCalls).to(WebStubTicketsCalls);
-    this.#container.bind(WebStubTicketsStorage).to(WebStubTicketsStorage);
+    const queue = new EventQueue();
+    this.#container.bind(EventQueue).toConstantValue(queue);
+
+    this.#container.bind(WebStubAttendancesCalls).toSelf();
+    this.#container.bind(WebStubAttendancesStorage).toSelf();
+    this.#container.bind(WebStubDirectoryCalls).toSelf();
+    this.#container.bind(WebStubDirectoryStorage).toSelf();
+    this.#container.bind(WebStubEventsCalls).toSelf();
+    this.#container.bind(WebStubEventsStorage).toSelf();
+    this.#container.bind(WebStubTicketsCalls).toSelf();
+    this.#container.bind(WebStubTicketsStorage).toSelf();
+    this.#container.bind(WebStubEventSubscribtion).toSelf();
   }
 
   async createOrOpenDatabase(
