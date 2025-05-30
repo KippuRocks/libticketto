@@ -13,15 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
       - run: |
           npm ci
-          npm run -w libs/protocol docs
-          mkdir docs
-          mv libs/protocol/docs docs/protocol
-
-      - name: Fix permissions
-        run: |
-          chmod -c -R +rX "docs/" | while read line; do
-            echo "::warning title=Invalid file permissions automatically fixed::$line"
-          done
+          npm run docs
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

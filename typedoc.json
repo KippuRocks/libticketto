@@ -1,7 +1,14 @@
 {
   // Comments are supported, like tsconfig.json
   "entryPoints": [
-    "src/index.ts"
+    "libs/*"
   ],
-  "out": "docs"
+  "exclude": [
+    "./test/*.ts"
+  ],
+  "name": "Libticketto",
+  "entryPointStrategy": "packages",
+  "includeVersion": false,
+  "logLevel": "Verbose",
+  "out": "./docs"
 }
