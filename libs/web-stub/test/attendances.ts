@@ -6,8 +6,8 @@ import {
 import { describe, it } from "node:test";
 
 import { AccountId } from "@ticketto/types";
-import { StubConsumerSettings } from "../src/types.js";
-import { TickettoWebStubConsumer } from "../src/index.js";
+import { StubConsumerSettings } from "../src/types.ts";
+import { TickettoWebStubConsumer } from "../src/index.ts";
 import assert from "node:assert";
 
 async function getClient(t: { name: string }, accountId?: AccountId) {

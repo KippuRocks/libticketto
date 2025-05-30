@@ -1,10 +1,10 @@
 import { describe, it } from "node:test";
 
-import { StubConsumerSettings } from "../src/types.js";
+import { StubConsumerSettings } from "../src/types.ts";
 import { TickettoClientBuilder } from "@ticketto/protocol";
-import { TickettoWebStubConsumer } from "../src/index.js";
+import { TickettoWebStubConsumer } from "../src/index.ts";
 import assert from "node:assert";
-import { defaultConfig } from "./defaultConfig.js";
+import { defaultConfig } from "./defaultConfig.ts";
 
 describe("events::storage", () => {
   async function getClient(t: { name: string }) {

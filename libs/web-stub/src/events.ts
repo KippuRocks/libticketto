@@ -4,8 +4,8 @@ import type { EventsCalls } from "@ticketto/protocol";
 import type { EventsStorage } from "@ticketto/protocol";
 import { injectable, inject } from "inversify";
 import { IDBPDatabase } from "idb";
-import { TickettoDBSchema } from "./types.js";
-import { EventQueue } from "./subscriptions.js";
+import { TickettoDBSchema } from "./types.ts";
+import { EventQueue } from "./subscriptions.ts";
 
 @injectable()
 export class WebStubEventsStorage implements EventsStorage {

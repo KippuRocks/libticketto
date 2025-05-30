@@ -10,6 +10,6 @@
     "outDir": "dist/esm",
   },
   "include": [
-    "src/*"
+    "test/*"
   ]
 }

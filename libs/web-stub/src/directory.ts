@@ -2,7 +2,7 @@ import { Account, AccountId, AccountIdentity } from "@ticketto/types";
 
 import { DirectoryCalls, DirectoryStorage } from "@ticketto/protocol";
 import { IDBPDatabase } from "idb";
-import { TickettoDBSchema } from "./types.js";
+import { TickettoDBSchema } from "./types.ts";
 import { inject, injectable } from "inversify";
 
 function boundedByString(s: string): [string, string] {

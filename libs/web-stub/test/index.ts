@@ -1,11 +1,11 @@
-import "./setup.js";
+import "./setup.ts";
 
 import test, { describe } from "node:test";
 
 import { TickettoClientBuilder } from "@ticketto/protocol";
-import { TickettoWebStubConsumer } from "../src/index.js";
+import { TickettoWebStubConsumer } from "../src/index.ts";
 import assert from "node:assert";
-import { defaultConfig } from "./defaultConfig.js";
+import { defaultConfig } from "./defaultConfig.ts";
 
 describe("TickettoWebStubConsumer", () => {
   test("building works", async () => {
@@ -48,7 +48,7 @@ describe("TickettoWebStubConsumer", () => {
   });
 });
 
-await import("./attendances.js");
-await import("./directory.js");
-await import("./events.js");
-await import("./tickets.js");
+await import("./attendances.ts");
+await import("./directory.ts");
+await import("./events.ts");
+await import("./tickets.ts");

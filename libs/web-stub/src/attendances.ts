@@ -6,10 +6,10 @@ import {
   TicketsStorage,
 } from "@ticketto/protocol";
 import { EventId, TicketId, Timestamp } from "@ticketto/types";
-import { TickettoDBSchema } from "./types.js";
+import { TickettoDBSchema } from "./types.ts";
 import { IDBPDatabase } from "idb";
-import { EventQueue } from "./subscriptions.js";
-import { WebStubTicketsStorage } from "./tickets.js";
+import { EventQueue } from "./subscriptions.ts";
+import { WebStubTicketsStorage } from "./tickets.ts";
 
 @injectable()
 export class WebStubAttendancesStorage implements AttendancesStorage {

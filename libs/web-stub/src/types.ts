@@ -9,7 +9,7 @@ import {
 } from "@ticketto/types";
 
 import { DBSchema } from "idb";
-import { TicketAttendance } from "./attendances.js";
+import { TicketAttendance } from "./attendances.ts";
 
 export type StubConsumerSettings = {
   databaseName?: string;

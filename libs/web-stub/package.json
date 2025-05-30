@@ -49,7 +49,6 @@
     "kippu"
   ],
   "devDependencies": {
-    "indexeddbshim": "^13.0.0",
-    "ts-node": "^10.9.2"
+    "indexeddbshim": "^13.0.0"
   }
 }

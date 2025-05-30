@@ -1,4 +1,4 @@
-import { StubGenesisConfig } from "../types.js";
+import { StubGenesisConfig } from "../types.ts";
 
 const zero = {
   free: 0,

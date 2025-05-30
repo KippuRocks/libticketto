@@ -35,7 +35,6 @@
   "devDependencies": {
     "@tsconfig/node-lts": "^22.0.1",
     "@types/node": "^22.15.28",
-    "@types/web": "^0.0.236",
     "ts-node": "^10.9.2",
     "typedoc": "^0.28.5",
     "typescript": "^5.8.3"

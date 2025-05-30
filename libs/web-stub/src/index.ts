@@ -6,14 +6,14 @@ import type {
 import {
   WebStubAttendancesCalls,
   WebStubAttendancesStorage,
-} from "./attendances.js";
-import { WebStubDirectoryCalls, WebStubDirectoryStorage } from "./directory.js";
-import { WebStubEventsCalls, WebStubEventsStorage } from "./events.js";
-import { WebStubTicketsCalls, WebStubTicketsStorage } from "./tickets.js";
+} from "./attendances.ts";
+import { WebStubDirectoryCalls, WebStubDirectoryStorage } from "./directory.ts";
+import { WebStubEventsCalls, WebStubEventsStorage } from "./events.ts";
+import { WebStubTicketsCalls, WebStubTicketsStorage } from "./tickets.ts";
 
-import { Stub } from "./stub/index.js";
-import { StubConsumerSettings } from "./types.js";
-import { WebStubEventSubscribtion } from "./subscriptions.js";
+import { Stub } from "./stub/index.ts";
+import { StubConsumerSettings } from "./types.ts";
+import { WebStubEventSubscribtion } from "./subscriptions.ts";
 import { injectable } from "inversify";
 
 @injectable()

@@ -1,5 +1,3 @@
-/// <reference lib="dom" />
-
 export type Get<T> = () => T;
 
 export type Timestamp = number;

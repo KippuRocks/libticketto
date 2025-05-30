@@ -2,8 +2,8 @@ import { AccountId, EventId, Get, Ticket, TicketId } from "@ticketto/types";
 import type { TicketsCalls, TicketsStorage } from "@ticketto/protocol";
 import { inject, injectable } from "inversify";
 import { IDBPDatabase } from "idb";
-import { TickettoDBSchema } from "./types.js";
-import { EventQueue } from "./subscriptions.js";
+import { TickettoDBSchema } from "./types.ts";
+import { EventQueue } from "./subscriptions.ts";
 
 @injectable()
 export class WebStubTicketsStorage implements TicketsStorage {
@@ -40,7 +40,7 @@ export class WebStubTicketsStorage implements TicketsStorage {
     }
 
     return new Uint8Array(
-      Buffer.from(
+      new TextEncoder().encode(
         JSON.stringify({
           attendance: { issuer, id },
         })

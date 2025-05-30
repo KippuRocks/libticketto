@@ -1,7 +1,7 @@
 import { AccountId, Get } from "@ticketto/types";
 import { Container, interfaces } from "inversify";
-import { WebStubEventsCalls, WebStubEventsStorage } from "../events.js";
-import { WebStubTicketsCalls, WebStubTicketsStorage } from "../tickets.js";
+import { WebStubEventsCalls, WebStubEventsStorage } from "../events.ts";
+import { WebStubTicketsCalls, WebStubTicketsStorage } from "../tickets.ts";
 
 import { ClientAccountProvider } from "@ticketto/protocol";
 import { IDBPTransaction, StoreNames, openDB, type IDBPDatabase } from "idb";
@@ -9,17 +9,17 @@ import {
   StubConsumerSettings,
   TickettoDBSchema,
   StubGenesisConfig,
-} from "../types.js";
-import defaultMock from "./default-mock.js";
+} from "../types.ts";
+import defaultMock from "./default-mock.ts";
 import {
   WebStubDirectoryCalls,
   WebStubDirectoryStorage,
-} from "../directory.js";
+} from "../directory.ts";
 import {
   WebStubAttendancesCalls,
   WebStubAttendancesStorage,
-} from "../attendances.js";
-import { EventQueue, WebStubEventSubscribtion } from "../subscriptions.js";
+} from "../attendances.ts";
+import { EventQueue, WebStubEventSubscribtion } from "../subscriptions.ts";
 
 export class Stub {
   #accountProvider: ClientAccountProvider = {

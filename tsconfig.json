@@ -4,12 +4,12 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "lib": [
-      "es2024"
+      "es2024",
+      "DOM"
     ],
     "types": [
       "reflect-metadata",
-      "node",
-      "web"
+      "node"
     ],
     "strict": true,
     "esModuleInterop": true,

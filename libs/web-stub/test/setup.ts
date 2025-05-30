@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-import type { ShimmedObject } from "indexeddbshim/dist/setGlobalVars.js";
+import type { ShimmedObject } from "indexeddbshim/dist/setGlobalVars.d.ts";
 import setGlobalVars from "indexeddbshim";
 
 setGlobalVars(globalThis as unknown as ShimmedObject, {

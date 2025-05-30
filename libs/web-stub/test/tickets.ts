@@ -1,9 +1,9 @@
 import { describe, it } from "node:test";
 
 import { AccountId } from "@ticketto/types";
-import { StubConsumerSettings } from "../src/types.js";
+import { StubConsumerSettings } from "../src/types.ts";
 import { TickettoClientBuilder } from "@ticketto/protocol";
-import { TickettoWebStubConsumer } from "../src/index.js";
+import { TickettoWebStubConsumer } from "../src/index.ts";
 import assert from "node:assert";
 
 describe("tickets::storage", () => {
