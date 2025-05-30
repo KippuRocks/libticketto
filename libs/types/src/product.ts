@@ -1,4 +1,4 @@
-import type { AssetCode, AssetId, Balance } from "./primitives.d.ts";
+import type { AssetCode, AssetId, Balance } from "./primitives.ts";
 
 export type LineItem = {
   description: string;

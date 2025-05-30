@@ -1,6 +1,8 @@
-import type { EventId } from "./events.d.ts";
-import type { FileLocation, Timestamp } from "./primitives.d.ts";
-import type { LineItem } from "./product.d.ts";
+import type { FileLocation, Timestamp } from "./primitives.ts";
+
+import { AccountId } from "./account.ts";
+import type { EventId } from "./events.ts";
+import type { LineItem } from "./product.ts";
 
 export type TicketId = number;
 

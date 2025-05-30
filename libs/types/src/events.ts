@@ -1,6 +1,7 @@
-import type { AccountId } from "./account.d.ts";
-import type { DateRange, FileLocation } from "./primitives.d.ts";
-import type { LineItemPrice } from "./product.d.ts";
+import type { DateRange, FileLocation } from "./primitives.ts";
+
+import type { AccountId } from "./account.ts";
+import type { LineItemPrice } from "./product.ts";
 
 export type EventId = number;
 

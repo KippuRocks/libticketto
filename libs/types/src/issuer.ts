@@ -1,4 +1,4 @@
-import type { AccountId } from "./account.js";
+import type { AccountId } from "./account.ts";
 
 export type Issuer = {
   accountId: AccountId;

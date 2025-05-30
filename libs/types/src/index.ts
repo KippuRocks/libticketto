@@ -1,8 +1,8 @@
-export type * from "./account.js";
-export type * from "./events.js";
-export type * from "./issuer.js";
-export type * from "./orders.js";
-export type * from "./primitives.js";
-export type * from "./product.js";
-export type * from "./storage.js";
-export type * from "./tickets.js";
+export type * from "./account.ts";
+export type * from "./events.ts";
+export type * from "./issuer.ts";
+export type * from "./orders.ts";
+export type * from "./primitives.ts";
+export type * from "./product.ts";
+export type * from "./storage.ts";
+export type * from "./tickets.ts";

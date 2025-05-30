@@ -1,4 +1,4 @@
-import { AssetId, Balance, FileLike, FileLocation } from "./primitives.js";
+import { AssetId, Balance, FileLike, FileLocation } from "./primitives.ts";
 
 export type AccountId = string | number[];
 
