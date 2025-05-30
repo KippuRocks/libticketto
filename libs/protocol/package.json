@@ -3,36 +3,33 @@
   "version": "1.4.0",
   "description": "Library that defines the interfaces of the ticketto protocol to be implemented on a client",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "module": "./dist/esm/index.js",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "browser": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "scripts": {
+    "build": "tsc && tsc -p ./tsconfig.cjs.json",
+    "docs": "typedoc",
+    "prepack": "npm run build"
+  },
   "author": {
     "name": "Pablo Andrés Dorado Suárez",
     "email": "hola@pablodorado.com",
     "url": "https://pablodorado.com"
   },
   "license": "MIT",
-  "scripts": {
-    "build": "tsc",
-    "docs": "typedoc",
-    "prepack": "npm run build"
-  },
-  "types": "src/index.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./*": {
-      "import": "./dist/*.js",
-      "types": "./dist/*.d.ts"
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/kippurocks/libticketto.git"
-  },
-  "bugs": {
-    "url": "https://github.com/kippurocks/libticketto/issues"
-  },
-  "homepage": "https://github.com/kippurocks/libticketto#readme",
   "keywords": [
     "ticketto",
     "nft",
@@ -42,5 +39,13 @@
   ],
   "dependencies": {
     "@ticketto/types": "^1.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/kippurocks/libticketto.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kippurocks/libticketto/issues"
+  },
+  "homepage": "https://github.com/kippurocks/libticketto#readme"
 }

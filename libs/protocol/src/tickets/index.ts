@@ -1,9 +1,9 @@
-import type { TicketsCalls } from "./calls.js";
-import type { TicketsStorage } from "./storage.js";
+import type { TicketsCalls } from "./calls.ts";
+import type { TicketsStorage } from "./storage.ts";
 
-export type * from "./calls.js";
-export type * from "./events.js";
-export type * from "./storage.js";
+export type * from "./calls.ts";
+export type * from "./events.ts";
+export type * from "./storage.ts";
 
 export type TicketsModule = {
   calls: TicketsCalls;

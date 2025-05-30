@@ -1,9 +1,9 @@
-import { AttendancesCalls } from "./calls.js";
-import { AttendancesStorage } from "./storage.js";
+import { AttendancesCalls } from "./calls.ts";
+import { AttendancesStorage } from "./storage.ts";
 
-export type * from "./calls.js";
-export type * from "./events.js";
-export type * from "./storage.js";
+export type * from "./calls.ts";
+export type * from "./events.ts";
+export type * from "./storage.ts";
 
 export type AttendancesModule = {
   calls: AttendancesCalls;

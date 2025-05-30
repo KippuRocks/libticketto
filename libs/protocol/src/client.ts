@@ -2,14 +2,14 @@ import { AccountId, Get } from "@ticketto/types";
 import type {
   AttandancesEvent,
   AttendancesModule,
-} from "./attendances/index.js";
-import type { EventsEvent, EventsModule } from "./events/index.js";
-import type { TicketsEvent, TicketsModule } from "./tickets/index.js";
+} from "./attendances/index.ts";
+import type { EventsEvent, EventsModule } from "./events/index.ts";
+import type { TicketsEvent, TicketsModule } from "./tickets/index.ts";
 
-import type { DirectoryModule } from "./directory/index.js";
-import type { EventSubscription } from "./subscription/event-subscription.js";
+import type { DirectoryModule } from "./directory/index.ts";
+import type { EventSubscription } from "./subscription/event-subscription.ts";
 
-export type * from "./subscription/event-subscription.js";
+export type * from "./subscription/event-subscription.ts";
 
 export interface TickettoConsumer<Config = ClientConfig> {
   build(config?: Config): Promise<TickettoClient>;

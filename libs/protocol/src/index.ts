@@ -1,24 +1,24 @@
-export type * from "./attendances/index.js";
-export type * from "./directory/index.js";
-export type * from "./events/index.js";
-export type * from "./tickets/index.js";
-export type * from "./client.js";
+export type * from "./attendances/index.ts";
+export type * from "./directory/index.ts";
+export type * from "./events/index.ts";
+export type * from "./tickets/index.ts";
+export type * from "./client.ts";
 
 import type {
   ClientConfig,
   TickettoClient,
   TickettoConsumer,
-} from "./client.js";
+} from "./client.ts";
 
 interface ConstructorOf<Config, Consumer = TickettoConsumer<Config>> {
-  new(...params: any[]): Consumer;
+  new (...params: any[]): Consumer;
 }
 
 export class TickettoClientBuilder<Config = ClientConfig> {
   private consumerLike?: ConstructorOf<Config> | TickettoConsumer<Config>;
   private config?: Config;
 
-  constructor() { }
+  constructor() {}
 
   withConsumer(
     consumer: ConstructorOf<Config> | TickettoConsumer<Config>

@@ -4,7 +4,9 @@
     "libs/*"
   ],
   "exclude": [
-    "./test/*.ts"
+    "node_modules/**",
+    "**/*.d.ts",
+    "libs/**/test/*.ts"
   ],
   "name": "Libticketto",
   "entryPointStrategy": "packages",

@@ -1,16 +1,24 @@
 {
-  "extends": "@tsconfig/node-lts/tsconfig.json",
   "compilerOptions": {
+    "target": "es2024",
     "module": "nodenext",
     "moduleResolution": "nodenext",
+    "lib": [
+      "es2024"
+    ],
+    "types": [
+      "reflect-metadata",
+      "node",
+      "web"
+    ],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
+    "rewriteRelativeImportExtensions": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "rewriteRelativeImportExtensions": true,
-    "types": [
-      "reflect-metadata"
-    ],
   },
   "exclude": [
     "node_modules",

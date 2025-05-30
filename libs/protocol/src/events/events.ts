@@ -1,6 +1,6 @@
 import { AccountId, EventId } from "@ticketto/types";
 
-import { EventsModule } from "./index.js";
+import { EventsModule } from "./index.ts";
 
 /**
  * The events that might be raised as a result of interactions with the {@link EventsModule}.

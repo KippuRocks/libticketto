@@ -1,8 +1,8 @@
-import { DirectoryCalls } from "./calls.js";
-import { DirectoryStorage } from "./storage.js";
+import { DirectoryCalls } from "./calls.ts";
+import { DirectoryStorage } from "./storage.ts";
 
-export type * from "./calls.js";
-export type * from "./storage.js";
+export type * from "./calls.ts";
+export type * from "./storage.ts";
 
 export type DirectoryModule = {
   calls: DirectoryCalls;

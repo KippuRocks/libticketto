@@ -1,6 +1,6 @@
 import { AccountId, EventId, LineItemPrice, TicketId } from "@ticketto/types";
 
-import type { TicketsModule } from "./index.js";
+import type { TicketsModule } from "./index.ts";
 
 /**
  * The events that might arise from the interactions with the {@link TicketsModule}
