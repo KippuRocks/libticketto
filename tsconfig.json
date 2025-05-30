@@ -1,12 +1,13 @@
 {
   "extends": "@tsconfig/node-lts/tsconfig.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "declaration": true,
-    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "rewriteRelativeImportExtensions": true,
     "types": [
       "reflect-metadata"
     ],

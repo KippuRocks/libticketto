@@ -14,7 +14,8 @@
     "libs/*"
   ],
   "scripts": {
-    "test": "node --loader=ts-node/esm test/mod.ts"
+    "docs": "typedoc",
+    "test": "npm test --workspace --if-present"
   },
   "repository": {
     "type": "git",
@@ -32,12 +33,12 @@
     "kippu"
   ],
   "devDependencies": {
-    "@tsconfig/node-lts": "^20.1.0",
+    "@tsconfig/node-lts": "^22.0.1",
     "ts-node": "^10.9.2",
-    "typedoc": "^0.25.12",
-    "typescript": "^5.3.3"
+    "typedoc": "^0.28.5",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@types/node": "^20.11.19"
+    "@types/node": "^20.17.55"
   }
 }
