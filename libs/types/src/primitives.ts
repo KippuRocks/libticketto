@@ -1,6 +1,6 @@
 export type Get<T> = () => T;
 
-export type Timestamp = number;
+export type Timestamp = bigint;
 
 export type BlockNumber = number;
 export type Balance = number;
