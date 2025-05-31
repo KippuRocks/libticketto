@@ -1,8 +1,8 @@
 {
-  "name": "@kippurocks/ticketto",
+  "name": "libticketto",
   "version": "1.0.0",
   "private": true,
-  "description": "Let's applications connect with Ticketto Protocol to emit, sell, resell, and transfer event tickets",
+  "description": "A set of javascript packages to implement The Ticketto Protocol",
   "author": {
     "name": "Pablo Andrés Dorado Suárez",
     "email": "hola@pablodorado.com",
@@ -10,8 +10,7 @@
   },
   "license": "MIT",
   "workspaces": [
-    "examples/*",
-    "libs/*"
+    "packages/*"
   ],
   "scripts": {
     "docs": "typedoc",

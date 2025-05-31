@@ -1,12 +1,12 @@
 {
   // Comments are supported, like tsconfig.json
   "entryPoints": [
-    "libs/*"
+    "packages/*"
   ],
   "exclude": [
     "node_modules/**",
     "**/*.d.ts",
-    "libs/**/test/*.ts"
+    "packages/**/test/*.ts"
   ],
   "name": "Libticketto",
   "entryPointStrategy": "packages",
