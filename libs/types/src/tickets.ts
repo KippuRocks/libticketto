@@ -4,7 +4,7 @@ import { AccountId } from "./account.ts";
 import type { EventId } from "./events.ts";
 import type { LineItem } from "./product.ts";
 
-export type TicketId = number;
+export type TicketId = bigint;
 
 export type Ticket<FileLike = FileLocation> = {
   /**
