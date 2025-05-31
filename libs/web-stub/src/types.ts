@@ -51,7 +51,7 @@ export interface TickettoDBSchema extends DBSchema {
     };
   };
   migrations: {
-    key: Timestamp;
+    key: number;
     value: { id: Timestamp; name: string };
   };
 }

@@ -55,7 +55,7 @@ export class WebStubAttendancesCalls implements AttendancesCalls {
       throw new Error("InvalidAttendance");
     }
 
-    const time = Date.now();
+    const time = BigInt(Date.now());
 
     await this.db.put("attendances", { issuer, id, attendances: [time] });
     this.queue.depositEvent({

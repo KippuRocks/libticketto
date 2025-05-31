@@ -44,11 +44,11 @@ export default {
       banner:
         "https://lumiere-a.akamaihd.net/v1/images/dua_lipa_portada_5_bf1628a4.jpeg?region=15,0,1956,1100&width=960",
       dates: [
-        [1710446400000, 1710475200000],
-        [1710532800000, 1710561600000],
-        [1710619200000, 1710648000000],
+        [1710446400000n, 1710475200000n],
+        [1710532800000n, 1710561600000n],
+        [1710619200000n, 1710648000000n],
       ],
-      date: [1710446400000, 1710475200000],
+      date: [1710446400000n, 1710475200000n],
       capacity: 24000,
     },
     {
@@ -59,8 +59,8 @@ export default {
       banner:
         "https://wild-presenta.com/wp-content/uploads/2023/07/MITU-ASTRATOURTUNJA19AGOSTO.jpg",
       capacity: 10_000,
-      dates: [[1709762400000, 1709776800000]],
-      date: [1709762400000, 1709776800000],
+      dates: [[1709762400000n, 1709776800000n]],
+      date: [1709762400000n, 1709776800000n],
     },
     {
       id: 3,
@@ -71,8 +71,8 @@ export default {
       banner:
         "https://wild-presenta.com/wp-content/uploads/2023/07/Copia-de-FINAL.jpg",
       capacity: 15_000,
-      dates: [[1712345600000, 1712360000000]],
-      date: [1712345600000, 1712360000000],
+      dates: [[1712345600000n, 1712360000000n]],
+      date: [1712345600000n, 1712360000000n],
     },
     {
       id: 4,
@@ -82,8 +82,8 @@ export default {
         'Main (Misa de 12):\n\nPaula Garcés\n\nLaura Villalobos\n\nMartin Arc\n\nBT.MKR\n\n\nAfter (Secret Location) Showcase Pulse Rythm:\nPuerto Moiseline\n\nSpecial Guest:\nMeteo (Cadencia)\n\n\n<iframe style="width: 100%" src="https://www.youtube.com/embed/ctX9y31pW4o" title="EXCLUSIVE 113 PAULA GARCES ¡¡ para ValeraUnderMusic, un set emotivo.no complaciente y exquisito ¡¡¡" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>',
       banner: "https://wild-presenta.com/wp-content/uploads/2024/01/FLYER.jpg",
       capacity: 20000,
-      dates: [[1714937600000, 1714952000000]],
-      date: [1714937600000, 1714952000000],
+      dates: [[1714937600000n, 1714952000000n]],
+      date: [1714937600000n, 1714952000000n],
     },
   ],
   tickets: [

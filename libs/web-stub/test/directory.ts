@@ -19,7 +19,7 @@ describe("accounts::storage", () => {
 
             return accountId;
           },
-          async sign(payload) {
+          async sign(payload: Uint8Array) {
             return payload;
           },
         },

@@ -22,7 +22,7 @@ import {
 import { EventQueue, WebStubEventSubscribtion } from "../subscriptions.ts";
 
 export class Stub {
-  #accountProvider: ClientAccountProvider = {
+  #accountProvider: ClientAccountProvider<Uint8Array> = {
     getAccountId() {
       throw new Error("NotImplemented");
     },
@@ -32,7 +32,7 @@ export class Stub {
   };
   #container = new Container();
 
-  withAccountProvider(accountProvider: ClientAccountProvider) {
+  withAccountProvider(accountProvider: ClientAccountProvider<Uint8Array>) {
     if (accountProvider !== undefined) {
       this.#accountProvider = accountProvider;
     }

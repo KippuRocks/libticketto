@@ -17,10 +17,10 @@ import { WebStubEventSubscribtion } from "./subscriptions.ts";
 import { injectable } from "inversify";
 
 @injectable()
-export class TickettoWebStubConsumer implements TickettoConsumer {
+export class TickettoWebStubConsumer implements TickettoConsumer<Uint8Array> {
   constructor(private stub: Stub = new Stub()) {}
 
-  async build(config: ClientConfig): Promise<TickettoClient> {
+  async build(config: ClientConfig<Uint8Array>): Promise<TickettoClient> {
     await this.stub
       .withAccountProvider(config.accountProvider)
       .build(config.consumerSettings as StubConsumerSettings | undefined);

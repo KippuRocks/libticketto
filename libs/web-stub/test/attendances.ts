@@ -22,7 +22,7 @@ async function getClient(t: { name: string }, accountId?: AccountId) {
 
           return accountId;
         },
-        async sign(payload) {
+        async sign(payload: Uint8Array) {
           return payload;
         },
       },
