@@ -13,6 +13,8 @@
     "packages/*"
   ],
   "scripts": {
+    "prebuild": "npm run build -w=packages/types; npm run build -w=packages/protocol",
+    "build": "npm run build --workspaces --if-present",
     "docs": "typedoc",
     "test": "npm test --workspaces --if-present"
   },

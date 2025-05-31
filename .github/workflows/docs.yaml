@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
       - run: |
           npm ci
+          npm run build
           npm run docs
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
