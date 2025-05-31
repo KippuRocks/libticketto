@@ -139,7 +139,12 @@ export class Stub {
 
     const ticketsStore = tx.objectStore("tickets");
     const tickets = genesisConfig?.tickets ?? [];
-    tickets.map((ticket) => ticketsStore.put(ticket));
+    tickets.map((ticket) =>
+      ticketsStore.put({
+        ...ticket,
+        id: Number(ticket.id),
+      })
+    );
   }
 
   get<T>(serviceIdentifier: interfaces.ServiceIdentifier<T>): T {

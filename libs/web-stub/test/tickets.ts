@@ -51,12 +51,12 @@ describe("tickets::storage", () => {
   describe("#get", () => {
     it("returns undefined if key not found", async (t) => {
       let client = await getClient(t);
-      assert((await client.tickets.query.get(1, 3)) === undefined);
+      assert((await client.tickets.query.get(1, 3n)) === undefined);
     });
 
     it("returns an event if key is found", async (t) => {
       let client = await getClient(t);
-      let ticket = await client.tickets.query.get(2, 1);
+      let ticket = await client.tickets.query.get(2, 1n);
       assert(ticket?.name === "Mitú");
     });
   });
@@ -68,7 +68,7 @@ describe("tickets::storage", () => {
         "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG"
       );
 
-      assert.rejects(() => client.tickets.query.attendanceRequest(1, 2));
+      assert.rejects(() => client.tickets.query.attendanceRequest(1, 2n));
     });
 
     it("returns attendance request bytes", async (t) => {
@@ -78,7 +78,7 @@ describe("tickets::storage", () => {
       );
       let attendanceRequest = await client.tickets.query.attendanceRequest(
         1,
-        1
+        1n
       );
 
       assert.deepEqual(

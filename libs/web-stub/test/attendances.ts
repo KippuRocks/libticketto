@@ -37,7 +37,7 @@ describe("attendances::storage", () => {
   describe("#attendances", () => {
     it("retrieves the list of all attendances", async (t) => {
       const client = await getClient(t);
-      const attendances = await client.attendances.query.attendances(1, 1);
+      const attendances = await client.attendances.query.attendances(1, 1n);
       assert.equal(attendances.length, 0);
     });
   });
@@ -46,7 +46,7 @@ describe("attendances::storage", () => {
 describe("attendances::calls", () => {
   describe("#submit", () => {
     function createCall(client: TickettoClient) {
-      return client.tickets.query.attendanceRequest(1, 1);
+      return client.tickets.query.attendanceRequest(1, 1n);
     }
 
     it("successfully registers the attendance", async (t) => {
@@ -61,13 +61,13 @@ describe("attendances::calls", () => {
       const call = await createCall(client);
       await client.attendances.calls.submit(call);
 
-      const atttendances = await client.attendances.query.attendances(1, 1);
+      const atttendances = await client.attendances.query.attendances(1, 1n);
       assert.equal(atttendances.length, 1);
 
       assert.deepEqual(capturedEvent, {
         type: "AttendanceMarked",
         issuer: 1,
-        id: 1,
+        id: 1n,
         owner: "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG",
         time: atttendances[0],
       } as SystemEvent);

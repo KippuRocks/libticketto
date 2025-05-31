@@ -25,12 +25,12 @@ describe("TickettoWebStubConsumer", () => {
 
     await client.tickets.calls.transfer(
       1,
-      1,
+      1n,
       "5HVoCpiwRWMZCmM8ituz46JVGAzvAjqsHrGkdhqrDUD4NW6o"
     );
 
     assert.equal(
-      (await client.tickets.query.get(1, 1))!.owner,
+      (await client.tickets.query.get(1, 1n))!.owner,
       "5HVoCpiwRWMZCmM8ituz46JVGAzvAjqsHrGkdhqrDUD4NW6o"
     );
 
@@ -39,7 +39,7 @@ describe("TickettoWebStubConsumer", () => {
       .withConfig(defaultConfig)
       .build();
 
-    let duaLipa = await client.tickets.query.get(1, 1);
+    let duaLipa = await client.tickets.query.get(1, 1n);
 
     assert.equal(
       duaLipa!.owner,

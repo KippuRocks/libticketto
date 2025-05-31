@@ -18,7 +18,10 @@ export class WebStubAttendancesStorage implements AttendancesStorage {
   ) {}
 
   async attendances(issuer: EventId, id: TicketId): Promise<Timestamp[]> {
-    const ticketAttendances = await this.db.get("attendances", [issuer, id]);
+    const ticketAttendances = await this.db.get("attendances", [
+      issuer,
+      Number(id),
+    ]);
     return ticketAttendances?.attendances ?? [];
   }
 }

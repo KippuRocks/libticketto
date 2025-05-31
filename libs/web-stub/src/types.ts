@@ -4,7 +4,6 @@ import {
   Event,
   EventId,
   Ticket,
-  TicketId,
   Timestamp,
 } from "@ticketto/types";
 
@@ -25,10 +24,10 @@ export type StubGenesisConfig = {
 
 export interface TickettoDBSchema extends DBSchema {
   attendances: {
-    key: [EventId, TicketId];
+    key: [EventId, number];
     value: TicketAttendance;
     indexes: {
-      id: [EventId, TicketId];
+      id: [EventId, number];
     };
   };
   accounts: {
@@ -37,15 +36,15 @@ export interface TickettoDBSchema extends DBSchema {
     indexes: { id: AccountId; display: string; phone: string; email: string };
   };
   events: {
-    key: EventId;
+    key: number;
     value: Event;
-    indexes: { id: EventId; owner: AccountId };
+    indexes: { id: number; owner: AccountId };
   };
   tickets: {
-    key: [EventId, TicketId];
-    value: Ticket;
+    key: [EventId, number];
+    value: Omit<Ticket, "id"> & { id: number };
     indexes: {
-      id: [EventId, TicketId];
+      id: [EventId, number];
       owner: AccountId;
       ownerIssuer: [AccountId, EventId];
     };

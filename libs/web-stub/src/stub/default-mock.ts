@@ -89,7 +89,7 @@ export default {
   tickets: [
     // Event: Dua Lipa en Colombia
     {
-      id: 1,
+      id: 1n,
       issuer: 1,
       owner: "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG",
       name: "Dua Lipa en Colombia",
@@ -103,7 +103,7 @@ export default {
       },
     },
     {
-      id: 2,
+      id: 2n,
       issuer: 1,
       owner: "5HVoCpiwRWMZCmM8ituz46JVGAzvAjqsHrGkdhqrDUD4NW6o",
       name: "Dua Lipa en Colombia",
@@ -118,7 +118,7 @@ export default {
     },
     // Event: Mitú
     {
-      id: 1,
+      id: 1n,
       issuer: 2,
       owner: "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG",
       name: "Mitú",
@@ -132,7 +132,7 @@ export default {
       },
     },
     {
-      id: 2,
+      id: 2n,
       issuer: 2,
       owner: "5HVoCpiwRWMZCmM8ituz46JVGAzvAjqsHrGkdhqrDUD4NW6o",
       name: "Mitú",
@@ -147,7 +147,7 @@ export default {
     },
     // Event: Dlina Volny
     {
-      id: 1,
+      id: 1n,
       issuer: 3,
       owner: "5DD8bv4RnTDuJt47SAjpWMT78N7gfBQNF2YiZpVUgbXkizMG",
       name: "Dlina Volny",
@@ -162,7 +162,7 @@ export default {
     },
     // Event: Paula Garcés - Laura Villalobos - Martin Arc - BT.MKR
     {
-      id: 1,
+      id: 1n,
       issuer: 4,
       owner: "5HVoCpiwRWMZCmM8ituz46JVGAzvAjqsHrGkdhqrDUD4NW6o",
       name: "Paula Garcés - Laura Villalobos - Martin Arc - BT.MKR",

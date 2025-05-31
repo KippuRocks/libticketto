@@ -12,20 +12,28 @@ export class WebStubTicketsStorage implements TicketsStorage {
     @inject("Get<AccountId>") private accountId: Get<AccountId>
   ) {}
 
-  ticketHolderOf(
+  async ticketHolderOf(
     ticketHolder: AccountId,
     eventId?: EventId
   ): Promise<Ticket[]> {
-    return eventId !== undefined
-      ? this.db.getAllFromIndex("tickets", "ownerIssuer", [
-          ticketHolder,
-          eventId,
-        ])
-      : this.db.getAllFromIndex("tickets", "owner", ticketHolder);
+    const tickets =
+      eventId !== undefined
+        ? await this.db.getAllFromIndex("tickets", "ownerIssuer", [
+            ticketHolder,
+            Number(eventId),
+          ])
+        : await this.db.getAllFromIndex("tickets", "owner", ticketHolder);
+
+    return tickets.map(({ id, ...ticket }) => ({
+      id: BigInt(id),
+      ...ticket,
+    }));
   }
 
   get(eventId: EventId, ticketId: TicketId): Promise<Ticket | undefined> {
-    return this.db.get("tickets", [eventId, ticketId]);
+    return this.db.get("tickets", [eventId, Number(ticketId)]).then((t) => {
+      return t !== undefined ? { ...t, id: BigInt(t.id) } : t;
+    });
   }
 
   async attendanceRequest(issuer: EventId, id: TicketId): Promise<Uint8Array> {
@@ -41,9 +49,12 @@ export class WebStubTicketsStorage implements TicketsStorage {
 
     return new Uint8Array(
       new TextEncoder().encode(
-        JSON.stringify({
-          attendance: { issuer, id },
-        })
+        JSON.stringify(
+          {
+            attendance: { issuer, id },
+          },
+          (k, v) => (k === "id" ? Number(v) : v)
+        )
       )
     );
   }
@@ -59,11 +70,11 @@ export class WebStubTicketsCalls implements TicketsCalls {
   ) {}
 
   issue(
-    _issuer: number,
+    _issuer: EventId,
     _ticket: Omit<Ticket, "issuer" | "id">,
     _forSale?: boolean,
     _beneficiary?: AccountId
-  ): Promise<number> {
+  ): Promise<TicketId> {
     throw new Error("MethodNotImplemented.");
   }
 
@@ -87,7 +98,7 @@ export class WebStubTicketsCalls implements TicketsCalls {
     }
 
     ticket.owner = newOwner;
-    await this.db.put("tickets", ticket);
+    await this.db.put("tickets", { ...ticket, id: Number(ticket.id) });
 
     this.queue.depositEvent({
       type: "TicketTransferred",
