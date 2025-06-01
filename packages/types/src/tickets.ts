@@ -1,54 +1,123 @@
-import type { FileLocation, Timestamp } from "./primitives.ts";
+import type {
+  FileLocation,
+  HexString,
+  Metadata,
+  Timestamp,
+} from "./primitives.ts";
 
 import { AccountId } from "./account.ts";
 import type { EventId } from "./events.ts";
-import type { LineItem } from "./product.ts";
+import type { LineItemPrice } from "./product.ts";
 
+/**
+ * A specific class of ticket that is issued for attending to an event.
+ */
+export type TicketClass = {
+  /**
+   * The attendance policy for a ticket. This defines how to validate
+   * whether marking an attendance for a ticket should be accepted or not.
+   */
+  attendancePolicy: AttendancePolicy;
+  /**
+   * The price for the tickets sold for this event.
+   */
+  ticketprice: LineItemPrice;
+  /**
+   * The restrictions imposed on the tickets sold for this event.
+   */
+  ticketRestrictions: TicketRestrictions;
+  /** A descriptive message for users to understand what this class
+   * means (e.g. Early Bird, VIP) */
+  description?: string;
+  /** JSON Schema that specifies metadata (e.g. location,
+   * tier, acommodations) associated to the class */
+  metadata?: Metadata;
+  /** A series of (business-logic) requirements the seller might
+   * require when issuing a ticket instance of this class */
+  constraints?: Record<string, unknown>;
+  /**
+   * The maxmimum number of ticket instances that can be issued for
+   * this class. Cannot be greater than the capacity of the event.
+   */
+  maxIssuance?: number;
+};
+
+/**
+ * A type that represents the unique identifier of an event's ticket.
+ */
 export type TicketId = bigint;
 
+/**
+ * A type that represents the unique identifier of a ticket class.
+ */
+export type TicketClassId = HexString;
+
+/**
+ * This structure represents a ticket.
+ */
 export type Ticket<FileLike = FileLocation> = {
   /**
-   * A unique identifier for the ticket
+   * The identifier for the ticket event.
+   */
+  eventId: EventId;
+  /**
+   * A unique identifier for the ticket.
    */
   id: TicketId;
   /**
-   * The identifier for the ticket event
-   */
-  issuer: EventId;
-  /**
-   * The account that owns the ticket
+   * The account that owns the ticket.
    */
   owner: AccountId;
   /**
-   * A SEO-friendly name for the ticket, available on indexers
-   */
-  name: string;
-  /**
-   * A SEO-friendly description for the ticket, available on indexers
-   */
-  description: string;
-  /**
-   * An image of the ticket art
-   */
-  ticketArt: FileLike;
-  /**
-   * A list of possible attendances for the ticket
+   * A list of possible attendances for the ticket.
    */
   attendances: Timestamp[];
   /**
-   * A flag marking whther the ticket is available for direct sale
+   * Optional metadata that is visible when attached on a ticket.
    */
-  forSale: boolean;
+  metadata?: TicketMetadata<FileLike>;
   /**
-   * The attendance policy for the ticket
+   * A flag marking whther the ticket is available for direct sale.
    */
-  attedancePolicy?: AttendancePolicy;
+  readonly forSale: boolean;
   /**
-   * The restrictions associated to the ticket
+   * If the ticket is available for sale, indicate the item's price.
+   */
+  price?: LineItemPrice;
+  /**
+   * The restrictions associated to the ticket.
    */
   restrictions?: TicketRestrictions;
 };
 
+/**
+ * This structure represents the metadata attached to a ticket.
+ */
+export type TicketMetadata<FileLike> = Metadata & {
+  /**
+   * A SEO-friendly description for the ticket, available on indexers.
+   */
+  description?: string;
+  /**
+   * An image of the ticket art.
+   */
+  ticketArt?: FileLike;
+};
+
+/**
+ * Represents the types of attendance policies available
+ * in the protocol.
+ */
+export enum AttendancePolicyType {
+  Single = "Single",
+  Multiple = "Multiple",
+  Unlimited = "Unlimited",
+}
+
+/**
+ * The attendance policy of a ticket. Can be either a single entrance, a multiple entrance
+ * (with an optional until date), or an unlimited entrance (with an optional until date).
+ */
 export type AttendancePolicy =
   | {
       type: AttendancePolicyType.Single;
@@ -56,19 +125,16 @@ export type AttendancePolicy =
   | {
       type: AttendancePolicyType.Multiple;
       max: number;
-      until: Timestamp;
+      until?: Timestamp;
     }
   | {
       type: AttendancePolicyType.Unlimited;
-      until: Timestamp;
+      until?: Timestamp;
     };
 
-export enum AttendancePolicyType {
-  Single = "Single",
-  Multiple = "Multiple",
-  Unlimited = "Unlimited",
-}
-
+/**
+ * Determines which restrictions are enforced system-level for a ticket.
+ */
 export type TicketRestrictions = {
   /** Determines if a ticket is not for resale (i.e. exclusive events, scolarships) */
   cannotResale: boolean;

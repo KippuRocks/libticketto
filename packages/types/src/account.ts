@@ -1,8 +1,8 @@
-import { AssetId, Balance, FileLike, FileLocation } from "./primitives.ts";
+import { AssetId, Balance } from "./primitives.ts";
 
 export type AccountId = string;
 
-export type Account<File extends FileLike = FileLocation> = {
+export type Account = {
   id: AccountId;
   identity?: AccountIdentity;
   balance: AccountBalance;
