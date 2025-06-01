@@ -1,4 +1,3 @@
-export type * from "./attendances/index.ts";
 export type * from "./directory/index.ts";
 export type * from "./events/index.ts";
 export type * from "./tickets/index.ts";
@@ -41,7 +40,7 @@ export class TickettoClientBuilder<S = Uint8Array, Config = ClientConfig<S>> {
     );
   }
 
-  build(): Promise<TickettoClient<S>> {
+  build(): Promise<TickettoClient> {
     if (this.consumerLike === undefined) {
       throw new Error("InvalidArgument: Missing `backend`");
     }

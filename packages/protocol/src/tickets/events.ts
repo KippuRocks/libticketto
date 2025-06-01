@@ -1,4 +1,10 @@
-import { AccountId, EventId, LineItemPrice, TicketId } from "@ticketto/types";
+import {
+  AccountId,
+  EventId,
+  LineItemPrice,
+  TicketId,
+  Timestamp,
+} from "@ticketto/types";
 
 import type { TicketsModule } from "./index.ts";
 
@@ -9,7 +15,8 @@ export type TicketsEvent =
   | TicketIssued
   | TicketOnSale
   | TicketPurchased
-  | TicketTransferred;
+  | TicketTransferred
+  | TicketAttendanceMarked;
 
 /**
  * A new ticket has been issued for an active event.
@@ -50,4 +57,12 @@ export type TicketTransferred = {
   issuer: EventId;
   id: TicketId;
   newOwner: AccountId;
+};
+
+export type TicketAttendanceMarked = {
+  type: "AttendanceMarked";
+  issuer: EventId;
+  id: TicketId;
+  owner: AccountId;
+  time: Timestamp;
 };
