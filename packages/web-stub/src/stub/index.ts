@@ -16,6 +16,7 @@ import {
   WebStubDirectoryStorage,
 } from "../directory.ts";
 import {
+  TicketAttendance,
   WebStubAttendancesCalls,
   WebStubAttendancesStorage,
 } from "../attendances.ts";
@@ -125,8 +126,8 @@ export class Stub {
   ) {
     const attendancesStore = tx.objectStore("attendances");
     const attendances = genesisConfig?.attendances ?? [];
-    attendances.map((ticketAttendances) =>
-      attendancesStore.put(ticketAttendances)
+    attendances.map(({ id, ...att }: TicketAttendance) =>
+      attendancesStore.put({ id: Number(id), ...att })
     );
 
     const accountsStore = tx.objectStore("accounts");

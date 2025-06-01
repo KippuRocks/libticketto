@@ -48,11 +48,12 @@ const client = await new TickettoClientBuilder()
 3. Enjoy!
 
 ```ts
-
 // Example of the client validating and submitting the contents of an attendance QR (let's call it `input`).
 
-/** A base-64 encoded input representing the call */
-const input: string = await readQrCode();
+/** In our example, the QR payload is a base-64 encoded input representing the call */
+const qr = await readQrCode();
+const input: Uint8Array = fromBase64();
+
 await client.attendances.calls.submit(input);
 ```
 

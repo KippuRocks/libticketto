@@ -4,6 +4,7 @@ import { inject, injectable } from "inversify";
 import { IDBPDatabase } from "idb";
 import { TickettoDBSchema } from "./types.ts";
 import { EventQueue } from "./subscriptions.ts";
+import { buffer } from "stream/consumers";
 
 @injectable()
 export class WebStubTicketsStorage implements TicketsStorage {
@@ -36,7 +37,7 @@ export class WebStubTicketsStorage implements TicketsStorage {
     });
   }
 
-  async attendanceRequest(issuer: EventId, id: TicketId): Promise<string> {
+  async attendanceRequest(issuer: EventId, id: TicketId): Promise<Uint8Array> {
     let ticket = await this.get(issuer, id);
 
     if (ticket === undefined) {
@@ -47,14 +48,11 @@ export class WebStubTicketsStorage implements TicketsStorage {
       throw new Error("RuntimeError: NotOwner");
     }
 
-    return btoa(
-      JSON.stringify(
-        {
-          attendance: { issuer, id },
-        },
-        (k, v) => (k === "id" ? Number(v) : v)
-      )
-    );
+    const dv = new DataView(new ArrayBuffer(12));
+    dv.setUint32(0, issuer, true);
+    dv.setBigUint64(4, id, true);
+
+    return new Uint8Array(dv.buffer);
   }
 }
 

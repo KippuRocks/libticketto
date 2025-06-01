@@ -83,11 +83,20 @@ describe("tickets::storage", () => {
 
       assert.deepEqual(
         attendanceRequest,
-        btoa(
-          JSON.stringify({
-            attendance: { issuer: 1, id: 1 },
-          })
-        )
+        new Uint8Array([
+          0x01,
+          0x00,
+          0x00,
+          0x00, // issuer
+          0x01,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00,
+          0x00, // id
+        ])
       );
     });
   });

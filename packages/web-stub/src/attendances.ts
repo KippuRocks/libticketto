@@ -41,11 +41,10 @@ export class WebStubAttendancesCalls implements AttendancesCalls {
     private storage: WebStubAttendancesStorage
   ) {}
 
-  async submit(input: string): Promise<void> {
-    const decodedCall = JSON.parse(atob(input));
-    const {
-      attendance: { issuer, id },
-    }: { attendance: Omit<TicketAttendance, "attendances"> } = decodedCall;
+  async submit(input: Uint8Array): Promise<void> {
+    const dv = new DataView(input.buffer);
+    const issuer = dv.getUint32(0, true);
+    const id = dv.getBigUint64(4, true);
 
     const ticket = await this.tickets.get(issuer, id);
     if (ticket === undefined) {
@@ -59,7 +58,11 @@ export class WebStubAttendancesCalls implements AttendancesCalls {
 
     const time = BigInt(Date.now());
 
-    await this.db.put("attendances", { issuer, id, attendances: [time] });
+    await this.db.put("attendances", {
+      issuer,
+      id: Number(id),
+      attendances: [time],
+    });
     this.queue.depositEvent({
       type: "AttendanceMarked",
       issuer: issuer,

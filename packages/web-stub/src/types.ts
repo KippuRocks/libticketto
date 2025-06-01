@@ -25,7 +25,7 @@ export type StubGenesisConfig = {
 export interface TickettoDBSchema extends DBSchema {
   attendances: {
     key: [EventId, number];
-    value: TicketAttendance;
+    value: Omit<TicketAttendance, "id"> & { id: number };
     indexes: {
       id: [EventId, number];
     };
