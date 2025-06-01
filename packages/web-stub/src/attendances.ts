@@ -41,12 +41,11 @@ export class WebStubAttendancesCalls implements AttendancesCalls {
     private storage: WebStubAttendancesStorage
   ) {}
 
-  async submit(call: Uint8Array): Promise<void> {
-    const decodedCall = new TextDecoder("utf-8").decode(call);
+  async submit(input: string): Promise<void> {
+    const decodedCall = JSON.parse(atob(input));
     const {
       attendance: { issuer, id },
-    }: { attendance: Omit<TicketAttendance, "attendances"> } =
-      JSON.parse(decodedCall);
+    }: { attendance: Omit<TicketAttendance, "attendances"> } = decodedCall;
 
     const ticket = await this.tickets.get(issuer, id);
     if (ticket === undefined) {

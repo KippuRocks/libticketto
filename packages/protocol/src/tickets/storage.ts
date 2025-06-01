@@ -18,9 +18,9 @@ export interface TicketsStorage {
   get(issuer: EventId, id: TicketId): Promise<Ticket | undefined>;
 
   /**
-   * Returns the payload to request an attendance.
+   * Returns the payload to request an attendance, encoded in base64 format.
    * @param issuer The {@link EventId} of the event that issues the ticket.
    * @param id The {@link TicketId} of a ticket.
    */
-  attendanceRequest(issuer: EventId, id: TicketId): Promise<Uint8Array>;
+  attendanceRequest(issuer: EventId, id: TicketId): Promise<string>;
 }

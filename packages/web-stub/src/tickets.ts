@@ -36,7 +36,7 @@ export class WebStubTicketsStorage implements TicketsStorage {
     });
   }
 
-  async attendanceRequest(issuer: EventId, id: TicketId): Promise<Uint8Array> {
+  async attendanceRequest(issuer: EventId, id: TicketId): Promise<string> {
     let ticket = await this.get(issuer, id);
 
     if (ticket === undefined) {
@@ -47,14 +47,12 @@ export class WebStubTicketsStorage implements TicketsStorage {
       throw new Error("RuntimeError: NotOwner");
     }
 
-    return new Uint8Array(
-      new TextEncoder().encode(
-        JSON.stringify(
-          {
-            attendance: { issuer, id },
-          },
-          (k, v) => (k === "id" ? Number(v) : v)
-        )
+    return btoa(
+      JSON.stringify(
+        {
+          attendance: { issuer, id },
+        },
+        (k, v) => (k === "id" ? Number(v) : v)
       )
     );
   }

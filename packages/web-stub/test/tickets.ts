@@ -83,12 +83,10 @@ describe("tickets::storage", () => {
 
       assert.deepEqual(
         attendanceRequest,
-        new Uint8Array(
-          Buffer.from(
-            JSON.stringify({
-              attendance: { issuer: 1, id: 1 },
-            })
-          )
+        btoa(
+          JSON.stringify({
+            attendance: { issuer: 1, id: 1 },
+          })
         )
       );
     });
