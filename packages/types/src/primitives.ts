@@ -4,7 +4,7 @@ export type Timestamp = bigint;
 export type HexString = `0x${string}`;
 
 export type BlockNumber = number;
-export type Balance = number;
+export type Balance = bigint;
 export type AssetId = number;
 
 export type AssetCode = string;

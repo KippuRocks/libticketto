@@ -18,7 +18,7 @@ export type EventId = number;
  */
 export type Event<FileLike = FileLocation> = {
   /** An unique identifier of the event */
-  id: EventId;
+  readonly id: EventId;
   /**
    * The account that owns the events
    */
@@ -35,7 +35,7 @@ export type Event<FileLike = FileLocation> = {
   /** A list of date ranges defining the dates of the event. Minimum
    * one for an event of one day. Multiple ranges are defined for
    * multi-day events. */
-  dates: DateRange[];
+  dates?: DateRange[];
   /**
    * The ticket class defined for this event. This is used to define
    * the features of a ticket when issuing one.
@@ -46,8 +46,32 @@ export type Event<FileLike = FileLocation> = {
    * of single day events, this will always return the range of the event
    * date.
    */
-  readonly date: DateRange;
+  readonly date?: DateRange;
+  /**
+   * The status of the event.
+   */
+  readonly state: EventState;
 };
+
+/**
+ * An enum which represents the status of the event.
+ */
+export enum EventState {
+  /** The initial state. Tickets cannot be issued. */
+  Created,
+  /**
+   * The event is now ready to be sold. Tickets can be issued, but not used. Capacity cannot be
+   * modified, but ticket's details can still be set.
+   */
+  Sales,
+  /**
+   * The first date in the list of dates has begun. Tickets can be issued, and used. Dates cannot
+   * longer be modified.
+   */
+  Ongoing,
+  /** The last date in the list of dates has finished. Tickets can no longer be issued. */
+  Finished,
+}
 
 /**
  * A structure that includes the content of the metadata attached to an event.

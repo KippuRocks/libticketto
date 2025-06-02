@@ -10,6 +10,11 @@ import type { EventId } from "./events.ts";
 import type { LineItemPrice } from "./product.ts";
 
 /**
+ * A type that represents the unique identifier of a ticket class.
+ */
+export type TicketClassId = HexString;
+
+/**
  * A specific class of ticket that is issued for attending to an event.
  */
 export type TicketClass = {
@@ -48,11 +53,6 @@ export type TicketClass = {
 export type TicketId = bigint;
 
 /**
- * A type that represents the unique identifier of a ticket class.
- */
-export type TicketClassId = HexString;
-
-/**
  * This structure represents a ticket.
  */
 export type Ticket<FileLike = FileLocation> = {
@@ -68,6 +68,10 @@ export type Ticket<FileLike = FileLocation> = {
    * The account that owns the ticket.
    */
   owner: AccountId;
+  /**
+   * The attendance policy of this ticket.
+   */
+  attendancePolicy: AttendancePolicy;
   /**
    * A list of possible attendances for the ticket.
    */

@@ -25,7 +25,7 @@ export type AccountIdentity = {
   firstName: string;
   lastName: string;
   phone: string;
-  email?: string;
+  email: string;
   image?: File;
   additional: IdentityAdditionalField[];
 };
