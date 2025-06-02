@@ -3,10 +3,6 @@ import type {
   TickettoClient,
   TickettoConsumer,
 } from "@ticketto/protocol";
-import {
-  WebStubAttendancesCalls,
-  WebStubAttendancesStorage,
-} from "./attendances.ts";
 import { WebStubDirectoryCalls, WebStubDirectoryStorage } from "./directory.ts";
 import { WebStubEventsCalls, WebStubEventsStorage } from "./events.ts";
 import { WebStubTicketsCalls, WebStubTicketsStorage } from "./tickets.ts";
@@ -26,11 +22,6 @@ export class TickettoWebStubConsumer implements TickettoConsumer<Uint8Array> {
       .build(config.consumerSettings as StubConsumerSettings | undefined);
 
     return {
-      accountProvider: this.stub.accountProvider!,
-      attendances: {
-        calls: this.stub.get(WebStubAttendancesCalls),
-        query: this.stub.get(WebStubAttendancesStorage),
-      },
       directory: {
         calls: this.stub.get(WebStubDirectoryCalls),
         query: this.stub.get(WebStubDirectoryStorage),

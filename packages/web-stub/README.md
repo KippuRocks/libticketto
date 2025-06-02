@@ -54,7 +54,7 @@ const client = await new TickettoClientBuilder()
 const qr = await readQrCode();
 const input: Uint8Array = fromBase64();
 
-await client.attendances.calls.submit(input);
+await client.tickets.calls.submitAttendanceCall(input);
 ```
 
 [gh:ticketto]: https://github.com/kippurocks/ticketto/blob/main/PROTOCOL.md

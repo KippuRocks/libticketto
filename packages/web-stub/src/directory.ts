@@ -2,7 +2,7 @@ import { Account, AccountId, AccountIdentity } from "@ticketto/types";
 
 import { DirectoryCalls, DirectoryStorage } from "@ticketto/protocol";
 import { IDBPDatabase } from "idb";
-import { TickettoDBSchema } from "./types.ts";
+import { TickettoDBSchema, zero } from "./types.ts";
 import { inject, injectable } from "inversify";
 
 function boundedByString(s: string): [string, string] {
@@ -22,12 +22,12 @@ export class WebStubDirectoryStorage implements DirectoryStorage {
   ) {}
 
   all(): Promise<Account[]> {
-    return this.db.getAll("accounts");
+    return this.db.getAll("Accounts");
   }
 
   indexByDisplay(display: string): Promise<Account[]> {
     return this.db.getAllFromIndex(
-      "accounts",
+      "Accounts",
       "display",
       IDBKeyRange.bound(...boundedByString(display))
     );
@@ -35,7 +35,7 @@ export class WebStubDirectoryStorage implements DirectoryStorage {
 
   indexByPhone(phone: string): Promise<Account[]> {
     return this.db.getAllFromIndex(
-      "accounts",
+      "Accounts",
       "phone",
       IDBKeyRange.bound(...boundedByString(phone))
     );
@@ -43,27 +43,40 @@ export class WebStubDirectoryStorage implements DirectoryStorage {
 
   indexByEmail(email: string): Promise<Account[]> {
     return this.db.getAllFromIndex(
-      "accounts",
+      "Accounts",
       "email",
       IDBKeyRange.bound(...boundedByString(email))
     );
   }
 
   get(accountId: AccountId): Promise<Account | undefined> {
-    return this.db.get("accounts", accountId);
+    return this.db.get("Accounts", accountId);
   }
 }
 
 @injectable()
 export class WebStubDirectoryCalls implements DirectoryCalls {
-  insert(accountId: AccountId, identity: AccountIdentity): Promise<void> {
-    throw new Error("Method not implemented.");
+  constructor(
+    @inject("TickettoDB") private db: IDBPDatabase<TickettoDBSchema>
+  ) {}
+
+  async insert(id: AccountId, identity: AccountIdentity) {
+    await this.db.put("Accounts", {
+      id,
+      identity,
+      balance: zero,
+      assets: {},
+    });
   }
 
-  setIdentity(
-    accountId: AccountId,
-    identity: Partial<AccountIdentity>
-  ): Promise<void> {
-    throw new Error("Method not implemented.");
+  async setIdentity(accountId: AccountId, identity: Partial<AccountIdentity>) {
+    const account = await this.db.get("Accounts", accountId);
+    if (account == undefined) {
+      throw new Error("AccountNotFound");
+    }
+    Object.defineProperty(account, "identity", {
+      value: { ...(account.identity ?? {}), ...identity },
+    });
+    await this.db.put("Accounts", account);
   }
 }

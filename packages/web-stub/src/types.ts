@@ -1,14 +1,13 @@
 import {
   Account,
   AccountId,
+  AccountIdentity,
   Event,
   EventId,
   Ticket,
-  Timestamp,
 } from "@ticketto/types";
 
 import { DBSchema } from "idb";
-import { TicketAttendance } from "./attendances.ts";
 
 export type StubConsumerSettings = {
   databaseName?: string;
@@ -16,41 +15,95 @@ export type StubConsumerSettings = {
 };
 
 export type StubGenesisConfig = {
-  attendances?: TicketAttendance[];
-  accounts?: Account[];
-  events?: Event[];
-  tickets?: Ticket[];
+  accounts?: TickettoDBSchema["Accounts"]["value"][];
+  events?: TickettoDBSchema["Events"]["value"][];
+  tickets?: TickettoDBSchema["Tickets"]["value"][];
+  attendances?: TickettoDBSchema["Attendances"]["value"][];
+  metadata?: TickettoDBSchema["Metadata"]["value"][];
 };
 
 export interface TickettoDBSchema extends DBSchema {
-  attendances: {
-    key: [EventId, number];
-    value: Omit<TicketAttendance, "id"> & { id: number };
-    indexes: {
-      id: [EventId, number];
-    };
-  };
-  accounts: {
-    key: AccountId;
+  Accounts: {
+    key: Account["id"];
     value: Account;
-    indexes: { id: AccountId; display: string; phone: string; email: string };
-  };
-  events: {
-    key: number;
-    value: Event;
-    indexes: { id: number; owner: AccountId };
-  };
-  tickets: {
-    key: [EventId, number];
-    value: Omit<Ticket, "id"> & { id: number };
     indexes: {
-      id: [EventId, number];
-      owner: AccountId;
-      ownerIssuer: [AccountId, EventId];
+      id: Account["id"];
+      display: AccountIdentity["display"];
+      phone: AccountIdentity["phone"];
+      email: AccountIdentity["email"];
     };
   };
-  migrations: {
-    key: number;
-    value: { id: Timestamp; name: string };
+  Events: {
+    key: Event["id"];
+    value: EventDB;
+    indexes: { id: number; organiser: AccountId };
+  };
+  Tickets: {
+    key: [TicketDB["eventId"], TicketDB["id"]];
+    value: TicketDB;
+    indexes: {
+      event: TicketDB["eventId"];
+      id: [TicketDB["eventId"], TicketDB["id"]];
+      owner: TicketDB["owner"];
+      ownerEvent: [TicketDB["owner"], TicketDB["eventId"]];
+    };
+  };
+  PendingTransfers: {
+    key: PendingTransfer["id"];
+    value: PendingTransfer;
+    indexes: {
+      sender: PendingTransfer["sender"];
+      beneficiary: PendingTransfer["beneficiary"];
+    };
+  };
+  Attendances: {
+    key: [TicketAttendance["eventId"], TicketAttendance["id"]];
+    value: TicketAttendance;
+  };
+  Metadata: {
+    key: [DBMetadata["type"], DBMetadata["id"]];
+    value: DBMetadata;
+  };
+  Migrations: {
+    key: Migration["id"];
+    value: Migration;
   };
 }
+
+export type EventDB = Omit<Event, "date" | "metadata">;
+
+export type TicketDB = Omit<
+  Ticket,
+  "id" | "metadata" | "attendances" | "forSale"
+> & {
+  id: number;
+};
+
+export type TicketAttendance = {
+  eventId: EventId;
+  id: number;
+  attendances: number[];
+};
+
+export type DBMetadata = {
+  type: "event" | "ticket";
+  id: number;
+  [k: string | number]: unknown | undefined;
+};
+
+export type PendingTransfer = {
+  id: [EventId, number];
+  sender: AccountId;
+  beneficiary: AccountId;
+};
+
+export type Migration = {
+  id: number;
+  name: string;
+};
+
+export const zero = {
+  free: 0n,
+  reserved: 0n,
+  frozen: 0n,
+};

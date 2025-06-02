@@ -15,11 +15,6 @@ import {
   WebStubDirectoryCalls,
   WebStubDirectoryStorage,
 } from "../directory.ts";
-import {
-  TicketAttendance,
-  WebStubAttendancesCalls,
-  WebStubAttendancesStorage,
-} from "../attendances.ts";
 import { EventQueue, WebStubEventSubscribtion } from "../subscriptions.ts";
 
 export class Stub {
@@ -50,7 +45,7 @@ export class Stub {
   }
 
   async build({
-    databaseName = "kippu",
+    databaseName = "tickettoStub",
     genesisConfig = defaultMock,
   }: StubConsumerSettings = {}) {
     const database = await this.createOrOpenDatabase(
@@ -64,8 +59,6 @@ export class Stub {
     const queue = new EventQueue();
     this.#container.bind(EventQueue).toConstantValue(queue);
 
-    this.#container.bind(WebStubAttendancesCalls).toSelf();
-    this.#container.bind(WebStubAttendancesStorage).toSelf();
     this.#container.bind(WebStubDirectoryCalls).toSelf();
     this.#container.bind(WebStubDirectoryStorage).toSelf();
     this.#container.bind(WebStubEventsCalls).toSelf();
@@ -81,11 +74,7 @@ export class Stub {
   ): Promise<IDBPDatabase<TickettoDBSchema>> {
     const database = await openDB<TickettoDBSchema>(name, undefined, {
       upgrade: (db, _, __, tx) => {
-        db.createObjectStore("attendances", {
-          keyPath: ["issuer", "id"],
-        });
-
-        const accountsStore = db.createObjectStore("accounts", {
+        const accountsStore = db.createObjectStore("Accounts", {
           keyPath: "id",
         });
         accountsStore.createIndex("id", "id");
@@ -93,19 +82,34 @@ export class Stub {
         accountsStore.createIndex("phone", "identity.phone");
         accountsStore.createIndex("email", "identity.email");
 
-        const eventsStore = db.createObjectStore("events", {
+        const eventsStore = db.createObjectStore("Events", {
           keyPath: "id",
         });
         eventsStore.createIndex("id", "id");
-        eventsStore.createIndex("owner", "owner");
+        eventsStore.createIndex("organiser", "organiser");
 
-        const ticketsStore = db.createObjectStore("tickets", {
-          keyPath: ["issuer", "id"],
+        const ticketsStore = db.createObjectStore("Tickets", {
+          keyPath: ["eventId", "id"],
         });
-        ticketsStore.createIndex("ownerIssuer", ["owner", "issuer"]);
+        ticketsStore.createIndex("event", "eventId");
+        ticketsStore.createIndex("ownerEvent", ["owner", "eventId"]);
         ticketsStore.createIndex("owner", "owner");
 
-        db.createObjectStore("migrations", {
+        const pendingTransfersStore = db.createObjectStore("PendingTransfers", {
+          keyPath: "id",
+        });
+        pendingTransfersStore.createIndex("sender", "sender");
+        pendingTransfersStore.createIndex("beneficiary", "beneficiary");
+
+        db.createObjectStore("Attendances", {
+          keyPath: ["eventId", "id"],
+        });
+
+        db.createObjectStore("Metadata", {
+          keyPath: ["type", "id"],
+        });
+
+        db.createObjectStore("Migrations", {
           keyPath: "id",
         });
 
@@ -124,21 +128,23 @@ export class Stub {
     >,
     genesisConfig: StubGenesisConfig
   ) {
-    const attendancesStore = tx.objectStore("attendances");
+    const attendancesStore = tx.objectStore("Attendances");
     const attendances = genesisConfig?.attendances ?? [];
-    attendances.map(({ id, ...att }: TicketAttendance) =>
-      attendancesStore.put({ id: Number(id), ...att })
-    );
+    attendances.map((att) => attendancesStore.put(att));
 
-    const accountsStore = tx.objectStore("accounts");
+    const accountsStore = tx.objectStore("Accounts");
     const accounts = genesisConfig?.accounts ?? [];
     accounts.map((account) => accountsStore.put(account));
 
-    const eventsStore = tx.objectStore("events");
+    const eventsStore = tx.objectStore("Events");
     const events = genesisConfig?.events ?? [];
     events.map((event) => eventsStore.put(event));
 
-    const ticketsStore = tx.objectStore("tickets");
+    const metadataStore = tx.objectStore("Metadata");
+    const metadata = genesisConfig?.metadata ?? [];
+    metadata.map((meta) => metadataStore.put(meta));
+
+    const ticketsStore = tx.objectStore("Tickets");
     const tickets = genesisConfig?.tickets ?? [];
     tickets.map((ticket) =>
       ticketsStore.put({
