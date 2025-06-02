@@ -37,6 +37,14 @@ export interface TicketsStorage {
   attendances(eventId: EventId, id: TicketId): Promise<Timestamp[]>;
 
   /**
+   * Returns the list of pending transfers where {@link who} is either the
+   * sender or the recipient of the ticket.
+   * @param who The {@link AccountId} of a ticket holder might send or receive
+   * a pending transfer.
+   */
+  pendingTransfersFor(who: AccountId): Promise<Ticket[]>;
+
+  /**
    * Produces a signed call with the attendance request, ready to be submitted
    * by an external provider.
    *
