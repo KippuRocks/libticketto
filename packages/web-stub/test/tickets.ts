@@ -275,7 +275,7 @@ describe("tickets::calls", () => {
   });
 
   describe("#submitAttendanceCall", () => {
-    function createCall(client: TickettoClient) {
+    function createCall(client: TickettoClient<Uint8Array>) {
       return client.tickets.query.attendanceRequest(1, 1n);
     }
 

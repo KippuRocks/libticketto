@@ -1,8 +1,4 @@
-import type {
-  ClientConfig,
-  TickettoClient,
-  TickettoConsumer,
-} from "@ticketto/protocol";
+import type { ClientConfig, TickettoConsumer } from "@ticketto/protocol";
 import { WebStubDirectoryCalls, WebStubDirectoryStorage } from "./directory.ts";
 import { WebStubEventsCalls, WebStubEventsStorage } from "./events.ts";
 import { WebStubTicketsCalls, WebStubTicketsStorage } from "./tickets.ts";
@@ -16,9 +12,7 @@ import { injectable } from "inversify";
 export class TickettoWebStubConsumer implements TickettoConsumer<Uint8Array> {
   constructor(private stub: Stub = new Stub()) {}
 
-  async build(
-    config: ClientConfig<Uint8Array>
-  ): Promise<TickettoClient<Uint8Array>> {
+  async build(config: ClientConfig<Uint8Array>) {
     await this.stub
       .withAccountProvider(config.accountProvider)
       .build(config.consumerSettings as StubConsumerSettings | undefined);

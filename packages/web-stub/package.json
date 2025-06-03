@@ -1,6 +1,6 @@
 {
   "name": "@ticketto/web-stub",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "description": "A stub-based, web-scoped implementation of The Ticketto Protocol",
   "type": "module",
   "files": [
@@ -40,7 +40,7 @@
   ],
   "dependencies": {
     "@subsquid/ss58-codec": "^1.2.3",
-    "@ticketto/protocol": "^1.6.2",
+    "@ticketto/protocol": "^1.6.3",
     "idb": "^8.0.0",
     "inversify": "^6.0.2",
     "reflect-metadata": "^0.2.1"
