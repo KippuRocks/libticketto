@@ -16,12 +16,15 @@ import { injectable } from "inversify";
 export class TickettoWebStubConsumer implements TickettoConsumer<Uint8Array> {
   constructor(private stub: Stub = new Stub()) {}
 
-  async build(config: ClientConfig<Uint8Array>): Promise<TickettoClient> {
+  async build(
+    config: ClientConfig<Uint8Array>
+  ): Promise<TickettoClient<Uint8Array>> {
     await this.stub
       .withAccountProvider(config.accountProvider)
       .build(config.consumerSettings as StubConsumerSettings | undefined);
 
     return {
+      accountProvider: this.stub.accountProvider,
       directory: {
         calls: this.stub.get(WebStubDirectoryCalls),
         query: this.stub.get(WebStubDirectoryStorage),

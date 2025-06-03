@@ -40,7 +40,7 @@ export class TickettoClientBuilder<S = Uint8Array, Config = ClientConfig<S>> {
     );
   }
 
-  build(): Promise<TickettoClient> {
+  build(): Promise<TickettoClient<S>> {
     if (this.consumerLike === undefined) {
       throw new Error("InvalidArgument: Missing `backend`");
     }
