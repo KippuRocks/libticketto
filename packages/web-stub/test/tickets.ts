@@ -22,8 +22,8 @@ async function getClient(t: { name: string }, accountId?: AccountId) {
 
           return accountId;
         },
-        async sign(payload: Uint8Array) {
-          if (accountId === undefined) {
+        async sign<T>(payload: T) {
+          if (accountId === undefined || !(payload instanceof Uint8Array)) {
             throw new Error("BadProof");
           }
 
@@ -275,7 +275,7 @@ describe("tickets::calls", () => {
   });
 
   describe("#submitAttendanceCall", () => {
-    function createCall(client: TickettoClient<Uint8Array>) {
+    function createCall(client: TickettoClient) {
       return client.tickets.query.attendanceRequest(1, 1n);
     }
 

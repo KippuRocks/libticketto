@@ -19,8 +19,8 @@ describe("accounts::storage", () => {
 
             return accountId;
           },
-          async sign(payload: Uint8Array) {
-            return payload;
+          async sign<T>(payload: T) {
+            return payload as Uint8Array;
           },
         },
         consumerSettings: {

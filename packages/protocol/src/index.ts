@@ -9,43 +9,43 @@ import type {
   TickettoConsumer,
 } from "./client.ts";
 
-interface ConstructorOf<S, Config, Consumer = TickettoConsumer<S, Config>> {
-  new (...params: any[]): Consumer;
+interface ConstructorOf<Config, Consumer = TickettoConsumer<Config>> {
+  new(...params: any[]): Consumer;
 }
 
-export class TickettoClientBuilder<S = Uint8Array, Config = ClientConfig<S>> {
-  private consumerLike?: ConstructorOf<S, Config> | TickettoConsumer<S, Config>;
+export class TickettoClientBuilder<Config = ClientConfig> {
+  private consumerLike?: ConstructorOf<Config> | TickettoConsumer<Config>;
   private config?: Config;
 
-  constructor() {}
+  constructor() { }
 
   withConsumer(
-    consumer: ConstructorOf<S, Config> | TickettoConsumer<S, Config>
-  ): TickettoClientBuilder<S, Config> {
+    consumer: ConstructorOf<Config> | TickettoConsumer<Config>
+  ): TickettoClientBuilder<Config> {
     this.consumerLike = consumer;
     return this;
   }
 
-  withConfig(config: Config): TickettoClientBuilder<S, Config> {
+  withConfig(config: Config): TickettoClientBuilder<Config> {
     this.config = config;
     return this;
   }
 
   isConstructorOf(
     consumerLike: unknown
-  ): consumerLike is ConstructorOf<S, Config> {
+  ): consumerLike is ConstructorOf<Config> {
     return (
       typeof consumerLike === "function" &&
       consumerLike?.constructor !== undefined
     );
   }
 
-  build(): Promise<TickettoClient<S>> {
+  build(): Promise<TickettoClient> {
     if (this.consumerLike === undefined) {
       throw new Error("InvalidArgument: Missing `backend`");
     }
 
-    let consumer: TickettoConsumer<S, Config>;
+    let consumer: TickettoConsumer<Config>;
     if (this.isConstructorOf(this.consumerLike)) {
       let ConsumerConstructor = this.consumerLike;
       consumer = new ConsumerConstructor();

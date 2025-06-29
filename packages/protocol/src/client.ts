@@ -7,8 +7,8 @@ import type { EventSubscription } from "./subscription/event-subscription.ts";
 
 export type * from "./subscription/event-subscription.ts";
 
-export interface TickettoConsumer<S, Config = ClientConfig<S>> {
-  build(config?: Config): Promise<TickettoClient<S>>;
+export interface TickettoConsumer<Config = ClientConfig> {
+  build(config?: Config): Promise<TickettoClient>;
 }
 
 /**
@@ -22,8 +22,8 @@ export type SystemEvent = EventsEvent | TicketsEvent;
  *
  * [gh:ticketto]: https://github.com/kippurocks/ticketto/blob/main/PROTOCOL.md
  */
-export type TickettoClient<S> = {
-  readonly accountProvider: ClientAccountProvider<S>;
+export type TickettoClient = {
+  readonly accountProvider: ClientAccountProvider;
   /**
    * Directory module: allows managing and fetching lists of accounts
    */
@@ -47,12 +47,12 @@ export type TickettoClient<S> = {
   readonly systemEvents: EventSubscription<SystemEvent>;
 };
 
-export type ClientConfig<S, T = unknown> = {
-  accountProvider: ClientAccountProvider<S>;
+export type ClientConfig<T = unknown> = {
+  accountProvider: ClientAccountProvider;
   consumerSettings?: T;
 };
 
-export interface ClientAccountProvider<S> {
+export interface ClientAccountProvider {
   getAccountId: Get<AccountId>;
-  sign(payload: S): Promise<Uint8Array>;
+  sign<S>(payload: S): Promise<Uint8Array>;
 }

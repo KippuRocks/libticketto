@@ -1,6 +1,6 @@
 {
   "name": "@ticketto/protocol",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "Library that defines the interfaces of the ticketto protocol to be implemented on a client",
   "type": "module",
   "files": [
