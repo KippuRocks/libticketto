@@ -4,7 +4,7 @@ The Ticketto SDK surface: commands, queries, errors, write completion, the log r
 
 Contracts `C1` (SDK surface) and `C8` (backend port). Owned by `F-002`.
 
-**Status:** package shell. No behaviour is implemented yet.
+**Status:** being built by `F-002` for `M0`. The surface is not agreed until the API report lands (`T-002-10`).
 
 | | |
 |---|---|
