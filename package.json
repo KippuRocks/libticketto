@@ -20,6 +20,8 @@
     "spec:check": "node tools/spec-codegen/dist/cli.js check",
     "spec:generate": "node tools/spec-codegen/dist/cli.js generate",
     "spec:vendor": "node tools/spec-codegen/dist/cli.js vendor",
+    "api:check": "pnpm --filter @ticketto/sdk api:check",
+    "api:update": "pnpm --filter @ticketto/sdk api:update",
     "hermes": "pnpm --filter @libticketto/hermes-bundle hermes",
     "changeset": "changeset",
     "version-packages": "changeset version",

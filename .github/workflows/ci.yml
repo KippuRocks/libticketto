@@ -28,6 +28,10 @@ jobs:
       # T-002-02: the SDK's error codes and invariant ids are generated from the
       # vendored spec/SPEC.md; a spec change not yet regenerated fails here.
       - run: pnpm spec:check
+      # T-002-10 — features/002-sdk/plan.md §6: the SDK's exported surface (C1, C8)
+      # is checked in as packages/sdk/api/sdk.api.md. A surface change that does
+      # not update the report fails here; acknowledge it with `pnpm api:update`.
+      - run: pnpm api:check
       - run: pnpm typecheck
       - run: pnpm lint
       # T-002-09 — features/002-sdk/plan.md §5.6: no switch over Command kinds or
