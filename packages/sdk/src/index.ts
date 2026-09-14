@@ -2,6 +2,32 @@
 // Design: features/002-sdk/plan.md in KippuRocks/kippu-docs.
 
 export type {
+  AccessPass,
+  AddZone,
+  AttendanceVerdict,
+  CanAttend,
+  Command,
+  CommandKind,
+  CreateEvent,
+  GetCancellationHolder,
+  GetEvent,
+  GetTicket,
+  IssueTicket,
+  OperationEnvelope,
+  Query,
+  QueryResult,
+  QueryResults,
+  RegisterCredential,
+  RemoveRestriction,
+  RemoveZone,
+  Restriction,
+  SetEventCapacity,
+  SetEventStatus,
+  SignedAccessPass,
+  TransferTicket,
+} from "./commands.js";
+export type { Authorisation, Registration } from "./credentials.js";
+export type {
   AttendancePolicy,
   Event,
   EventStatus,
