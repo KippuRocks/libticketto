@@ -9,3 +9,19 @@ Everything here is built from the Kippu specification and plan, in
 `kippurocks/kippu-docs`: `SPEC.md` decides behaviour, `PLAN.md` and
 `features/` decide how it is built. Work is tracked as one issue per feature
 per milestone.
+
+## Development
+
+Requires Node.js 24 or later and pnpm (the version is pinned in
+`package.json`'s `packageManager` field; `corepack enable` or a matching global
+install will pick it up). Installing on an older Node fails by design.
+
+```sh
+pnpm install
+pnpm build        # every package, in dependency order
+pnpm typecheck
+```
+
+The workspace is ESM only and TypeScript strict. Every package extends
+`tsconfig.base.json`, which loads no ambient type packages (`"types": []`), so a
+package that needs Node's globals must say so explicitly.

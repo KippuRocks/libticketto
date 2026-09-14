@@ -1,0 +1,19 @@
+{
+  "name": "libticketto",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The Ticketto monorepo: SDK surface, V0 cryptographic profile, ledger rules, conformance suite, reference backend, log, and backend bindings",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.17.1",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}
