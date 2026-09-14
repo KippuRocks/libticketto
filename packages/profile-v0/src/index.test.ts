@@ -39,6 +39,20 @@ describe("@ticketto/profile-v0", () => {
     expect(typeof profile.verifyPass).toBe("function");
   });
 
+  it("exports createProfileV0", () => {
+    const v0 = profile.createProfileV0({ rpId: "kippu.example" });
+    expect(Object.keys(v0).sort()).toEqual([
+      "accountOf",
+      "decodePass",
+      "encodeCommand",
+      "encodePass",
+      "eventId",
+      "registrationAccount",
+      "ticketId",
+      "verify",
+    ]);
+  });
+
   it("exports identifier derivation", () => {
     expect(typeof profile.eventId).toBe("function");
     expect(typeof profile.ticketId).toBe("function");

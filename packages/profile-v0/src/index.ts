@@ -65,6 +65,7 @@ export {
   producePass,
   verifyPass,
 } from "./pass.js";
+export { createProfileV0, type ProfileV0Config } from "./profile.js";
 export { codecs };
 
 export const packageName = "@ticketto/profile-v0";
