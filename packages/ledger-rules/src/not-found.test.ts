@@ -112,7 +112,7 @@ describe("commands against what does not exist", () => {
     const caps = createFakeCapabilities();
     const organiser = await registered(caps);
     const signed = await sign(organiser, commandOf("createEvent", eventId()));
-    await expect(execute(caps, profile, signed)).rejects.toThrow("not implemented");
+    expect(codeOf(await execute(caps, profile, signed))).not.toBe("ERR-EventNotFound");
   });
 
   it("issueTicket names a ticket yet to exist, and is not refused as not found", async () => {

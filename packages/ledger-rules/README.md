@@ -4,9 +4,13 @@ The ledger's rules — commands, invariants and errors — implemented once over
 
 Contract `C3`. Owned by `F-008`.
 
-**Status:** the `C3` capability interfaces are declared (`T-008-01`), and
-`execute` runs the checks every signed command passes (`T-008-02`). Command
-handlers, access passes, `canAttend` and `getCancellationHolder` follow.
+**Status:** the `C3` capability interfaces are declared (`T-008-01`); `execute`
+runs the checks every signed command passes (`T-008-02`, `T-008-13`).
+
+| Command | Handler |
+|---|---|
+| `createEvent` | Implemented (`T-008-03`) |
+| Every other command, access passes, `canAttend`, `getCancellationHolder` | Not yet — each throws until its task lands |
 
 | | |
 |---|---|
