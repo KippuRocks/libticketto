@@ -1,0 +1,21 @@
+{
+  "name": "@libticketto/spec-codegen",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Generates the SDK's error codes and invariant ids from the vendored SPEC.md, and checks they have not drifted",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "spec-codegen": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.4"
+  }
+}

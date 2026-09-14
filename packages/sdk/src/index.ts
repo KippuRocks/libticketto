@@ -12,6 +12,15 @@ export type {
   Zone,
   ZoneKind,
 } from "./domain.js";
+export type { Result, TickettoError } from "./errors.js";
+export {
+  type ErrorOrigin,
+  INVARIANT_IDS,
+  type InvariantId,
+  TICKETTO_ERROR_CODES,
+  TICKETTO_ERROR_ORIGINS,
+  type TickettoErrorCode,
+} from "./generated/spec.js";
 export type {
   AccountId,
   Brand,
