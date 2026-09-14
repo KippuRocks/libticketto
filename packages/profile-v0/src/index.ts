@@ -10,6 +10,7 @@ export {
   type AuthorisationValue,
   accountOf,
   CREDENTIAL_KIND_INDEX,
+  type CredentialConfig,
   decodeAuthorisation,
   decodeRegistration,
   encodeAuthorisation,
@@ -25,6 +26,24 @@ export {
   p256AuthorisationDigest,
   p256RegistrationDigest,
 } from "./credential/p256.js";
+export {
+  type Assertion,
+  type AssertionMeta,
+  type Attestation,
+  type AttestationMeta,
+  assertionCodec,
+  attestationCodec,
+  checkWebAuthnAssertion,
+  checkWebAuthnRegistration,
+  KREIVO_AUTHORITY_ID,
+  p256PointFromSpki,
+  V0_CONTEXT,
+  type WebAuthnAuthorisation,
+  type WebAuthnConfig,
+  type WebAuthnFailure,
+  type WebAuthnRegistration,
+  webAuthnChallenge,
+} from "./credential/webauthn.js";
 export {
   blake2b256,
   deviceId,

@@ -20,6 +20,18 @@ describe("@ticketto/profile-v0", () => {
     expect(profile.CREDENTIAL_KIND_INDEX.p256).toBe(1);
   });
 
+  it("exports pass-webauthn codecs and verification", () => {
+    expect(typeof profile.attestationCodec.enc).toBe("function");
+    expect(typeof profile.assertionCodec.enc).toBe("function");
+    expect(typeof profile.checkWebAuthnAssertion).toBe("function");
+    expect(profile.CREDENTIAL_KIND_INDEX.passWebAuthn).toBe(0);
+    expect(profile.KREIVO_AUTHORITY_ID).toHaveLength(32);
+  });
+
+  it("does not export the simulated authenticator from the main entry point", () => {
+    expect(Object.keys(profile).some((name) => /simulated/i.test(name))).toBe(false);
+  });
+
   it("exports identifier derivation", () => {
     expect(typeof profile.eventId).toBe("function");
     expect(typeof profile.ticketId).toBe("function");
