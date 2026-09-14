@@ -1511,7 +1511,7 @@ pass through free.
 | `ERR-EventIdExists` | Creating an event whose derived `EventId` already exists (`REQ-EV-9`) |
 | `ERR-EventNotFound` | Operation or query against an event that does not exist |
 | `ERR-TicketNotFound` | Operation or query against a ticket that does not exist |
-| `ERR-OperationExpired` | A command submitted after its own expiry (`REQ-CM-1`) |
+| `ERR-OperationExpired` | A command submitted after its own expiry, or whose expiry lies further ahead than the ledger accepts (`REQ-CM-1`) |
 | `ERR-InvalidAuthorisation` | A command whose authorisation does not verify, or does not come from a credential registered to the signing account (`REQ-CP-6`) |
 | `ERR-LedgerUnavailable` | The ledger could not be reached. Retryable, and carries no backend detail (`REQ-SDK-2`) |
 | `ERR-OperationConflict` | A command reusing an operation id already recorded for a different command (`REQ-CM-1`) |

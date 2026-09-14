@@ -677,7 +677,7 @@ export const TICKETTO_ERROR_CODES: readonly [
 "ERR-EventNotFound",
 /** Operation or query against a ticket that does not exist */
 "ERR-TicketNotFound",
-/** A command submitted after its own expiry (`REQ-CM-1`) */
+/** A command submitted after its own expiry, or whose expiry lies further ahead than the ledger accepts (`REQ-CM-1`) */
 "ERR-OperationExpired",
 /** A command whose authorisation does not verify, or does not come from a credential registered to the signing account (`REQ-CP-6`) */
 "ERR-InvalidAuthorisation",

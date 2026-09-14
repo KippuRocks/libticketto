@@ -13,7 +13,14 @@ export type {
   TicketRecord,
   Value,
 } from "./capabilities.js";
-export { type Execute, type ExecuteContext, execute } from "./execute.js";
+export {
+  configureExecute,
+  DEFAULT_MAX_OPERATION_LIFETIME,
+  type Execute,
+  type ExecuteContext,
+  execute,
+  type RulesConfig,
+} from "./execute.js";
 export { query } from "./query.js";
 
 export const packageName = "@ticketto/ledger-rules";
