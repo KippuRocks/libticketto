@@ -1,5 +1,5 @@
 // The V0 scope of the conformance suite — features/004-conformance/plan.md §5.3
-// (kippu-docs 178e9a4), SPEC.md §15, NFR-8.
+// (kippu-docs 96f4c06), SPEC.md §15, NFR-8.
 //
 // Curated, and checked against the spec: every live invariant of §9 and every
 // live error of §10 is either in the V0 list, which the suite must cover, or out
