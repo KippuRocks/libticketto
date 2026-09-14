@@ -10,6 +10,21 @@ Everything here is built from the Kippu specification and plan, in
 `features/` decide how it is built. Work is tracked as one issue per feature
 per milestone.
 
+## Packages
+
+| Package | What it is |
+|---|---|
+| [`@ticketto/sdk`](packages/sdk) | SDK surface and backend port (`C1`, `C8`) |
+| [`@ticketto/profile-v0`](packages/profile-v0) | V0 cryptographic profile (`C2`) |
+| [`@ticketto/ledger-rules`](packages/ledger-rules) | The ledger's rules over capability interfaces (`C3`) |
+| [`@ticketto/backend-memory`](packages/backend-memory) | In-memory reference backend |
+| [`@ticketto/log`](packages/log) | Published log, checkpoints, export and import (`C7`) |
+| [`@ticketto/binding-offchain`](packages/binding-offchain) | Binding to the hosted `ticketto-offchain` service |
+| [`@ticketto/conformance`](packages/conformance) | Shared conformance suite, run against every backend |
+| [`@ticketto/rx`](packages/rx) | Optional RxJS adapter |
+
+Every package is a shell until its owning feature lands.
+
 ## Development
 
 Requires Node.js 24 or later and pnpm (the version is pinned in
@@ -22,7 +37,7 @@ pnpm build        # every package, in dependency order
 pnpm typecheck
 pnpm lint         # Biome: lint and formatting, read-only
 pnpm format       # Biome: apply safe fixes and formatting
-pnpm test         # Vitest: every package and tool, plus workspace checks
+pnpm test         # Vitest: every package and tool, plus workspace checks (build first)
 ```
 
 Vitest runs one project per package and tool. `test/workspace.test.ts` holds the

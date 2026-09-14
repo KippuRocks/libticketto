@@ -21,6 +21,22 @@ importers:
         specifier: 5.0.0
         version: 5.0.0(@types/node@24.13.4)(vite@8.3.0(@types/node@24.13.4))
 
+  packages/backend-memory: {}
+
+  packages/binding-offchain: {}
+
+  packages/conformance: {}
+
+  packages/ledger-rules: {}
+
+  packages/log: {}
+
+  packages/profile-v0: {}
+
+  packages/rx: {}
+
+  packages/sdk: {}
+
 packages:
 
   '@biomejs/biome@2.5.13':

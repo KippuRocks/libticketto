@@ -1,0 +1,30 @@
+{
+  "name": "@ticketto/binding-offchain",
+  "version": "0.0.0",
+  "description": "The SDK binding to the hosted `ticketto-offchain` ledger service.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KippuRocks/libticketto.git",
+    "directory": "packages/binding-offchain"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}
