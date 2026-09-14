@@ -173,8 +173,9 @@ export function createExecute(handlers: CommandHandlers): Execute {
       }
       const ticketId = namedTicket(command);
       const ticket = ticketId === null ? null : await tx.getTicket(ticketId);
-      if (ticket === null && ticketId !== null) {
-        return err("ERR-TicketNotFound", `no ticket ${ticketId}`);
+      // A ticket of another event does not exist in the event named (INV-1, plan §5.7a).
+      if (ticketId !== null && (ticket === null || ticket.event !== eventId)) {
+        return err("ERR-TicketNotFound", `no ticket ${ticketId} in event ${eventId}`);
       }
 
       // 1. The envelope.

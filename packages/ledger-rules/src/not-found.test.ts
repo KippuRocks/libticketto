@@ -57,6 +57,24 @@ describe("commands against what does not exist", () => {
   );
 
   it.each(EXISTING_TICKET_COMMAND_KINDS)(
+    "ERR-TicketNotFound: %s naming a ticket of another event, changing nothing (INV-1)",
+    async (kind) => {
+      const caps = createFakeCapabilities();
+      const organiser = await registered(caps);
+      const named = eventId();
+      const other = eventId();
+      await caps.registry.putEvent(activeEvent(named, organiser.account));
+      await caps.registry.putEvent(activeEvent(other, organiser.account));
+      const command = commandOf(kind, named);
+      await caps.registry.insertTicket(ticketIn(other, ticketOf(kind, command), organiser.account));
+      const signed = await sign(organiser, command);
+
+      expect(codeOf(await execute(caps, profile, signed))).toBe("ERR-TicketNotFound");
+      expect(caps.log()).toHaveLength(0);
+    },
+  );
+
+  it.each(EXISTING_TICKET_COMMAND_KINDS)(
     "ERR-EventNotFound: %s against a missing event is reported before its ticket",
     async (kind) => {
       const caps = createFakeCapabilities();
@@ -133,6 +151,18 @@ describe("queries against what does not exist", () => {
     const id = eventId();
     await caps.registry.putEvent(activeEvent(id, id32<AccountId>()));
     const q = { kind: "canAttend", event: id, ticket: id32<TicketId>() } as const;
+    expect(codeOf(await query(caps, profile, q))).toBe("ERR-TicketNotFound");
+  });
+
+  it("ERR-TicketNotFound: canAttend naming a ticket of another event (INV-1)", async () => {
+    const caps = createFakeCapabilities();
+    const named = eventId();
+    const other = eventId();
+    await caps.registry.putEvent(activeEvent(named, id32<AccountId>()));
+    await caps.registry.putEvent(activeEvent(other, id32<AccountId>()));
+    const ticket = id32<TicketId>();
+    await caps.registry.insertTicket(ticketIn(other, ticket, id32<AccountId>()));
+    const q = { kind: "canAttend", event: named, ticket } as const;
     expect(codeOf(await query(caps, profile, q))).toBe("ERR-TicketNotFound");
   });
 
