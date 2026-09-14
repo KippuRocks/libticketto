@@ -755,7 +755,11 @@ believes.
 
 **`REQ-ID-3`** **Derivation is Kippu's responsibility**, not the ledger's — the
 ledger enforces uniqueness over an id it is given, and performs no derivation
-of its own. Kippu MUST therefore reject seat double-allocation at the platform
+of its own: it allocates and chooses no identifier. It MUST, however, reject a
+command whose stated `EventId` or `TicketId` is not the profile's canonical
+representation of the components the same command states
+(`ERR-IdentifierMismatch`); otherwise one placement could be issued under two
+ids, and `INV-13` would not hold. Kippu MUST therefore reject seat double-allocation at the platform
 layer, before submission, so the organiser gets a comprehensible error rather
 than a collision. Defence at both layers is retained and deliberate: the ledger
 check is the guarantee, the platform check is the user experience.
@@ -1503,7 +1507,7 @@ pass through free.
 | `ERR-UnknownZone` | Issuance against a zone not defined for this event (`REQ-ID-7`) |
 | `ERR-ZoneInUse` | Removal of a zone in which a ticket has been issued (`REQ-ID-7`) |
 | `ERR-ZoneKindMismatch` | Placement does not match the zone's kind (`REQ-ID-7`) |
-| `ERR-ZoneExists` | Adding a zone whose id already exists in the event (`REQ-ID-7`) |
+| `ERR-ZoneExists` | Adding a zone whose id already exists in the event, or creating an event that names the same zone id twice (`REQ-ID-7`) |
 | `ERR-EventIdExists` | Creating an event whose derived `EventId` already exists (`REQ-EV-9`) |
 | `ERR-EventNotFound` | Operation or query against an event that does not exist |
 | `ERR-TicketNotFound` | Operation or query against a ticket that does not exist |
@@ -1511,6 +1515,7 @@ pass through free.
 | `ERR-InvalidAuthorisation` | A command whose authorisation does not verify, or does not come from a credential registered to the signing account (`REQ-CP-6`) |
 | `ERR-LedgerUnavailable` | The ledger could not be reached. Retryable, and carries no backend detail (`REQ-SDK-2`) |
 | `ERR-OperationConflict` | A command reusing an operation id already recorded for a different command (`REQ-CM-1`) |
+| `ERR-IdentifierMismatch` | A command whose stated `EventId` or `TicketId` is not the profile's canonical representation of its stated components (`REQ-ID-1`, `REQ-ID-3`, `REQ-EV-9`) |
 | `ERR-SponsorshipRefused` | The operation is outside every sponsorship entitlement (`REQ-SP-3`), or its sponsorship is missing or invalid. Not retryable |
 
 **Errors by where they arise.** Every error above is raised by the ledger's rules, except two groups. `ERR-UnknownClass` and `ERR-ClassQuotaExceeded` are **platform errors**: classes and their quotas never reach the ledger (`REQ-TC-2`), so Kippu raises them. `ERR-LedgerUnavailable` is raised by a backend binding that cannot reach its ledger. `ERR-SponsorshipRefused` is raised by Kippu's sponsorship relay, or by a backend refusing a submission whose sponsorship is missing or invalid, before any rule runs. Neither group can be produced by a ledger, and `REQ-SDK-7` does not require it.

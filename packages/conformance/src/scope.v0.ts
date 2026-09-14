@@ -76,6 +76,7 @@ export const SCOPE_V0: Scope = {
     "ERR-TicketNotFound",
     "ERR-OperationExpired",
     "ERR-InvalidAuthorisation",
+    "ERR-IdentifierMismatch",
     "ERR-OperationConflict",
   ],
   outOfScope: {
