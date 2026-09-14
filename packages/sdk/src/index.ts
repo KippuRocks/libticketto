@@ -1,6 +1,7 @@
 // @ticketto/sdk — the Ticketto SDK surface (C1) and backend port (C8).
 // Design: features/002-sdk/plan.md in KippuRocks/kippu-docs.
 
+export type { Assurance, AssuranceDeclaration } from "./assurance.js";
 export type { Backend } from "./backend.js";
 export type {
   CredentialAccount,

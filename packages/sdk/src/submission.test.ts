@@ -3,11 +3,13 @@
 import { afterEach, beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 import {
   type AccountId,
+  type AssuranceDeclaration,
   type Authorisation,
   type Backend,
   type Cursor,
   createSubmission,
   type EventId,
+  INVARIANT_IDS,
   type OperationId,
   type Receipt,
   type Result,
@@ -49,6 +51,9 @@ function scriptedBackend(latency: number, script: Script): Backend {
       },
       async *hints() {},
     },
+    assurance: Object.fromEntries(
+      INVARIANT_IDS.map((id) => [id, "attested"]),
+    ) as AssuranceDeclaration,
   };
 }
 
