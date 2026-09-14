@@ -34,7 +34,36 @@ importers:
 
   packages/log: {}
 
-  packages/profile-v0: {}
+  packages/profile-v0:
+    dependencies:
+      '@ticketto/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+      scale-ts:
+        specifier: 1.6.1
+        version: 1.6.1
+    devDependencies:
+      '@babel/core':
+        specifier: 7.29.7
+        version: 7.29.7
+      '@babel/runtime':
+        specifier: 7.29.7
+        version: 7.29.7
+      '@react-native/babel-preset':
+        specifier: 0.87.1
+        version: 0.87.1(@babel/core@7.29.7)
+      '@react-native/metro-config':
+        specifier: 0.87.1
+        version: 0.87.1(@babel/core@7.29.7)
+      '@types/node':
+        specifier: 24.13.4
+        version: 24.13.4
+      hermes-compiler:
+        specifier: 250829098.0.17
+        version: 250829098.0.17
+      metro:
+        specifier: 0.87.1
+        version: 0.87.1
 
   packages/rx: {}
 
@@ -1581,6 +1610,9 @@ packages:
     resolution: {integrity: sha512-Z67nTmhZe7anqnM/EjI392w5i/ANUinjip7QYsOyN37oayduxt3ksdX0hf5OOamkAd53BiIHfbfSzfUmzKFQqQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
+
+  scale-ts@1.6.1:
+    resolution: {integrity: sha512-PBMc2AWc6wSEqJYBDPcyCLUj9/tMKnLX70jLOSndMtcUoLQucP/DM0vnQo1wJAYjTrQiq8iG9rD0q6wFzgjH7g==}
 
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -3403,6 +3435,8 @@ snapshots:
       '@rolldown/binding-openharmony-arm64': 1.2.8
       '@rolldown/binding-win32-arm64-msvc': 1.2.8
       '@rolldown/binding-win32-x64-msvc': 1.2.8
+
+  scale-ts@1.6.1: {}
 
   semver@6.3.1: {}
 
