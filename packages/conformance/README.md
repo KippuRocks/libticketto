@@ -4,7 +4,7 @@ The shared conformance suite, written once against the SDK surface and run again
 
 Owned by `F-004`. Serves `REQ-SDK-7`, `REQ-CP-5` and `NFR-8`.
 
-**Status:** harness, `TestControls` contract, V0 signer fixtures, the V0 scope, and the `REQ-SDK-6` assurance-declaration check. No invariant or error suites yet.
+**Status:** harness, `TestControls` contract, V0 signer fixtures, the V0 scope, the `REQ-SDK-6` assurance-declaration check, and the event lifecycle suites (`T-004-03`).
 
 | | |
 |---|---|
@@ -28,7 +28,7 @@ defineConformance({
   name: "backend-example × profile-v0",
   makeBackend: async () => createTestBackend(),
   ...profileV0Fixtures(),
-});
+}, { through: "M1" });
 ```
 
 The backend package lists `@ticketto/conformance` as a devDependency only, and registers with
@@ -63,6 +63,13 @@ spec — so a spec change that adds one fails CI until it is classified.
 One suite per identifier. Every test title begins with the identifier it verifies and a colon —
 `INV-13: a second ticket for the same position is rejected` — and a suite refuses a test titled
 otherwise.
+
+Every test is also tagged with the milestone whose rules it needs (§5.2a): sealing, cancelling,
+finishing and capacity changes land in `M4`, attendance in `M3`. `defineConformance` takes
+`{ through: "M<n>" }` and runs every test tagged up to that milestone; later tests are
+registered as skipped. A backend registers the suite through the current milestone; from `M5`,
+everything runs. An untagged test is an error. A tag schedules a test and never removes it from
+V0 scope.
 
 Part of [libticketto](../../README.md). Behaviour is specified in `SPEC.md` and
 the package's design in `PLAN.md` and `features/`, in
