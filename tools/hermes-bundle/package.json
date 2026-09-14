@@ -1,0 +1,29 @@
+{
+  "name": "@libticketto/hermes-bundle",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Bundles the React Native path of libticketto with Metro and compiles it to Hermes bytecode",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "hermes": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@babel/core": "7.29.7",
+    "@react-native/babel-preset": "0.87.1",
+    "@react-native/metro-config": "0.87.1",
+    "@ticketto/binding-offchain": "workspace:*",
+    "@ticketto/profile-v0": "workspace:*",
+    "@ticketto/sdk": "workspace:*",
+    "hermes-compiler": "250829098.0.17",
+    "metro": "0.87.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.4"
+  }
+}

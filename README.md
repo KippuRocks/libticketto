@@ -38,7 +38,12 @@ pnpm typecheck
 pnpm lint         # Biome: lint and formatting, read-only
 pnpm format       # Biome: apply safe fixes and formatting
 pnpm test         # Vitest: every package and tool, plus workspace checks (build first)
+pnpm boundaries   # package dependency rules (tools/boundaries)
+pnpm hermes       # Metro + hermesc bundle of the React Native path (tools/hermes-bundle)
 ```
+
+CI (`.github/workflows/ci.yml`, Node 24) runs all of these on every pull request
+and on `main`.
 
 Vitest runs one project per package and tool. `test/workspace.test.ts` holds the
 conventions every member must keep: ESM only, Node 24 as the engine floor, the

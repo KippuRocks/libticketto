@@ -15,7 +15,8 @@
     "lint": "biome ci .",
     "format": "biome check --write .",
     "test": "vitest run",
-    "boundaries": "node tools/boundaries/dist/cli.js"
+    "boundaries": "node tools/boundaries/dist/cli.js",
+    "hermes": "pnpm --filter @libticketto/hermes-bundle hermes"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.13",
