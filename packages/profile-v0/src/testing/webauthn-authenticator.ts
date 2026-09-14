@@ -36,6 +36,7 @@ export interface CeremonyOverrides {
   readonly challenge?: Uint8Array;
   /** Signs for this RP id instead of the authenticator's own. */
   readonly rpId?: string;
+  readonly userPresent?: boolean;
   readonly userVerified?: boolean;
   readonly context?: number;
   readonly authorityId?: Uint8Array;
@@ -120,7 +121,10 @@ export class SimulatedWebAuthnAuthenticator {
   }
 
   private flags(overrides: CeremonyOverrides): number {
-    return FLAG_USER_PRESENT | (overrides.userVerified === false ? 0 : FLAG_USER_VERIFIED);
+    return (
+      (overrides.userPresent === false ? 0 : FLAG_USER_PRESENT) |
+      (overrides.userVerified === false ? 0 : FLAG_USER_VERIFIED)
+    );
   }
 
   /** A registration ceremony (`navigator.credentials.create`) over `challenge`. */

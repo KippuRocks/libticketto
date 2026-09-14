@@ -40,6 +40,7 @@ import {
   verify,
 } from "./credential/credential.js";
 import { err, ok } from "./result.js";
+import { PASS_SIGNING_TAG } from "./signing.js";
 
 /** Bytes in an encoded access pass, format version included. */
 export const PASS_LENGTH = 97;
@@ -74,9 +75,23 @@ const signedPassCodec: Codec<SignedAccessPass> = createCodec(
   })),
 );
 
-/** The canonical bytes a holder authorises for `pass` (`Profile.encodePass`). */
+/** The canonical bytes of `pass`: 97 bytes, format version included. */
 export function encodePass(pass: AccessPass): Uint8Array {
   return passCodec.enc(pass);
+}
+
+/**
+ * The bytes a holder authorises for `pass` (`Profile.encodePass`):
+ * `"ticketto/v0/pass" ‖ encodePass(pass)`, so that a pass signature never
+ * verifies as a command signature (plan §5.7, ruling 3).
+ */
+export function passSigningPayload(pass: AccessPass): Uint8Array {
+  return concatBytes(PASS_SIGNING_TAG, encodePass(pass));
+}
+
+/** The access pass `bytes` canonically encode. Throws `DecodeError` otherwise. */
+export function decodePassBytes(bytes: Uint8Array): AccessPass {
+  return decodeExact(passCodec, bytes);
 }
 
 /** A signed pass as presented — for example, in a QR code. */
@@ -128,7 +143,7 @@ export async function producePass(request: PassRequest, signer: Signer): Promise
     notBefore: request.notBefore,
     notAfter: request.notBefore + window,
   };
-  return { pass, authorisation: await signer.sign(encodePass(pass)) };
+  return { pass, authorisation: await signer.sign(passSigningPayload(pass)) };
 }
 
 /** A source of the current time, in milliseconds since the Unix epoch. */
@@ -170,7 +185,7 @@ export function verifyPass(
   }
   let payload: Uint8Array;
   try {
-    payload = encodePass(pass);
+    payload = passSigningPayload(pass);
   } catch {
     return err("ERR-InvalidPass", "malformed pass");
   }

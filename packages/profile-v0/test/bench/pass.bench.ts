@@ -15,6 +15,7 @@ import {
   encodePass,
   encodeSignedPass,
   PASS_LENGTH,
+  passSigningPayload,
   verifyPass,
 } from "../../src/pass.js";
 import { Random } from "../random.js";
@@ -67,13 +68,13 @@ async function passWebAuthn(options: BenchOptions): Promise<BenchResult> {
   };
   const signed: SignedAccessPass = {
     pass,
-    authorisation: await holder.signer.sign(encodePass(pass)),
+    authorisation: await holder.signer.sign(passSigningPayload(pass)),
   };
   const presented = encodeSignedPass(signed);
   const sizes: number[] = [];
   for (let sample = 0; sample < SAMPLES; sample++) {
     const other = { ...pass, id: random.hex<PassId>(16) };
-    const auth = await holder.signer.sign(encodePass(other));
+    const auth = await holder.signer.sign(passSigningPayload(other));
     sizes.push(encodeSignedPass({ pass: other, authorisation: auth }).length);
   }
   const clock = { now: () => T0 + 1_000 };

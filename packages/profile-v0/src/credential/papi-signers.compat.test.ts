@@ -6,8 +6,14 @@
 // same bytes, as `@virtonetwork/signer` and `@virtonetwork/authenticators-webauthn`.
 // Their `WebAuthn` authenticator runs here unmodified, against a
 // `navigator.credentials` backed by the simulated authenticator, with the V0
-// challenger (no block hash: `BLAKE2b-256(xtc)`, context 0). Every comparison
-// is against their output; a divergence fails CI.
+// challenger (no block hash, context 0; plan §5.7): a registration's challenge is
+// `BLAKE2b-256("ticketto/v0/registration" ‖ account)`, and an assertion's is
+// `BLAKE2b-256(xtc)` over a signing payload that carries its domain tag. Every
+// comparison is against their output; a divergence fails CI.
+//
+// papi-signers calls one challenger for both ceremonies — with the account on
+// `register`, with the payload on `authenticate` — so a V0 client (Saifu, F-030)
+// must apply the registration tag on `register` only, as `v0Challenger` does.
 
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
@@ -19,9 +25,10 @@ import {
 import { beforeAll, describe, expect, it } from "vitest";
 import { p256Key } from "../../test/keys.js";
 import { Random } from "../../test/random.js";
-import { toHex } from "../bytes.js";
+import { concatBytes, fromHex, toBase64Url, toHex, utf8Decode } from "../bytes.js";
 import { decodeExact } from "../codec/scale.js";
 import { blake2b256, deviceId, hashedUserId, holderAccountId } from "../derive.js";
+import { COMMAND_SIGNING_TAG, PASS_SIGNING_TAG, registrationChallenge } from "../signing.js";
 import { SimulatedWebAuthnAuthenticator } from "../testing/webauthn-authenticator.js";
 import {
   accountOf,
@@ -111,8 +118,18 @@ function installCredentials(authenticator: SimulatedWebAuthnAuthenticator, cerem
   });
 }
 
-/** The V0 challenger: papi-signers' `blockHashChallenger` with no block hash to mix in. */
-const v0Challenger = (_context: number, xtc: Uint8Array) => blake2b256(xtc);
+type CeremonyKind = "register" | "authenticate";
+
+/**
+ * The V0 challenger: papi-signers' `blockHashChallenger` with no block hash to
+ * mix in, and the registration tag applied to the account on `register`.
+ */
+function v0Challenger(phase: { current: CeremonyKind }) {
+  return (_context: number, bytes: Uint8Array) =>
+    phase.current === "register"
+      ? registrationChallenge(toHex(bytes) as Parameters<typeof registrationChallenge>[0])
+      : blake2b256(bytes);
+}
 
 describe("T-003-10 compatibility with @virtonetwork/signer and authenticators-webauthn", () => {
   const random = new Random(0xc0de_ba5e);
@@ -120,7 +137,10 @@ describe("T-003-10 compatibility with @virtonetwork/signer and authenticators-we
     userId: random.hex<string>(32),
     secretKey: p256Key(random).secretKey,
     credentialId: random.bytes(16 + random.below(48)),
-    payload: random.bytes(random.below(300)),
+    payload: concatBytes(
+      random.below(2) === 0 ? COMMAND_SIGNING_TAG : PASS_SIGNING_TAG,
+      random.bytes(random.below(300)),
+    ),
   }));
 
   it("uses the same authority id", () => {
@@ -138,7 +158,9 @@ describe("T-003-10 compatibility with @virtonetwork/signer and authenticators-we
       const ceremony: Ceremony = { rawId: credentialId };
       installCredentials(authenticator, ceremony);
 
-      const theirs = await new WebAuthn(userId, v0Challenger).setup();
+      const phase: { current: CeremonyKind } = { current: "register" };
+      const challenger = v0Challenger(phase);
+      const theirs = await new WebAuthn(userId, challenger).setup();
 
       // Account ids.
       expect(toHex(hashedUserId(userId))).toBe(toHex(theirs.hashedUserId));
@@ -160,6 +182,14 @@ describe("T-003-10 compatibility with @virtonetwork/signer and authenticators-we
       };
       expect(toHex(attestationCodec.enc(ourAttestation))).toBe(toHex(theirAttestationBytes));
       expect(decodeExact(attestationCodec, theirAttestationBytes)).toEqual(ourAttestation);
+      // The registration challenge papi-signers requested is the V0 one over the holder's account.
+      const { challenge } = JSON.parse(utf8Decode(created.client_data)) as { challenge: string };
+      expect(challenge).toBe(toBase64Url(registrationChallenge(holderAccountId(userId))));
+      expect(toHex(challenger(0, fromHex(holderAccountId(userId))))).toBe(
+        toHex(registrationChallenge(holderAccountId(userId))),
+      );
+
+      phase.current = "authenticate";
 
       // Authentication: device id and assertion bytes.
       const authenticated = await theirs.authenticate(V0_CONTEXT, payload);
@@ -189,7 +219,7 @@ describe("T-003-10 compatibility with @virtonetwork/signer and authenticators-we
       expect(accountOf(authorisation)).toEqual(registered);
       expect(verify(registration, payload, authorisation, { rpId: RP_ID })).toBe(true);
       expect(decodeAuthorisation(authorisation).kind).toBe("passWebAuthn");
-      expect(toHex(webAuthnChallenge(payload))).toBe(toHex(v0Challenger(0, payload)));
+      expect(toHex(webAuthnChallenge(payload))).toBe(toHex(challenger(0, payload)));
     },
   );
 });

@@ -4,7 +4,9 @@
 //   Account        BLAKE2b-256("ticketto/v0/account/p256" ‖ compressed public key)
 //   Registration   the public key, signed by itself: ECDSA P-256 over
 //                  BLAKE2b-256("ticketto/v0/registration/p256" ‖ public key)
-//   Authorisation  ECDSA P-256 over BLAKE2b-256(payload), plus the public key
+//   Authorisation  ECDSA P-256 over BLAKE2b-256(payload), plus the public key,
+//                  where the payload is a signing payload carrying its domain
+//                  tag (`signing.ts`, plan §5.7)
 //
 // Signatures are 64-byte `r ‖ s` with low S. A DER signature, as a KMS returns,
 // is normalised to that form by `normaliseP256Signature`.
@@ -28,7 +30,10 @@ export interface P256Signed {
   readonly signature: Uint8Array;
 }
 
-/** The digest a `p256` credential signs to authorise `payload`. */
+/**
+ * The digest a `p256` credential signs to authorise `payload`: `BLAKE2b-256(payload)`.
+ * `payload` is a signing payload, so the digest carries its domain tag (plan §5.7).
+ */
 export function p256AuthorisationDigest(payload: Uint8Array): Uint8Array {
   return blake2b256(payload);
 }

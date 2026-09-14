@@ -39,6 +39,22 @@ describe("@ticketto/profile-v0", () => {
     expect(typeof profile.verifyPass).toBe("function");
   });
 
+  it("exports the domain-separated signing payloads and the registration challenge", () => {
+    expect(typeof profile.commandSigningPayload).toBe("function");
+    expect(typeof profile.passSigningPayload).toBe("function");
+    expect(typeof profile.registrationChallenge).toBe("function");
+    expect(new TextDecoder().decode(profile.COMMAND_SIGNING_TAG)).toBe("ticketto/v0/command");
+    expect(new TextDecoder().decode(profile.PASS_SIGNING_TAG)).toBe("ticketto/v0/pass");
+  });
+
+  it("exports the signed input framing", () => {
+    expect(typeof profile.encodeSignedCommand).toBe("function");
+    expect(typeof profile.decodeSignedCommand).toBe("function");
+    expect(typeof profile.encodeSignedAccessPass).toBe("function");
+    expect(typeof profile.decodeSignedAccessPass).toBe("function");
+    expect(profile.SIGNED_INPUT_KIND_INDEX).toEqual({ command: 0, accessPass: 1 });
+  });
+
   it("exports createProfileV0", () => {
     const v0 = profile.createProfileV0({ rpId: "kippu.example" });
     expect(Object.keys(v0).sort()).toEqual([

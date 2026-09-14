@@ -57,6 +57,27 @@ value.
 | Enumerations | one-byte index, in the order the SDK declares the variants |
 | Command | version, `operationId`, `expiresAt`, kind index, body |
 
+### Signed inputs
+
+A signed command or a signed access pass, as the log and the wire protocol carry
+it, has one canonical framing (`REQ-CP-1`):
+
+```
+SignedInput = version u8, kind u8, payload Vec<u8>, authorisation Vec<u8>
+```
+
+| Kind | Input | Payload | Encode / decode |
+|---|---|---|---|
+| `0` | command | the command bytes (`encodeCommand`) | `encodeSignedCommand` / `decodeSignedCommand` |
+| `1` | access pass | the 97 pass bytes (`encodePass`) | `encodeSignedAccessPass` / `decodeSignedAccessPass` |
+
+The payload is the untagged canonical encoding, not the signing payload; the
+authorisation is the profile's `version ‖ kind ‖ body`, carried opaque. Decoding
+is strict — an unknown version or kind, a non-canonical payload, truncation or a
+trailing byte is refused — with `ERR-InvalidAuthorisation` for a signed command
+and `ERR-InvalidPass` for a signed access pass. This is not the form a pass is
+presented in at the gate: that is `encodeSignedPass` (see Access passes).
+
 ## Identifiers
 
 | Identifier | Derivation |
@@ -67,6 +88,25 @@ value.
 | `EventId` | `BLAKE2b-256("ticketto/v0/event" ‖ creator ‖ salt)` |
 | `TicketId` | `BLAKE2b-256("ticketto/v0/ticket" ‖ SCALE(eventId, zoneId, placement))` |
 
+## Signing payloads
+
+What a credential signs is separated by domain (plan §5.7), so that a signature
+over a command can never verify as a signature over a pass, or the other way
+round:
+
+| Input | Signing payload | Produced by |
+|---|---|---|
+| Command | `"ticketto/v0/command" ‖ command bytes` | `Profile.encodeCommand`, `commandSigningPayload` |
+| Access pass | `"ticketto/v0/pass" ‖ pass bytes` | `Profile.encodePass`, `passSigningPayload` |
+
+**Always sign and verify the signing payload, never the raw SCALE bytes.**
+`Signer.sign` and `Profile.verify` carry no domain, so the tag travels inside the
+payload: give a signer, and `Profile.verify`, what `Profile.encodeCommand` or
+`Profile.encodePass` returns. `encodeCommand` and `encodePass` return the untagged
+canonical bytes — for decoding, storage and framing only — and a signature over
+them verifies as nothing. Every credential kind hashes exactly the payload it is
+given, so a production signer needs no knowledge of domains.
+
 ## Credentials
 
 `Registration` and `Authorisation` are `version u8 ‖ kind u8 ‖ body`. Kind `0` is
@@ -75,7 +115,7 @@ value.
 | `p256` | |
 |---|---|
 | Registration | compressed public key (33) ‖ signature (64) over `BLAKE2b-256("ticketto/v0/registration/p256" ‖ public key)` |
-| Authorisation | compressed public key (33) ‖ signature (64) over `BLAKE2b-256(payload)` |
+| Authorisation | compressed public key (33) ‖ signature (64) over `BLAKE2b-256(signing payload)` |
 | Credential id | the compressed public key, as hex |
 
 | `pass-webauthn` | |
@@ -89,14 +129,25 @@ value.
 with `authority_id` `"kreivo_p"` and `context` `0`. An assertion over a payload
 verifies when its user id is the registration's, its device is the registered
 one, its client data is a `webauthn.get` whose challenge is
-`base64url(BLAKE2b-256(payload))`, its authenticator data carries the configured
-RP id hash and the user-verified flag, and its ECDSA P-256 signature over
+`base64url(BLAKE2b-256(signing payload))`, its authenticator data carries the
+configured RP id hash and both the user-present and user-verified flags, and its
+ECDSA P-256 signature over
 `authenticatorData ‖ SHA-256(clientDataJSON)` verifies after DER is normalised
 to low S. The RP id is deployment configuration: changing it invalidates every
 holder passkey.
 
-The profile does not interpret an attestation's challenge: a registration is
-accepted for an account only through a command authorised under `REQ-CP-6`.
+A registration's attestation challenge must be
+`BLAKE2b-256("ticketto/v0/registration" ‖ account)`, where the account is the one
+its hashed user id names (`registrationChallenge`); any other challenge is
+refused with `ERR-InvalidAuthorisation`. That binds a registration to its
+account. A further registration is still accepted for an account only through a
+command authorised under `REQ-CP-6`.
+
+**papi-signers' challenger.** `@virtonetwork/authenticators-webauthn`'s `WebAuthn`
+calls one challenger for both ceremonies: with the account on `register`, and
+with the payload on `authenticate`. A V0 client using it — Saifu (`F-030`) — must
+return `registrationChallenge(account)` on `register` only, and
+`BLAKE2b-256(payload)` on `authenticate`, passing a signing payload.
 
 `p256` signatures are `r ‖ s` with low S; `normaliseP256Signature` turns a DER signature
 (as a KMS returns) into that form. A high-S signature is refused.
@@ -110,7 +161,8 @@ SignedAccessPass = pass, authorisation (length-prefixed bytes)
 ```
 
 `producePass` is a pure function plus a `Signer`, with no network (`NFR-3`); the
-window defaults to 60 s (`NFR-5`). `verifyPass` checks that the authorisation
+signer signs the pass's signing payload, and the window defaults to 60 s
+(`NFR-5`). `verifyPass` checks that the authorisation
 comes from the pass's holder account through the given registration, that the
 signature verifies, and that the supplied clock is inside `[notBefore, notAfter]`:
 `ERR-InvalidPass` or `ERR-PassExpired` otherwise. Whether the holder still holds
@@ -137,7 +189,9 @@ HERMES_VM=~/.cache/hermes-vm/bin/hermes pnpm --filter @ticketto/profile-v0 test:
 `src/credential/papi-signers.compat.test.ts` runs on Node only: it drives
 `@virtonetwork/authenticators-webauthn`'s own `WebAuthn` authenticator (with
 `@virtonetwork/signer`) against a simulated `navigator.credentials`, and requires
-identical account ids, device ids, attestation bytes and assertion bytes.
+identical account ids, device ids, attestation bytes and assertion bytes. Its
+challenger is the V0 one described under Credentials, and the test checks the
+challenges it requests.
 
 The runner bundles the suites with Metro and React Native's Babel preset,
 compiles them with the `hermesc` React Native ships, and executes the bytecode
@@ -146,10 +200,12 @@ on a VM built from the same `facebook/hermes` release. CI does the same in the
 
 ## Test vectors (`C2`)
 
-`vectors/v0.json` is the contract: identifiers (holder and `p256` accounts,
-device ids, `EventId`, `TicketId`), credential registrations, two commands of
-every kind with their bytes, valid and invalid authorisations, signed passes
-with their expected verdict, and malformed inputs. It ships in the package
+`vectors/v0.json` is the contract: identifiers (holder and `p256` accounts with
+their registration challenges, device ids, `EventId`, `TicketId`), credential
+registrations and registrations refused for their challenge, two commands of
+every kind with their bytes and signing payloads, valid and invalid
+authorisations (cross-domain signatures among them), signed passes with their
+expected verdict, framed signed inputs, and malformed inputs. It ships in the package
 (`@ticketto/profile-v0/vectors/v0.json`); `binding-offchain`, `ticketto-offchain`
 and any other implementation must reproduce every vector. Byte strings are
 lower-case hex.

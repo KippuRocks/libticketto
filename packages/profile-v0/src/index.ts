@@ -58,14 +58,30 @@ export {
   type Clock,
   DEFAULT_PASS_WINDOW,
   decodePass,
+  decodePassBytes,
   encodePass,
   encodeSignedPass,
   PASS_LENGTH,
   type PassRequest,
+  passSigningPayload,
   producePass,
   verifyPass,
 } from "./pass.js";
 export { createProfileV0, type ProfileV0Config } from "./profile.js";
+export {
+  decodeSignedAccessPass,
+  decodeSignedCommand,
+  encodeSignedAccessPass,
+  encodeSignedCommand,
+  SIGNED_INPUT_KIND_INDEX,
+} from "./signed-input.js";
+export {
+  COMMAND_SIGNING_TAG,
+  commandSigningPayload,
+  PASS_SIGNING_TAG,
+  REGISTRATION_CHALLENGE_TAG,
+  registrationChallenge,
+} from "./signing.js";
 export { codecs };
 
 export const packageName = "@ticketto/profile-v0";
