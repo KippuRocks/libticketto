@@ -4,9 +4,23 @@ The in-memory reference backend, independent of the hosted one, and the slow-bac
 
 Owned by `F-005`. Serves `REQ-MG-1`.
 
-**Status:** the in-memory `C3` capabilities are implemented (`T-005-01`). The
-`C8` port, log reader, assurance declaration, test controls, export and the
-slow decorator are not yet.
+**Status:** the in-memory `C3` capabilities (`T-005-01`) and the `C8` port over
+`ledger-rules` (`T-005-02`) are implemented. The log reader, assurance
+declaration, test controls, export and the slow decorator are not yet: the log
+reader and assurance throw until their tasks land.
+
+## Backend (`C8`)
+
+`createMemoryBackend({ profile, clock? })` runs `@ticketto/ledger-rules` in
+process, over fresh in-memory capabilities (`AD-25`):
+
+| | |
+|---|---|
+| `submit` | Reports `submitted` before it returns — with the command's operation id, or a pass's id — and settles only on a later microtask, never synchronously (plan §5.2, `NFR-9`). A §10 error from the rules rejects the submission; a defect fails it |
+| `query` | The rules' point queries |
+
+A sponsorship is accepted and not verified: that is the hosted ledger service's
+concern (`F-010`).
 
 ## Capabilities (`C3`)
 
