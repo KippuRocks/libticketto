@@ -24,7 +24,6 @@ import type {
   AccountId,
   Count,
   Cursor,
-  Event,
   EventId,
   LogRecord,
   OperationId,
@@ -77,9 +76,15 @@ class Layer<K, V> {
   }
 }
 
+/**
+ * An event as the registry records it: whatever `putEvent` is given, stored and
+ * returned whole, the rules' own bookkeeping included.
+ */
+type EventRecord = Parameters<Registry["putEvent"]>[0];
+
 /** The committed state. Stored values are readonly and replaced, never mutated. */
 interface State {
-  readonly events: Map<EventId, Event>;
+  readonly events: Map<EventId, EventRecord>;
   readonly registrations: Map<AccountId, readonly CredentialRegistration[]>;
   readonly tickets: Map<TicketId, TicketRecord>;
   /** Keyed by ticket and pass id; the value is the retention time. */
