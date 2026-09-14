@@ -4,7 +4,7 @@ The shared conformance suite, written once against the SDK surface and run again
 
 Owned by `F-004`. Serves `REQ-SDK-7`, `REQ-CP-5` and `NFR-8`.
 
-**Status:** harness, `TestControls` contract and V0 signer fixtures. No behaviour suites yet.
+**Status:** harness, `TestControls` contract, V0 signer fixtures and the V0 scope. No behaviour suites yet.
 
 | | |
 |---|---|
@@ -50,6 +50,13 @@ the CI matrix by defining a `conformance` script that runs that file, for exampl
 
 Each test runs in a fresh `World`: the backend, the SDK over it on the backend's clock and
 randomness, and the organiser's and holders' credentials already registered.
+
+## Scope
+
+`src/scope.v0.ts` lists every invariant and ledger error the V0 suite must cover, and every other
+live §9 and §10 identifier with a one-line reason it is left out (`features/004-conformance/plan.md`
+§5.3). A test fails when an identifier is in neither list, in both, or not live in the vendored
+spec — so a spec change that adds one fails CI until it is classified.
 
 ## Suites
 
