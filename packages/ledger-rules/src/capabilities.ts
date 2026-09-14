@@ -23,6 +23,7 @@ import type {
   TicketId,
   TicketRestrictions,
   Timestamp,
+  ZoneId,
 } from "@ticketto/sdk";
 
 /** A monotonic current timestamp agreed by all parties to the backend (`REQ-SDK-3`). */
@@ -50,6 +51,16 @@ export interface CredentialRegistration {
   readonly credential: CredentialId;
   /** Opaque to the store; only the profile reads it (`REQ-CP-3`). */
   readonly registration: Registration;
+}
+
+/** An event as the registry holds it: its §5.1 facts, plus the rules' own bookkeeping. */
+export interface EventRecord extends Event {
+  /**
+   * The zones in which a ticket has been issued, each once: a set, not a count,
+   * because zones carry no capacity (plan §5.7a, `DEF-11`). `issueTicket` adds
+   * its zone; `removeZone` reads it for `ERR-ZoneInUse` (`REQ-ID-7`).
+   */
+  readonly zonesInUse: readonly ZoneId[];
 }
 
 /** A ticket as the registry holds it: its §5.2 facts, plus the rules' own bookkeeping. */
@@ -113,9 +124,9 @@ export interface LogAppend {
  */
 export interface Registry {
   /** An event by id, or `null` when none exists. */
-  getEvent(id: EventId): Promise<Event | null>;
+  getEvent(id: EventId): Promise<EventRecord | null>;
   /** Records an event, replacing any existing event with its id. */
-  putEvent(event: Event): Promise<void>;
+  putEvent(event: EventRecord): Promise<void>;
 
   /** The credentials registered to an account, in registration order; empty for an unknown account. */
   getRegistrations(account: AccountId): Promise<readonly CredentialRegistration[]>;

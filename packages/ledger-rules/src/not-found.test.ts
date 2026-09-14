@@ -1,7 +1,7 @@
 // T-008-13: not-found checks, with the codes amendment 0003 ruled
 // (features/008-ledger-rules/plan.md §5.2, SPEC.md §10).
 
-import type { AccountId, CommandKind, Event, EventId, Result, TicketId } from "@ticketto/sdk";
+import type { AccountId, CommandKind, EventId, Result, TicketId } from "@ticketto/sdk";
 import { describe, expect, it } from "vitest";
 import {
   commandOf,
@@ -11,11 +11,12 @@ import {
 } from "../test/commands.js";
 import { createFakeCapabilities } from "../test/fake-capabilities.js";
 import { credential, eventId, id32, profile, registered, sign } from "../test/fixtures.js";
+import type { EventRecord } from "./capabilities.js";
 import { execute } from "./execute.js";
 import { query } from "./query.js";
 
-function activeEvent(id: EventId, owner: AccountId): Event {
-  return { id, owner, status: "Active", maxCapacity: null, issued: 0, zones: [] };
+function activeEvent(id: EventId, owner: AccountId): EventRecord {
+  return { id, owner, status: "Active", maxCapacity: null, issued: 0, zones: [], zonesInUse: [] };
 }
 
 function codeOf(result: Result<unknown>): string {

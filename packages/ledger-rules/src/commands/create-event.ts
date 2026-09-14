@@ -42,6 +42,7 @@ export const createEvent: CommandHandler<CreateEvent> = async ({
       maxCapacity: command.capacity,
       issued: 0,
       zones: command.zones.map(({ id, kind }) => ({ id, kind })),
+      zonesInUse: [],
     });
   });
 };
