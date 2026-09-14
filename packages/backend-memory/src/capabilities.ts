@@ -7,6 +7,10 @@
 // function resolves. Serialisable by construction (`INV-6`, `AC-E3.2`), and
 // deliberately naive: correctness over speed.
 //
+// The log is produced through `@ticketto/log` (T-005-03): every append is linked
+// onto the hash chain inside its transaction, and the chain's head moves only
+// when the transaction commits.
+//
 // Nothing here is persisted, and nothing is forgotten: the registry MAY drop a
 // consumed pass or an operation past its retention, and this one never does.
 
@@ -21,6 +25,7 @@ import type {
   TicketFacts,
   TicketRecord,
 } from "@ticketto/ledger-rules";
+import { type ChainHead, EMPTY_CHAIN, type LinkedRecord, linkRecord } from "@ticketto/log";
 import type {
   AccountId,
   Count,
@@ -87,8 +92,19 @@ interface State {
   readonly operations: Map<OperationId, OperationRecord>;
   /** The number of records each event has in the log. */
   readonly eventRecords: Map<EventId, Count>;
-  readonly log: LogRecord[];
+  readonly log: StoredRecord[];
+  /** The chain's head: where the next committed record links. */
+  readonly chain: { head: ChainHead };
 }
+
+/** A committed log record: as the SDK presents it, and as the chain links it (`C7`). */
+export interface StoredRecord {
+  readonly record: LogRecord;
+  readonly linked: LinkedRecord;
+}
+
+/** The cursor of the record at `sequence` in the total order: its sequence, in decimal. */
+export const cursorAt = (sequence: number) => String(sequence) as Cursor;
 
 const passKey = (ticket: TicketId, pass: PassId) => `${ticket}/${pass}`;
 
@@ -105,7 +121,7 @@ function layeredRegistry(state: State, assertOpen: () => void) {
   const consumedPasses = new Layer(state.consumedPasses);
   const operations = new Layer(state.operations);
   const eventRecords = new Layer(state.eventRecords);
-  const appended: LogRecord[] = [];
+  const appended: StoredRecord[] = [];
 
   const existingTicket = (id: TicketId): TicketRecord => {
     const ticket = tickets.get(id);
@@ -173,21 +189,20 @@ function layeredRegistry(state: State, assertOpen: () => void) {
 
     async appendLog(append: LogAppend) {
       assertOpen();
-      let event: LogRecord["event"] = null;
-      if (append.event !== null) {
-        // An event's first record is sequence 0, as in the published log (C7).
-        const sequence = eventRecords.get(append.event) ?? 0;
-        eventRecords.set(append.event, sequence + 1);
-        event = { id: append.event, sequence };
-      }
+      const head = appended.at(-1)?.linked.head ?? state.chain.head;
+      // An event's first record is sequence 0, as in the published log (C7).
+      const eventSequence = append.event === null ? null : (eventRecords.get(append.event) ?? 0);
+      // Throws, recording nothing, for an input the log cannot carry (NFR-6).
+      const linked = linkRecord(head, append, eventSequence);
+      if (append.event !== null) eventRecords.set(append.event, (eventSequence as number) + 1);
       const record: LogRecord = {
-        cursor: String(state.log.length + appended.length + 1) as Cursor,
+        cursor: cursorAt(linked.record.sequence),
         recordedAt: append.recordedAt,
-        event,
+        event: linked.record.event,
         entry: append.entry,
         presentedAt: append.presentedAt,
       };
-      appended.push(record);
+      appended.push({ record, linked });
       return record;
     },
   };
@@ -199,7 +214,12 @@ function layeredRegistry(state: State, assertOpen: () => void) {
     consumedPasses.commit();
     operations.commit();
     eventRecords.commit();
-    state.log.push(...appended);
+    const last = appended.at(-1);
+    if (last !== undefined) {
+      state.log.push(...appended);
+      state.chain.head = last.linked.head;
+    }
+    return appended.length;
   };
 
   return { registry, commit };
@@ -220,6 +240,21 @@ function layeredRegistry(state: State, assertOpen: () => void) {
  * each write as a transaction of its own.
  */
 export function createMemoryCapabilities(options: MemoryCapabilitiesOptions = {}): Capabilities {
+  return createMemoryStore(options).capabilities;
+}
+
+/** In-memory capabilities, with the backend's read of their committed log. */
+export interface MemoryStore {
+  readonly capabilities: Capabilities;
+  /** The committed log, in its total order. */
+  records(): readonly StoredRecord[];
+  /** Calls `listener` after every commit that appends to the log; returns its unsubscriber. */
+  onAppend(listener: () => void): () => void;
+}
+
+/** Fresh, empty in-memory capabilities and the read of their log (see {@link createMemoryCapabilities}). */
+export function createMemoryStore(options: MemoryCapabilitiesOptions = {}): MemoryStore {
+  const listeners = new Set<() => void>();
   const state: State = {
     events: new Map(),
     registrations: new Map(),
@@ -228,6 +263,7 @@ export function createMemoryCapabilities(options: MemoryCapabilitiesOptions = {}
     operations: new Map(),
     eventRecords: new Map(),
     log: [],
+    chain: { head: EMPTY_CHAIN },
   };
   let tail: Promise<unknown> = Promise.resolve();
 
@@ -239,7 +275,14 @@ export function createMemoryCapabilities(options: MemoryCapabilitiesOptions = {}
       });
       try {
         const value = await fn(tx);
-        commit();
+        if (commit() > 0) {
+          // The commit has happened: a listener's failure must not reject the transaction.
+          for (const listener of [...listeners]) {
+            try {
+              listener();
+            } catch {}
+          }
+        }
         return value;
       } finally {
         open = false;
@@ -276,8 +319,12 @@ export function createMemoryCapabilities(options: MemoryCapabilitiesOptions = {}
   };
 
   return {
-    registry,
-    clock: options.clock ?? createSystemClock(),
-    transaction,
+    capabilities: { registry, clock: options.clock ?? createSystemClock(), transaction },
+    records: () => state.log,
+    onAppend(listener) {
+      const own = () => listener();
+      listeners.add(own);
+      return () => listeners.delete(own);
+    },
   };
 }

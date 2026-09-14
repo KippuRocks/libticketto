@@ -29,6 +29,9 @@ importers:
       '@ticketto/ledger-rules':
         specifier: workspace:*
         version: link:../ledger-rules
+      '@ticketto/log':
+        specifier: workspace:*
+        version: link:../log
       '@ticketto/sdk':
         specifier: workspace:*
         version: link:../sdk

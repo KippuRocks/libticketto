@@ -5,10 +5,8 @@
 import type { Capabilities, Clock, Registry } from "@ticketto/ledger-rules";
 import type {
   AccountId,
-  Authorisation,
   ClassId,
   Cursor,
-  EventId,
   OperationId,
   PassId,
   Receipt,
@@ -18,12 +16,18 @@ import type {
   TicketId,
   ZoneId,
 } from "@ticketto/sdk";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import {
+  event as eventId,
+  signedPass as makePass,
+  otherEvent,
+  registerCommand,
+  statusCommand,
+} from "../test/fixtures.js";
 import { createMemoryCapabilities } from "./index.js";
 
 const ticketId = "01" as TicketId;
 const passId = "aa" as PassId;
-const eventId = "e1" as EventId;
 
 const ticket: Ticket = {
   id: ticketId,
@@ -41,21 +45,15 @@ const ticket: Ticket = {
 /** Stands in for BLAKE2b-256 of a signed input's framing; the store never computes it. */
 const digest = Uint8Array.from({ length: 32 }, (_, i) => i);
 
-const signedPass: SignedAccessPass = {
-  pass: { ticket: ticketId, holder: ticket.holder, id: passId, notBefore: 0, notAfter: 60_000 },
-  authorisation: new Uint8Array() as Authorisation,
-};
-
-const signedCommand: SignedCommand = {
-  command: {
-    kind: "setEventStatus",
-    operationId: "0f".repeat(16) as OperationId,
-    expiresAt: 60_000,
-    event: eventId,
-    status: "Sealed",
-  },
-  authorisation: new Uint8Array() as Authorisation,
-};
+// Inputs the log can carry: it encodes and links every record it is given (C7).
+let signedPass: SignedAccessPass;
+let signedCommand: SignedCommand;
+let unownedCommand: SignedCommand;
+beforeAll(async () => {
+  signedPass = await makePass();
+  signedCommand = await statusCommand(0x0f);
+  unownedCommand = await registerCommand(0x10);
+});
 
 /** Lets every other pending transaction run between a read and the write that depends on it. */
 async function yieldToOthers(times = 50): Promise<void> {
@@ -337,11 +335,16 @@ describe("in-memory capabilities: serialisable transactions", () => {
     const entry = signedPass;
     const records = [
       await caps.registry.appendLog({ recordedAt: 1, event: eventId, entry, presentedAt: 1 }),
-      await caps.registry.appendLog({ recordedAt: 2, event: null, entry, presentedAt: 2 }),
+      await caps.registry.appendLog({
+        recordedAt: 2,
+        event: null,
+        entry: unownedCommand,
+        presentedAt: null,
+      }),
       await caps.registry.appendLog({ recordedAt: 3, event: eventId, entry, presentedAt: 3 }),
       await caps.registry.appendLog({
         recordedAt: 4,
-        event: "e2" as EventId,
+        event: otherEvent,
         entry,
         presentedAt: 4,
       }),
@@ -350,7 +353,7 @@ describe("in-memory capabilities: serialisable transactions", () => {
       { id: eventId, sequence: 0 },
       null,
       { id: eventId, sequence: 1 },
-      { id: "e2", sequence: 0 },
+      { id: otherEvent, sequence: 0 },
     ]);
     expect(new Set(records.map((r) => r.cursor)).size).toBe(4);
   });
