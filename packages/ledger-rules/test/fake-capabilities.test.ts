@@ -5,11 +5,13 @@ import type {
   AccountId,
   Authorisation,
   ClassId,
+  Cursor,
   EventId,
   OperationId,
   PassId,
   Receipt,
   SignedAccessPass,
+  SignedCommand,
   Ticket,
   TicketId,
   ZoneId,
@@ -34,6 +36,9 @@ const ticket: Ticket = {
   restrictions: { cannotResale: false, cannotTransfer: false },
   attendances: 0,
 };
+
+/** Stands in for BLAKE2b-256 of a signed input's framing; the store never computes it. */
+const digest = Uint8Array.from({ length: 32 }, (_, i) => i);
 
 const signedPass: SignedAccessPass = {
   pass: { ticket: ticketId, holder: ticket.holder, id: passId, notBefore: 0, notAfter: 60_000 },
@@ -104,12 +109,17 @@ describe("fake capabilities: serialisability smoke test", () => {
     const receipt = await caps.transaction(async (tx) => {
       await tx.insertTicket(ticket);
       await tx.recordConsumedPass(ticketId, passId, 60_000);
-      const record = await tx.appendLog({ recordedAt: 5, event: eventId, entry: signedPass });
+      const record = await tx.appendLog({
+        recordedAt: 5,
+        event: eventId,
+        entry: signedPass,
+        presentedAt: 4,
+      });
       const receipt: Receipt = {
         operationId: passId as string as OperationId,
         cursor: record.cursor,
       };
-      await tx.recordOperation(receipt.operationId, { expiresAt: 60_000, receipt });
+      await tx.recordOperation(receipt.operationId, { expiresAt: 60_000, digest, receipt });
       return receipt;
     });
     expect(await caps.registry.getTicket(ticketId)).toEqual({
@@ -119,6 +129,7 @@ describe("fake capabilities: serialisability smoke test", () => {
     expect(await caps.registry.isPassConsumed(ticketId, passId)).toBe(true);
     expect(await caps.registry.getOperation(receipt.operationId)).toEqual({
       expiresAt: 60_000,
+      digest,
       receipt,
     });
     expect(caps.log()).toEqual([
@@ -127,7 +138,7 @@ describe("fake capabilities: serialisability smoke test", () => {
         recordedAt: 5,
         event: { id: eventId, sequence: 1 },
         entry: signedPass,
-        presentedAt: null,
+        presentedAt: 4,
       },
     ]);
   });
@@ -139,12 +150,18 @@ describe("fake capabilities: serialisability smoke test", () => {
       caps.transaction(async (tx) => {
         await tx.insertTicket(ticket);
         await tx.recordConsumedPass(ticketId, passId, 60_000);
-        await tx.appendLog({ recordedAt: 5, event: eventId, entry: signedPass });
+        await tx.recordOperation(passId as string as OperationId, {
+          expiresAt: 60_000,
+          digest,
+          receipt: { operationId: passId as string as OperationId, cursor: "1" as Cursor },
+        });
+        await tx.appendLog({ recordedAt: 5, event: eventId, entry: signedPass, presentedAt: 4 });
         throw failure;
       }),
     ).rejects.toBe(failure);
     expect(await caps.registry.getTicket(ticketId)).toBeNull();
     expect(await caps.registry.isPassConsumed(ticketId, passId)).toBe(false);
+    expect(await caps.registry.getOperation(passId as string as OperationId)).toBeNull();
     expect(caps.log()).toEqual([]);
   });
 
@@ -191,15 +208,53 @@ describe("fake capabilities: serialisability smoke test", () => {
   it("numbers log records per event, and leaves an unowned write without a sequence", async () => {
     const caps = createFakeCapabilities();
     const entry = signedPass;
-    await caps.registry.appendLog({ recordedAt: 1, event: eventId, entry });
-    await caps.registry.appendLog({ recordedAt: 2, event: null, entry });
-    await caps.registry.appendLog({ recordedAt: 3, event: eventId, entry });
+    await caps.registry.appendLog({ recordedAt: 1, event: eventId, entry, presentedAt: 1 });
+    await caps.registry.appendLog({ recordedAt: 2, event: null, entry, presentedAt: 2 });
+    await caps.registry.appendLog({ recordedAt: 3, event: eventId, entry, presentedAt: 3 });
     expect(caps.log().map((r) => r.event)).toEqual([
       { id: eventId, sequence: 1 },
       null,
       { id: eventId, sequence: 2 },
     ]);
     expect(new Set(caps.log().map((r) => r.cursor)).size).toBe(3);
+  });
+
+  it("REQ-CM-1: keeps and returns an operation's digest as recorded, computing nothing", async () => {
+    const caps = createFakeCapabilities();
+    const id = "0f".repeat(16) as OperationId;
+    const receipt: Receipt = { operationId: id, cursor: "1" as Cursor };
+    const recorded = Uint8Array.from(digest);
+    await caps.registry.recordOperation(id, { expiresAt: 60_000, digest: recorded, receipt });
+    recorded.fill(0);
+    expect(await caps.registry.getOperation(id)).toEqual({ expiresAt: 60_000, digest, receipt });
+    expect(await caps.registry.getOperation("other" as OperationId)).toBeNull();
+  });
+
+  it("carries a log append's presentedAt into the record, and null for a command", async () => {
+    const caps = createFakeCapabilities();
+    await caps.registry.appendLog({
+      recordedAt: 7,
+      event: eventId,
+      entry: signedPass,
+      presentedAt: 6,
+    });
+    const command: SignedCommand = {
+      command: {
+        kind: "setEventStatus",
+        operationId: "0f".repeat(16) as OperationId,
+        expiresAt: 60_000,
+        event: eventId,
+        status: "Sealed",
+      },
+      authorisation: new Uint8Array() as Authorisation,
+    };
+    await caps.registry.appendLog({
+      recordedAt: 8,
+      event: eventId,
+      entry: command,
+      presentedAt: null,
+    });
+    expect(caps.log().map((r) => r.presentedAt)).toEqual([6, null]);
   });
 
   it("has a clock that only moves forward", () => {

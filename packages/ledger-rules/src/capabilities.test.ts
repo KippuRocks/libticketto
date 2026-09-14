@@ -54,7 +54,7 @@ describe("C3 capability interfaces (REQ-SDK-3)", () => {
     expectTypeOf<TicketRecord["cancellationHolder"]>().toEqualTypeOf<AccountId | null>();
   });
 
-  it("records consumed passes with retention, and operations with expiry and receipt", () => {
+  it("REQ-CM-1: records consumed passes with retention, and operations with expiry, digest and receipt", () => {
     expectTypeOf<Registry["recordConsumedPass"]>().parameters.toEqualTypeOf<
       [ticket: TicketId, pass: PassId, retainUntil: Timestamp]
     >();
@@ -63,13 +63,17 @@ describe("C3 capability interfaces (REQ-SDK-3)", () => {
     >();
     expectTypeOf<OperationRecord>().toEqualTypeOf<{
       readonly expiresAt: Timestamp;
+      readonly digest: Uint8Array;
       readonly receipt: Receipt;
     }>();
   });
 
   it("appends logical log records; the store assigns cursor and sequence", () => {
-    expectTypeOf<keyof LogAppend>().toEqualTypeOf<"recordedAt" | "event" | "entry">();
+    expectTypeOf<keyof LogAppend>().toEqualTypeOf<
+      "recordedAt" | "event" | "entry" | "presentedAt"
+    >();
     expectTypeOf<LogAppend["entry"]>().toEqualTypeOf<LogRecord["entry"]>();
+    expectTypeOf<LogAppend["presentedAt"]>().toEqualTypeOf<LogRecord["presentedAt"]>();
     expectTypeOf<Registry["appendLog"]>().returns.toEqualTypeOf<Promise<LogRecord>>();
   });
 });
