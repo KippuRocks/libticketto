@@ -9,12 +9,25 @@ export {
   type ChainState,
   type ChainVerification,
   EMPTY_CHAIN,
+  type HeldCheckpoint,
   type LinkedRecord,
   LogChain,
   type LogEntry,
   linkRecord,
   verifyChain,
 } from "./chain.js";
+export {
+  CHECKPOINT_SIGNING_TAG,
+  CHECKPOINT_VERSION,
+  type Checkpoint,
+  type CheckpointStatement,
+  checkpointSigningPayload,
+  decodeCheckpoint,
+  encodeCheckpoint,
+  signCheckpoint,
+  statementFor,
+  verifyCheckpoint,
+} from "./checkpoint.js";
 export {
   type ChainedRecord,
   decodeRecord,

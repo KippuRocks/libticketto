@@ -18,7 +18,7 @@ import type {
   SignedCommand,
   ZoneId,
 } from "@ticketto/sdk";
-import type { ChainedRecord, LogInput } from "../src/index.js";
+import type { ChainedRecord, LogEntry, LogInput } from "../src/index.js";
 
 function filled(length: number, byte: number): Uint8Array {
   return new Uint8Array(length).fill(byte);
@@ -30,6 +30,8 @@ function hex(length: number, byte: number): string {
 
 export const organiser = softwareP256Signer({ secretKey: filled(32, 0x11) });
 export const holder = softwareP256Signer({ secretKey: filled(32, 0x22) });
+/** Kippu's publication key, which signs checkpoints. */
+export const publication = softwareP256Signer({ secretKey: filled(32, 0x33) });
 
 export const salt = filled(16, 0x5a);
 export const event: EventId = eventId(organiser.signer.account, salt);
@@ -128,4 +130,34 @@ export async function samplePass(): Promise<SignedAccessPass> {
 export function eventOf(input: LogInput, sequence: number): ChainedRecord["event"] {
   if ("pass" in input) return { id: event, sequence };
   return "event" in input.command ? { id: input.command.event, sequence } : null;
+}
+
+/** Entries for a sample log: a registration, an event's commands, and a pass. */
+export async function sampleEntries(): Promise<LogEntry[]> {
+  const kinds: CommandKind[] = [
+    "registerCredential",
+    "createEvent",
+    "addZone",
+    "issueTicket",
+    "removeRestriction",
+    "transferTicket",
+    "setEventStatus",
+  ];
+  const entries: LogEntry[] = [];
+  for (const kind of kinds) {
+    const entry = await signCommand(COMMANDS[kind]);
+    entries.push({
+      recordedAt: 1_800_000_000_000 + entries.length,
+      event: eventOf(entry, 0)?.id ?? null,
+      entry,
+      presentedAt: null,
+    });
+  }
+  entries.push({
+    recordedAt: 1_800_000_000_000 + entries.length,
+    event,
+    entry: await samplePass(),
+    presentedAt: 1_800_000_000_000,
+  });
+  return entries;
 }

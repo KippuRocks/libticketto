@@ -133,7 +133,17 @@ export type ChainFault =
   /** The record does not commit to its predecessor's hash: one of the two was changed. */
   | "link"
   /** The record is not at the next position of its event's own order. */
-  | "eventSequence";
+  | "eventSequence"
+  /** The record's hash is not the one a held checkpoint states for its sequence. */
+  | "checkpoint"
+  /** The log ends before a record a held checkpoint covers. */
+  | "truncated";
+
+/** What a held checkpoint states: the hash of the record at a sequence. */
+export interface HeldCheckpoint {
+  readonly sequence: number;
+  readonly headHash: string;
+}
 
 /** The outcome of verifying a chain: its state, or the first record that was rejected. */
 export type ChainVerification =
@@ -153,6 +163,13 @@ export type ChainVerification =
  * rejects: a removed or reordered record at the position it left, a changed
  * record at its successor, whose link no longer holds.
  *
+ * Given `checkpoints` a party already holds, it also checks that each record they
+ * cover still has the stated hash (`REQ-TM-3`). A log rewritten and re-linked
+ * consistently passes every other check, but not this one: it is reported at
+ * the checkpoint's sequence, or where the log ends if it ends before it.
+ * Checkpoints must be verified first (`verifyCheckpoint`); those before `from`
+ * are outside the stretch verified, and ignored.
+ *
  * Starting mid-log, an event's first record seen sets its baseline unless
  * `from.eventSequences` names it. Whether each input was authorised is not
  * checked here.
@@ -160,8 +177,23 @@ export type ChainVerification =
 export function verifyChain(
   records: Iterable<Uint8Array>,
   from: ChainState = { head: EMPTY_CHAIN, eventSequences: new Map() },
+  checkpoints: readonly HeldCheckpoint[] = [],
 ): ChainVerification {
+  const held = new Map<number, string[]>();
+  for (const { sequence, headHash } of checkpoints) {
+    held.set(sequence, [...(held.get(sequence) ?? []), headHash]);
+  }
+  const mismatch = (sequence: number, hash: string): ChainVerification | null => {
+    const stated = (held.get(sequence) ?? []).find((headHash) => headHash !== hash);
+    if (stated === undefined) return null;
+    const detail = `record ${sequence} has hash ${hash}; a checkpoint states ${stated}`;
+    return { ok: false, sequence, fault: "checkpoint", detail };
+  };
   let head = from.head;
+  if (head.next > 0) {
+    const atFrom = mismatch(head.next - 1, head.hash);
+    if (atFrom !== null) return atFrom;
+  }
   const eventSequences = new Map(from.eventSequences);
   const fromGenesis = from.head.next === 0;
   for (const bytes of records) {
@@ -189,6 +221,13 @@ export function verifyChain(
       eventSequences.set(record.event.id, record.event.sequence + 1);
     }
     head = { next: at + 1, hash: hashRecordBytes(bytes) };
+    const diverged = mismatch(at, head.hash);
+    if (diverged !== null) return diverged;
+  }
+  const beyond = Math.max(-1, ...held.keys());
+  if (beyond >= head.next) {
+    const detail = `the log ends at sequence ${head.next}; a checkpoint covers record ${beyond}`;
+    return { ok: false, sequence: head.next, fault: "truncated", detail };
   }
   return { ok: true, state: { head, eventSequences } };
 }
