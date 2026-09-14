@@ -15,6 +15,8 @@ import errIdentifierMismatch from "./ERR-IdentifierMismatch.js";
 import errInvalidAuthorisation from "./ERR-InvalidAuthorisation.js";
 import errInvalidTransition from "./ERR-InvalidTransition.js";
 import errNotOwner from "./ERR-NotOwner.js";
+import errOperationConflict from "./ERR-OperationConflict.js";
+import errOperationExpired from "./ERR-OperationExpired.js";
 import errRestrictionNotPermitted from "./ERR-RestrictionNotPermitted.js";
 import errTicketIdExists from "./ERR-TicketIdExists.js";
 import errTicketNotFound from "./ERR-TicketNotFound.js";
@@ -31,6 +33,7 @@ import inv12 from "./INV-12.js";
 import inv13 from "./INV-13.js";
 import inv14 from "./INV-14.js";
 import inv16 from "./INV-16.js";
+import reqCm1 from "./REQ-CM-1.js";
 import reqCp6 from "./REQ-CP-6.js";
 import reqSdk6 from "./REQ-SDK-6.js";
 
@@ -68,4 +71,8 @@ export const V0_SUITES: readonly Suite[] = [
   errInvalidAuthorisation,
   errIdentifierMismatch,
   reqCp6,
+  // Replay (T-004-07): REQ-CM-1.
+  reqCm1,
+  errOperationExpired,
+  errOperationConflict,
 ];
