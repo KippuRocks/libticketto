@@ -77,12 +77,6 @@ class Layer<K, V> {
   }
 }
 
-/**
- * An event as the registry records it: whatever `putEvent` is given, stored and
- * returned whole, the rules' own bookkeeping included.
- */
-type EventRecord = Parameters<Registry["putEvent"]>[0];
-
 /** The committed state. Stored values are readonly and replaced, never mutated. */
 interface State {
   readonly events: Map<EventId, EventRecord>;
