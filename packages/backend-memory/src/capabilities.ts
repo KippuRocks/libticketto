@@ -87,14 +87,21 @@ interface State {
   readonly events: Map<EventId, EventRecord>;
   readonly registrations: Map<AccountId, readonly CredentialRegistration[]>;
   readonly tickets: Map<TicketId, TicketRecord>;
-  /** Keyed by ticket and pass id; the value is the retention time. */
-  readonly consumedPasses: Map<string, Timestamp>;
+  /** Keyed by ticket and pass id. */
+  readonly consumedPasses: Map<string, ConsumedPass>;
   readonly operations: Map<OperationId, OperationRecord>;
   /** The number of records each event has in the log. */
   readonly eventRecords: Map<EventId, Count>;
   readonly log: StoredRecord[];
   /** The chain's head: where the next committed record links. */
   readonly chain: { head: ChainHead };
+}
+
+/** A pass id consumed for a ticket, kept at least until `retainUntil` (`INV-6`). */
+export interface ConsumedPass {
+  readonly ticket: TicketId;
+  readonly pass: PassId;
+  readonly retainUntil: Timestamp;
 }
 
 /** A committed log record: as the SDK presents it, and as the chain links it (`C7`). */
@@ -173,7 +180,7 @@ function layeredRegistry(state: State, assertOpen: () => void) {
     },
     async recordConsumedPass(ticket, pass, retainUntil) {
       assertOpen();
-      consumedPasses.set(passKey(ticket, pass), retainUntil);
+      consumedPasses.set(passKey(ticket, pass), { ticket, pass, retainUntil });
     },
 
     async getOperation(id) {
@@ -243,13 +250,37 @@ export function createMemoryCapabilities(options: MemoryCapabilitiesOptions = {}
   return createMemoryStore(options).capabilities;
 }
 
-/** In-memory capabilities, with the backend's read of their committed log. */
+/** Everything a store holds, as committed: what export reads and import loads. */
+export interface StoreContents {
+  /** The log, in its total order. */
+  readonly records: readonly StoredRecord[];
+  readonly events: readonly EventRecord[];
+  readonly tickets: readonly TicketRecord[];
+  /** Each account's credentials, in registration order. */
+  readonly registrations: ReadonlyMap<AccountId, readonly CredentialRegistration[]>;
+  readonly consumedPasses: readonly ConsumedPass[];
+  readonly operations: ReadonlyMap<OperationId, OperationRecord>;
+}
+
+/** In-memory capabilities, with the backend's read of their committed state. */
 export interface MemoryStore {
   readonly capabilities: Capabilities;
   /** The committed log, in its total order. */
   records(): readonly StoredRecord[];
   /** Calls `listener` after every commit that appends to the log; returns its unsubscriber. */
   onAppend(listener: () => void): () => void;
+  /** A copy of the committed state's containers. Stored values are never mutated, so it is a snapshot. */
+  contents(): StoreContents;
+  /** Whether the store holds nothing at all. */
+  isEmpty(): boolean;
+  /** Runs `fn` holding the transaction mutex, so no transaction commits while it runs. */
+  exclusive<T>(fn: () => T | Promise<T>): Promise<T>;
+  /**
+   * Loads `contents` into an empty store, deriving the chain's head and each
+   * event's record count from the records. Throws when the store is not empty.
+   * Call it inside `exclusive`.
+   */
+  load(contents: StoreContents): void;
 }
 
 /** Fresh, empty in-memory capabilities and the read of their log (see {@link createMemoryCapabilities}). */
@@ -267,6 +298,23 @@ export function createMemoryStore(options: MemoryCapabilitiesOptions = {}): Memo
   };
   let tail: Promise<unknown> = Promise.resolve();
 
+  const isEmpty = () =>
+    state.log.length === 0 &&
+    state.events.size === 0 &&
+    state.registrations.size === 0 &&
+    state.tickets.size === 0 &&
+    state.consumedPasses.size === 0 &&
+    state.operations.size === 0;
+
+  // Called once the log has grown: a listener's failure must not undo that.
+  const notify = () => {
+    for (const listener of [...listeners]) {
+      try {
+        listener();
+      } catch {}
+    }
+  };
+
   const transaction = <T>(fn: (tx: Registry) => Promise<T>): Promise<T> => {
     const run = async () => {
       let open = true;
@@ -275,14 +323,7 @@ export function createMemoryStore(options: MemoryCapabilitiesOptions = {}): Memo
       });
       try {
         const value = await fn(tx);
-        if (commit() > 0) {
-          // The commit has happened: a listener's failure must not reject the transaction.
-          for (const listener of [...listeners]) {
-            try {
-              listener();
-            } catch {}
-          }
-        }
+        if (commit() > 0) notify();
         return value;
       } finally {
         open = false;
@@ -325,6 +366,43 @@ export function createMemoryStore(options: MemoryCapabilitiesOptions = {}): Memo
       const own = () => listener();
       listeners.add(own);
       return () => listeners.delete(own);
+    },
+    contents: () => ({
+      records: [...state.log],
+      events: [...state.events.values()],
+      tickets: [...state.tickets.values()],
+      registrations: new Map(state.registrations),
+      consumedPasses: [...state.consumedPasses.values()],
+      operations: new Map(state.operations),
+    }),
+    isEmpty,
+    exclusive(fn) {
+      return transaction(async () => fn());
+    },
+    load(contents) {
+      if (!isEmpty()) throw new Error("only an empty store can be loaded");
+      for (const event of contents.events) state.events.set(event.id, event);
+      for (const [account, list] of contents.registrations) state.registrations.set(account, list);
+      for (const ticket of contents.tickets) state.tickets.set(ticket.id, ticket);
+      for (const consumed of contents.consumedPasses) {
+        state.consumedPasses.set(passKey(consumed.ticket, consumed.pass), consumed);
+      }
+      for (const [id, operation] of contents.operations) {
+        state.operations.set(id, copyOperation(operation));
+      }
+      for (const [i, stored] of contents.records.entries()) {
+        if (stored.linked.record.sequence !== i) {
+          throw new Error(`record ${i} carries sequence ${stored.linked.record.sequence}`);
+        }
+        const event = stored.linked.record.event;
+        if (event !== null) state.eventRecords.set(event.id, event.sequence + 1);
+        state.log.push(stored);
+      }
+      const last = contents.records.at(-1);
+      if (last !== undefined) {
+        state.chain.head = last.linked.head;
+        notify();
+      }
     },
   };
 }

@@ -11,18 +11,21 @@ import { type Clock, execute, query } from "@ticketto/ledger-rules";
 import {
   type Backend,
   createSubmission,
+  type Migration,
   type OperationId,
   type Profile,
   type Query,
   type QueryResult,
   type Receipt,
   type Result,
+  type Signer,
   type Submission,
   type SubmitInput,
 } from "@ticketto/sdk";
 import { MEMORY_ASSURANCE } from "./assurance.js";
 import { createMemoryStore, type MemoryStore } from "./capabilities.js";
 import { createLogReader } from "./log.js";
+import { memoryMigration } from "./migration.js";
 
 /** Options for {@link createMemoryBackend}. */
 export interface MemoryBackendOptions {
@@ -30,6 +33,16 @@ export interface MemoryBackendOptions {
   readonly profile: Profile;
   /** The ledger's clock (`REQ-SDK-3`). Defaults to the system clock, held monotonic. */
   readonly clock?: Clock;
+  /**
+   * The deployment's publication key, which signs an export's checkpoint
+   * (`C7` §4). Without one, exporting a non-empty log throws.
+   */
+  readonly publication?: Signer;
+}
+
+/** The in-memory backend: the port, always with its `migration` member (`REQ-MG-3`). */
+export interface MemoryBackend extends Backend {
+  readonly migration: Migration;
 }
 
 /** The operation id a submission reports: a command's own, or a pass's id (`AD-15`, `AD-13`). */
@@ -46,17 +59,25 @@ function operationIdOf(input: SubmitInput): OperationId {
  * A sponsorship is accepted and not verified: verifying one is the hosted
  * ledger service's concern (`F-010`), not the rules'.
  */
-export function createMemoryBackend(options: MemoryBackendOptions): Backend {
-  const { profile, clock } = options;
-  return backendOver(createMemoryStore(clock === undefined ? {} : { clock }), profile);
+export function createMemoryBackend(options: MemoryBackendOptions): MemoryBackend {
+  const { profile, clock, publication } = options;
+  return backendOver(createMemoryStore(clock === undefined ? {} : { clock }), profile, publication);
 }
 
 /**
  * The port over a given store. Not exported from the package: whoever holds the
  * store's capabilities can write ledger state around the rules (`REQ-SDK-9`).
  */
-export function backendOver(store: MemoryStore, profile: Profile): Backend {
+export function backendOver(
+  store: MemoryStore,
+  profile: Profile,
+  publication?: Signer,
+): MemoryBackend {
   const caps = store.capabilities;
+  const migration = memoryMigration(
+    store,
+    publication === undefined ? { clock: caps.clock } : { clock: caps.clock, publication },
+  );
 
   return {
     submit(input: SubmitInput): Submission<Receipt> {
@@ -82,5 +103,7 @@ export function backendOver(store: MemoryStore, profile: Profile): Backend {
     log: createLogReader(store),
 
     assurance: MEMORY_ASSURANCE,
+
+    migration,
   };
 }

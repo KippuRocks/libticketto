@@ -5,7 +5,7 @@
 // can be reached, and a failing run replayed.
 
 import type { Clock } from "@ticketto/ledger-rules";
-import type { Backend, Profile, Timestamp } from "@ticketto/sdk";
+import type { Backend, Migration, Profile, Signer, Timestamp } from "@ticketto/sdk";
 import { backendOver } from "../backend.js";
 import { createMemoryStore } from "../capabilities.js";
 
@@ -19,6 +19,7 @@ export interface ControlledClock extends Clock {
 
 /** The in-memory backend under test controls: the settable clock the rules read, and seeded randomness. */
 export interface TestMemoryBackend extends Backend {
+  readonly migration: Migration;
   readonly clock: ControlledClock;
   /**
    * Random bytes from a seeded source, for operation and pass ids. Backends made
@@ -33,6 +34,8 @@ export interface TestMemoryBackendOptions {
   readonly start?: Timestamp;
   /** Seeds `randomBytes`. Defaults to 0. */
   readonly seed?: number;
+  /** The publication key an export's checkpoint is signed with (`C7` §4). */
+  readonly publication?: Signer;
 }
 
 /** The default start of a test backend's clock: a fixed time, so runs are reproducible. */
@@ -98,7 +101,7 @@ export function seededRandomBytes(seed = 0): (length: number) => Uint8Array {
 /** A fresh, empty in-memory backend under test controls. */
 export function createTestMemoryBackend(options: TestMemoryBackendOptions): TestMemoryBackend {
   const clock = createControlledClock(options.start);
-  const backend = backendOver(createMemoryStore({ clock }), options.profile);
+  const backend = backendOver(createMemoryStore({ clock }), options.profile, options.publication);
   return {
     submit: (input, sponsorship) => backend.submit(input, sponsorship),
     query: (q) => backend.query(q),
@@ -108,6 +111,7 @@ export function createTestMemoryBackend(options: TestMemoryBackendOptions): Test
     get assurance() {
       return backend.assurance;
     },
+    migration: backend.migration,
     clock,
     randomBytes: seededRandomBytes(options.seed),
   };
