@@ -1,3 +1,16 @@
-// Package shell. Nothing is implemented here yet; the owning feature replaces
-// this export with the package's real surface.
+// @ticketto/ledger-rules — the ledger's rules over the capability interfaces (C3).
+// Design: features/008-ledger-rules/plan.md in KippuRocks/kippu-docs.
+
+export type {
+  Capabilities,
+  Clock,
+  CredentialRegistration,
+  LogAppend,
+  OperationRecord,
+  Registry,
+  TicketFacts,
+  TicketRecord,
+  Value,
+} from "./capabilities.js";
+
 export const packageName = "@ticketto/ledger-rules";

@@ -30,7 +30,11 @@ importers:
 
   packages/conformance: {}
 
-  packages/ledger-rules: {}
+  packages/ledger-rules:
+    dependencies:
+      '@ticketto/sdk':
+        specifier: workspace:*
+        version: link:../sdk
 
   packages/log: {}
 
