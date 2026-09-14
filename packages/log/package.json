@@ -18,17 +18,26 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./vectors/v0.json": "./vectors/v0.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "vectors",
+    "FORMAT.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "vectors:generate": "TICKETTO_WRITE_VECTORS=1 vitest run --root . src/vectors.test.ts"
   },
   "dependencies": {
     "@ticketto/profile-v0": "workspace:*",
     "@ticketto/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@noble/curves": "2.4.0",
+    "@noble/hashes": "2.4.0",
+    "@types/node": "24.13.4"
   }
 }
