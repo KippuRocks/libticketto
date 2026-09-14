@@ -12,6 +12,20 @@ the test vectors land (`T-003-08`).
 | Runs on | Node 24, React Native (Hermes), browser |
 | May depend on | `sdk`, for types only. Must never depend on a backend. |
 
+## Use
+
+```ts
+import { createProfileV0 } from "@ticketto/profile-v0";
+import { createTicketto } from "@ticketto/sdk";
+
+const profile = createProfileV0({ rpId: "kippu.rocks" });
+const ticketto = createTicketto({ backend, profile, sponsor, operationLifetime: 120_000 });
+```
+
+`createProfileV0` implements the SDK's `Profile` (`REQ-CP-2`). Its one
+configuration is the WebAuthn RP id holder passkeys are bound to; changing it
+invalidates every holder passkey, so it is a profile change and a migration.
+
 ## Encoding
 
 SCALE, through `scale-ts` (`AD-11`). Every top-level value starts with a one-byte
