@@ -72,6 +72,7 @@ export type {
   ZoneId,
 } from "./identifiers.js";
 
+export { type Cursor, LOG_START, type LogPage, type LogReader, type LogRecord } from "./log.js";
 export {
   createSubmission,
   type Receipt,
