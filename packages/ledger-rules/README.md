@@ -35,7 +35,10 @@ passes, in this order (plan §5.2):
 
 0. The event and ticket it names exist → `ERR-EventNotFound` /
    `ERR-TicketNotFound`. `createEvent` and `issueTicket` name ones yet to exist.
-1. Its envelope has not expired → `ERR-OperationExpired`.
+1. Its envelope has not expired, and its expiry lies no more than the maximum
+   operation lifetime ahead of the clock → `ERR-OperationExpired`. The maximum
+   defaults to 24 hours (`DEFAULT_MAX_OPERATION_LIFETIME`); an authority sets
+   its own with `configureExecute({ maxOperationLifetime })`.
 2. Its operation id is not recorded. An identical replay — same id, same digest
    of the profile's signed-input framing — returns the original receipt and
    changes nothing; the same id with a different input is

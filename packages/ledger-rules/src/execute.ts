@@ -8,7 +8,8 @@
 // The checks every signed command passes, in order (plan §5.2):
 //   0. the event and ticket it names exist         → ERR-EventNotFound /
 //      (createEvent names an event yet to exist)      ERR-TicketNotFound
-//   1. its envelope has not expired                → ERR-OperationExpired
+//   1. its envelope has not expired, nor expires further ahead than the
+//      maximum operation lifetime                  → ERR-OperationExpired
 //   2. its operation id is not recorded            → an identical replay returns
 //      the original receipt; a different command    → ERR-OperationConflict
 //   3. its authorisation verifies against a credential registered to the
@@ -134,8 +135,25 @@ async function authorise(
   return ok(account);
 }
 
-/** `execute` over a given set of command handlers. */
-export function createExecute(handlers: CommandHandlers): Execute {
+/** The default maximum operation lifetime: 24 hours, in milliseconds (plan §5.4). */
+export const DEFAULT_MAX_OPERATION_LIFETIME = 24 * 60 * 60 * 1000;
+
+/** Configuration of the rules, set by whatever runs them. */
+export interface RulesConfig {
+  /**
+   * How far ahead of the authority's clock, in milliseconds, a command's
+   * expiry may lie. Bounds how long operation records are kept (plan §5.4,
+   * `AD-15`). Defaults to {@link DEFAULT_MAX_OPERATION_LIFETIME}.
+   */
+  readonly maxOperationLifetime?: number;
+}
+
+/** `execute` over a given set of command handlers and configuration. */
+export function createExecute(handlers: CommandHandlers, config: RulesConfig = {}): Execute {
+  const maxLifetime = config.maxOperationLifetime ?? DEFAULT_MAX_OPERATION_LIFETIME;
+  if (!Number.isSafeInteger(maxLifetime) || maxLifetime < 0) {
+    throw new RangeError("maxOperationLifetime is a non-negative whole number of milliseconds");
+  }
   return async (caps, profile, input, context = {}) => {
     if (!isSignedCommand(input)) {
       throw new Error("submitAccessPass is not implemented yet (T-008-10)");
@@ -168,6 +186,12 @@ export function createExecute(handlers: CommandHandlers): Execute {
       // 1. The envelope.
       if (now > command.expiresAt) {
         return err("ERR-OperationExpired", `expired at ${command.expiresAt}`);
+      }
+      if (command.expiresAt - now > maxLifetime) {
+        return err(
+          "ERR-OperationExpired",
+          `expires more than ${maxLifetime} ms ahead of the authority's clock`,
+        );
       }
 
       // 2. Replay (plan §5.4). A record past its own expiry is one the store MAY
@@ -245,3 +269,8 @@ export const handlers: CommandHandlers = {
  * changed nothing. A defect — an input no rule can judge — throws.
  */
 export const execute: Execute = createExecute(handlers);
+
+/** `execute` under the given configuration, for an authority that sets its own. */
+export function configureExecute(config: RulesConfig): Execute {
+  return createExecute(handlers, config);
+}

@@ -14,9 +14,22 @@ import type {
 import { describe, expect, it, vi } from "vitest";
 import { commandOf, EVENT_COMMAND_KINDS, ticketIn } from "../test/commands.js";
 import { createFakeCapabilities, type FakeCapabilities } from "../test/fake-capabilities.js";
-import { credential, eventId, profile, registered, sign } from "../test/fixtures.js";
+import {
+  createEventCommand,
+  credential,
+  eventId,
+  profile,
+  registered,
+  sign,
+} from "../test/fixtures.js";
 import type { EventRecord } from "./capabilities.js";
-import { createExecute, execute, handlers as v0Handlers } from "./execute.js";
+import {
+  configureExecute,
+  createExecute,
+  DEFAULT_MAX_OPERATION_LIFETIME,
+  execute,
+  handlers as v0Handlers,
+} from "./execute.js";
 import { accept, type CommandHandler, type CommandHandlers, reject } from "./handler.js";
 
 /** Handlers that accept every command by recording its event as Active. */
@@ -175,6 +188,73 @@ describe("execute — the envelope", () => {
       operationId: original.command.operationId,
     });
     expect((await run(caps, profile, later)).ok).toBe(true);
+  });
+});
+
+describe("execute — maximum operation lifetime (plan §5.4)", () => {
+  const HOUR = 60 * 60 * 1000;
+
+  it("ERR-OperationExpired: an expiry beyond the default 24-hour maximum is rejected", async () => {
+    const { caps } = await setup();
+    const organiser = await registered(caps);
+    caps.clock.set(1_000);
+    const signed = await sign(
+      organiser,
+      createEventCommand(organiser.account, { expiresAt: 1_000 + 24 * HOUR + 1 }),
+    );
+    expectError(await execute(caps, profile, signed), "ERR-OperationExpired");
+    expect(caps.log()).toHaveLength(0);
+    expect(await caps.registry.getOperation(signed.command.operationId)).toBeNull();
+  });
+
+  it("an expiry exactly at the default maximum is accepted", async () => {
+    const { caps } = await setup();
+    const organiser = await registered(caps);
+    caps.clock.set(1_000);
+    const signed = await sign(
+      organiser,
+      createEventCommand(organiser.account, { expiresAt: 1_000 + 24 * HOUR }),
+    );
+    expect((await execute(caps, profile, signed)).ok).toBe(true);
+    expect(DEFAULT_MAX_OPERATION_LIFETIME).toBe(24 * HOUR);
+  });
+
+  it("ERR-OperationExpired: the configured maximum applies, and one exactly at it is accepted", async () => {
+    const { caps } = await setup();
+    const run = configureExecute({ maxOperationLifetime: 5_000 });
+    const organiser = await registered(caps);
+    caps.clock.set(10_000);
+
+    const beyond = await sign(
+      organiser,
+      createEventCommand(organiser.account, { expiresAt: 15_001, salt: new Uint8Array([1]) }),
+    );
+    expectError(await run(caps, profile, beyond), "ERR-OperationExpired");
+
+    const at = await sign(
+      organiser,
+      createEventCommand(organiser.account, { expiresAt: 15_000, salt: new Uint8Array([2]) }),
+    );
+    expect((await run(caps, profile, at)).ok).toBe(true);
+  });
+
+  it("the maximum is measured from the authority's clock when the command is executed", async () => {
+    const { caps } = await setup();
+    const run = configureExecute({ maxOperationLifetime: 5_000 });
+    const organiser = await registered(caps);
+    const signed = await sign(
+      organiser,
+      createEventCommand(organiser.account, { expiresAt: 8_000 }),
+    );
+
+    expectError(await run(caps, profile, signed), "ERR-OperationExpired");
+    caps.clock.set(3_000);
+    expect((await run(caps, profile, signed)).ok).toBe(true);
+  });
+
+  it("refuses a maximum that is not a non-negative whole number of milliseconds", () => {
+    expect(() => configureExecute({ maxOperationLifetime: -1 })).toThrow(RangeError);
+    expect(() => configureExecute({ maxOperationLifetime: 1.5 })).toThrow(RangeError);
   });
 });
 
