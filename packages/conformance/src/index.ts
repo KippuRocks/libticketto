@@ -3,6 +3,7 @@
 //
 // Test infrastructure only: its V0 fixtures hold software keys in plain bytes.
 
+export { assuranceProblems } from "./assurance.js";
 export { defineConformance } from "./conformance.js";
 export { expectError, expectOk } from "./expect.js";
 export {
