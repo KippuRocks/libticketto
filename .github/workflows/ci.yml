@@ -87,8 +87,8 @@ jobs:
       - name: Pass benchmark (Node, Hermes)
         run: |
           set -o pipefail
-          pnpm --filter @ticketto/profile-v0 bench | grep '^BENCH'
-          HERMES_VM="$HOME/.cache/hermes-vm/bin/hermes" pnpm --filter @ticketto/profile-v0 bench:hermes | grep '^BENCH'
+          pnpm --filter @ticketto/profile-v0 bench | grep -o 'BENCH {.*'
+          HERMES_VM="$HOME/.cache/hermes-vm/bin/hermes" pnpm --filter @ticketto/profile-v0 bench:hermes | grep -o 'BENCH {.*'
 
   canary:
     # T-001-07: a Changesets snapshot of every @ticketto/* package, packed with
