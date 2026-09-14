@@ -8,6 +8,7 @@ import { checkWorkspace, type Report } from "./check.js";
 interface FakePackage {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
   files?: Record<string, string>;
 }
 
@@ -75,13 +76,32 @@ describe("a workspace keeping every §5.2 rule", () => {
           `import "@ticketto/sdk/errors"; import "@ticketto/profile-v0"; import "./local.js";`,
         ),
       },
-      log: src(`import "@ticketto/backend-memory";`),
-      rx: src(`import "rxjs";`),
+      log: {
+        dependencies: { "@ticketto/sdk": "workspace:*", "@ticketto/profile-v0": "workspace:*" },
+        devDependencies: { "@noble/curves": "2.4.0" },
+        files: {
+          "src/index.ts": `import type { Signer } from "@ticketto/sdk";\nimport { verify } from "@ticketto/profile-v0";\nimport { encode } from "scale-ts";`,
+          "src/vectors.test.ts": `import { readFileSync } from "node:fs";\nimport { signer } from "@ticketto/profile-v0/testing";`,
+        },
+      },
+      rx: {
+        dependencies: { "@ticketto/sdk": "workspace:*" },
+        // RxJS is third-party, so not governed by §5.2.
+        peerDependencies: { rxjs: "7.8.2" },
+        ...src(`import { Observable } from "rxjs";\nimport { surface } from "@ticketto/sdk";`),
+      },
     });
     const report = checkWorkspace(root);
     expect(reasons(report)).toEqual([]);
-    expect(report.checked).toHaveLength(6);
-    expect([...report.unruled].sort()).toEqual(["@ticketto/log", "@ticketto/rx"]);
+    expect(report.checked).toHaveLength(8);
+    expect(report.unruled).toEqual([]);
+  });
+
+  it("lists a package with no row in §5.2 without checking it", () => {
+    const root = workspace({ future: src(`import "@ticketto/backend-memory";`) });
+    const report = checkWorkspace(root);
+    expect(report.violations).toEqual([]);
+    expect(report.unruled).toEqual(["@ticketto/future"]);
   });
 });
 
@@ -247,6 +267,86 @@ describe("conformance — backends are injected", () => {
     expect(checkWorkspace(root).violations.map((v) => v.to)).toEqual([
       "@ticketto/backend-memory",
       "@ticketto/binding-offchain",
+    ]);
+  });
+});
+
+describe("log — sdk for types, profile-v0, never a backend", () => {
+  it("fails on a value import of sdk", () => {
+    const root = workspace({ log: src(`import { surface } from "@ticketto/sdk";`) });
+    expect(reasons(checkWorkspace(root))).toEqual([
+      "@ticketto/sdk: @ticketto/log may depend on @ticketto/sdk for types only; use `import type` or `export type`",
+    ]);
+  });
+
+  it("fails on any backend or binding, even as a devDependency or from a test", () => {
+    const root = workspace({
+      log: {
+        devDependencies: { "@ticketto/backend-memory": "workspace:*" },
+        files: {
+          "src/index.ts": `import type { B } from "@ticketto/binding-offchain";`,
+          "src/chain.test.ts": `import "@ticketto/binding-kreivo";`,
+        },
+      },
+    });
+    // Sorted: the order source files are read in is the file system's.
+    expect(reasons(checkWorkspace(root)).sort()).toEqual([
+      "@ticketto/backend-memory: @ticketto/log must never depend on any backend",
+      "@ticketto/binding-kreivo: @ticketto/log must never depend on any backend",
+      "@ticketto/binding-offchain: @ticketto/log must never depend on any backend",
+    ]);
+  });
+
+  it("fails on an internal package outside its allowance", () => {
+    const root = workspace({
+      log: {
+        dependencies: { "@ticketto/ledger-rules": "workspace:*" },
+        ...src(`import "@ticketto/rx";`),
+      },
+    });
+    expect(reasons(checkWorkspace(root))).toEqual([
+      "@ticketto/ledger-rules: @ticketto/log may depend only on: @ticketto/sdk, @ticketto/profile-v0",
+      "@ticketto/rx: @ticketto/log may depend only on: @ticketto/sdk, @ticketto/profile-v0",
+    ]);
+  });
+});
+
+describe("rx — sdk only, RxJS as a peer", () => {
+  it("fails on ledger-rules, even as a devDependency or from a test", () => {
+    const root = workspace({
+      rx: {
+        devDependencies: { "@ticketto/ledger-rules": "workspace:*" },
+        files: { "src/index.test.ts": `import "@ticketto/ledger-rules";` },
+      },
+    });
+    expect(reasons(checkWorkspace(root))).toEqual([
+      "@ticketto/ledger-rules: @ticketto/rx must never depend on @ticketto/ledger-rules",
+      "@ticketto/ledger-rules: @ticketto/rx must never depend on @ticketto/ledger-rules",
+    ]);
+  });
+
+  it("fails on any backend or binding, even as a devDependency or from a test", () => {
+    const root = workspace({
+      rx: {
+        devDependencies: { "@ticketto/backend-memory": "workspace:*" },
+        files: {
+          "src/index.ts": `import "@ticketto/binding-offchain";`,
+          "test/adapter.test.ts": `import "@ticketto/binding-kreivo";`,
+        },
+      },
+    });
+    // Sorted: the order source files are read in is the file system's.
+    expect(reasons(checkWorkspace(root)).sort()).toEqual([
+      "@ticketto/backend-memory: @ticketto/rx must never depend on any backend",
+      "@ticketto/binding-kreivo: @ticketto/rx must never depend on any backend",
+      "@ticketto/binding-offchain: @ticketto/rx must never depend on any backend",
+    ]);
+  });
+
+  it("fails on an internal package outside its allowance", () => {
+    const root = workspace({ rx: src(`import "@ticketto/profile-v0";`) });
+    expect(reasons(checkWorkspace(root))).toEqual([
+      "@ticketto/profile-v0: @ticketto/rx may depend only on: @ticketto/sdk",
     ]);
   });
 });

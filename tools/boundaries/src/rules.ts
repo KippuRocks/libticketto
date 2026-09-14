@@ -11,9 +11,11 @@
 //   nothing that survives compilation.
 // - "Any backend" is every `@ticketto/backend-*` and `@ticketto/binding-*`.
 // - "Any I/O" is any Node.js built-in module.
+// - A third-party package (`@noble/*`, `scale-ts`, `rxjs`, …) is not internal
+//   and is not governed by the table: `rx`'s RxJS peer dependency needs no entry.
 //
-// A package with no row (today `log` and `rx`) is not checked: the plan has not
-// ruled its edges, and this tool does not rule them either.
+// A package with no row is not checked: the plan has not ruled its edges, and
+// this tool does not rule them either.
 
 export const INTERNAL_SCOPE = "@ticketto/";
 
@@ -66,6 +68,18 @@ export const RULES: Readonly<Record<string, Rule>> = {
     allow: [{ name: pkg("sdk") }, { name: pkg("profile-v0") }],
     forbidBackends: true,
     forbid: [],
+    forbidIo: false,
+  },
+  [pkg("log")]: {
+    allow: [{ name: pkg("sdk"), typesOnly: true }, { name: pkg("profile-v0") }],
+    forbidBackends: true,
+    forbid: [],
+    forbidIo: false,
+  },
+  [pkg("rx")]: {
+    allow: [{ name: pkg("sdk") }],
+    forbidBackends: true,
+    forbid: [pkg("ledger-rules")],
     forbidIo: false,
   },
 };
