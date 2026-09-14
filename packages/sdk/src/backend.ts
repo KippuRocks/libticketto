@@ -5,6 +5,7 @@
 // behalf: the rules run in the authority behind it (AD-25). Everything that
 // crosses this port is named by the surface, never by the backend (REQ-SDK-2).
 
+import type { AssuranceDeclaration } from "./assurance.js";
 import type { SignedCommand } from "./capabilities.js";
 import type { Query, QueryResult, SignedAccessPass } from "./commands.js";
 import type { Sponsorship } from "./credentials.js";
@@ -20,4 +21,6 @@ export interface Backend {
   query<Q extends Query>(query: Q): Promise<Result<QueryResult<Q>>>;
   /** The deployment's log (`REQ-SDK-5`). */
   readonly log: LogReader;
+  /** Which invariants this backend enforces and which it attests (`REQ-SDK-6`). */
+  readonly assurance: AssuranceDeclaration;
 }
