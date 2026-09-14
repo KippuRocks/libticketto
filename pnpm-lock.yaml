@@ -24,7 +24,14 @@ importers:
         specifier: 5.0.0
         version: 5.0.0(@types/node@24.13.4)(vite@8.3.0(@types/node@24.13.4)(terser@5.51.2)(yaml@2.9.1))
 
-  packages/backend-memory: {}
+  packages/backend-memory:
+    dependencies:
+      '@ticketto/ledger-rules':
+        specifier: workspace:*
+        version: link:../ledger-rules
+      '@ticketto/sdk':
+        specifier: workspace:*
+        version: link:../sdk
 
   packages/binding-offchain: {}
 

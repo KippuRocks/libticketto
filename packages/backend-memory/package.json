@@ -26,5 +26,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@ticketto/ledger-rules": "workspace:*",
+    "@ticketto/sdk": "workspace:*"
   }
 }
