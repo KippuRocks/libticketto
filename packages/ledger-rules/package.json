@@ -1,7 +1,7 @@
 {
   "name": "@ticketto/ledger-rules",
   "version": "0.0.0",
-  "description": "The ledger's rules — commands, invariants and errors — implemented once over the capability interfaces, and run by whatever holds authoritative ledger state.",
+  "description": "The ledger's rules \u2014 commands, invariants and errors \u2014 implemented once over the capability interfaces, and run by whatever holds authoritative ledger state.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@ticketto/profile-v0": "workspace:*",
     "@ticketto/sdk": "workspace:*"
   }
 }

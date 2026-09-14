@@ -12,5 +12,7 @@ export type {
   TicketRecord,
   Value,
 } from "./capabilities.js";
+export { type Execute, type ExecuteContext, execute } from "./execute.js";
+export { query } from "./query.js";
 
 export const packageName = "@ticketto/ledger-rules";
