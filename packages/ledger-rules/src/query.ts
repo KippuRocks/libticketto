@@ -46,6 +46,12 @@ export async function query<Q extends Query>(
         if ((await caps.registry.getTicket(q.ticket)) === null) return err("ERR-TicketNotFound");
         throw new Error("getCancellationHolder is not implemented yet (T-008-09)");
       }
+      case "getCredential": {
+        // One registration by (account, credential); the account's others stay unexposed (REQ-MG-5).
+        const registrations = await caps.registry.getRegistrations(q.account);
+        const found = registrations.find(({ credential }) => credential === q.credential);
+        return ok(found === undefined ? null : found.registration);
+      }
       default:
         throw new Error(`unknown query ${(q as Query).kind}`);
     }
