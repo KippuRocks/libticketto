@@ -88,8 +88,12 @@ jobs:
     # `pnpm pack` and installed into a throwaway client outside the workspace,
     # where each package is imported and typechecked by name. Nothing is
     # published.
+    #
+    # Normally about half a minute. Each step inside the tool has its own bound
+    # and fails naming the step; this bounds the job as a whole.
     name: Canary release installs in a client
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
