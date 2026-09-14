@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="3" failures="0" errors="0">
+    <testsuite name="src/events.test.ts" tests="3" failures="0" errors="0" skipped="1">
+        <testcase classname="src/events.test.ts" name="events &gt; AC-A1.1: an organiser creates an event &amp; owns it">
+        </testcase>
+        <testcase classname="src/events.test.ts" name="AC-E5.1: authorisation is granted in Kippu" time="0.1"/>
+        <testcase classname="src/events.test.ts" name="AC-A1.2: skipped here too">
+            <skipped/>
+        </testcase>
+    </testsuite>
+</testsuites>

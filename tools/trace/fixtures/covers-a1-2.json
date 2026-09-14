@@ -1,0 +1,13 @@
+{
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "title": "AC-A1.2: issuance is unbounded without capacity",
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "numTotalTests": 4,
+  "success": true,
+  "testResults": [
+    {
+      "name": "packages/conformance/src/suites/INV-1.ts",
+      "status": "passed",
+      "assertionResults": [
+        {
+          "ancestorTitles": ["backend-memory × profile-v0"],
+          "title": "INV-1: a ticket belongs to exactly one event",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": ["backend-memory × profile-v0"],
+          "title": "ERR-CapacityExceeded: issuance beyond capacity fails",
+          "status": "failed"
+        },
+        {
+          "ancestorTitles": ["REQ-SDK-7 the suite runs against every backend"],
+          "title": "runs",
+          "status": "passed"
+        },
+        {
+          "ancestorTitles": [],
+          "title": "AC-A1.2: a skipped test covers nothing",
+          "status": "skipped"
+        }
+      ]
+    }
+  ]
+}

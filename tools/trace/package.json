@@ -1,0 +1,24 @@
+{
+  "name": "@libticketto/trace",
+  "version": "0.0.0",
+  "private": true,
+  "description": "ticketto-trace: fails when a V0-binding AC, INV or ERR identifier has no test, or a test names an identifier the spec does not define or has tombstoned",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "ticketto-trace": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@ticketto/conformance": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.4"
+  }
+}
