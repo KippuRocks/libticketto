@@ -12,6 +12,7 @@ runs the checks every signed command passes (`T-008-02`, `T-008-13`).
 | `createEvent` | Implemented (`T-008-03`) |
 | `addZone`, `removeZone` | Implemented (`T-008-06`) |
 | `issueTicket` | Implemented (`T-008-07`) |
+| `registerCredential` | Implemented (`T-008-14`) |
 | Every other command, access passes, `canAttend`, `getCancellationHolder` | Not yet — each throws until its task lands |
 
 | | |
@@ -40,7 +41,8 @@ passes, in this order (plan §5.2):
    `ERR-OperationConflict` (`REQ-CM-1`).
 3. Its authorisation verifies, over `profile.encodeCommand(command)`, against a
    credential registered to the account it claims → `ERR-InvalidAuthorisation`
-   (`REQ-CP-6`).
+   (`REQ-CP-6`). An account's first `registerCredential` is the one
+   exception: the credential being registered authorises it.
 4. The event it names is not `Finished` → `ERR-EventFinished` (`INV-16`).
 5. The command's own checks.
 

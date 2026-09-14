@@ -38,6 +38,7 @@ import type {
 import type { Capabilities, Registry } from "./capabilities.js";
 import { createEvent } from "./commands/create-event.js";
 import { issueTicket } from "./commands/issue-ticket.js";
+import { registerCredential } from "./commands/register-credential.js";
 import { addZone, removeZone } from "./commands/zones.js";
 import type { CommandHandler, CommandHandlers } from "./handler.js";
 import { err, ok } from "./result.js";
@@ -86,21 +87,48 @@ function namedTicket(command: Command): TicketId | null {
  * Step 3: the account an authorisation speaks for, provided it verifies against
  * a credential registered to that account (`REQ-CP-6`). The payload verified is
  * the profile's signing payload for the command, never bytes framed here.
+ *
+ * The one exception is an account's first registration: no credential is
+ * registered yet, so the new credential authorises its own registration. The
+ * registration must name the account and the credential that signed, and the
+ * authorisation must verify against it (plan §5.2, `registerCredential`).
  */
 async function authorise(
   tx: Registry,
   profile: Profile,
   signed: SignedCommand,
 ): Promise<Result<AccountId>> {
-  const claimed = profile.accountOf(signed.authorisation);
+  const { command, authorisation } = signed;
+  const claimed = profile.accountOf(authorisation);
   if (!claimed.ok) return err("ERR-InvalidAuthorisation", claimed.error.detail);
   const { account, credential } = claimed.value;
-  const registered = (await tx.getRegistrations(account)).find((r) => r.credential === credential);
+  const registrations = await tx.getRegistrations(account);
+  const payload = profile.encodeCommand(command);
+
+  if (
+    command.kind === "registerCredential" &&
+    command.account === account &&
+    registrations.length === 0
+  ) {
+    const named = profile.registrationAccount(command.registration);
+    if (!named.ok) return err("ERR-InvalidAuthorisation", named.error.detail);
+    if (named.value.account !== account || named.value.credential !== credential) {
+      return err(
+        "ERR-InvalidAuthorisation",
+        "a first registration is authorised by the credential it registers",
+      );
+    }
+    if (!profile.verify(command.registration, payload, authorisation)) {
+      return err("ERR-InvalidAuthorisation", "the authorisation does not verify");
+    }
+    return ok(account);
+  }
+
+  const registered = registrations.find((r) => r.credential === credential);
   if (registered === undefined) {
     return err("ERR-InvalidAuthorisation", "the credential is not registered to the account");
   }
-  const payload = profile.encodeCommand(signed.command);
-  if (!profile.verify(registered.registration, payload, signed.authorisation)) {
+  if (!profile.verify(registered.registration, payload, authorisation)) {
     return err("ERR-InvalidAuthorisation", "the authorisation does not verify");
   }
   return ok(account);
@@ -208,7 +236,7 @@ export const handlers: CommandHandlers = {
   issueTicket,
   transferTicket: notImplemented("transferTicket", "T-008-08"),
   removeRestriction: notImplemented("removeRestriction", "T-008-12"),
-  registerCredential: notImplemented("registerCredential", "T-008-14"),
+  registerCredential,
 };
 
 /**
