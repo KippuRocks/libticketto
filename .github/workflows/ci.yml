@@ -25,6 +25,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      # T-002-02: the SDK's error codes and invariant ids are generated from the
+      # vendored spec/SPEC.md; a spec change not yet regenerated fails here.
+      - run: pnpm spec:check
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
