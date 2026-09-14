@@ -64,6 +64,9 @@ importers:
       '@types/node':
         specifier: 24.13.4
         version: 24.13.4
+      '@virtonetwork/authenticators-webauthn':
+        specifier: 1.2.7
+        version: 1.2.7(postcss@8.5.28)(rxjs@7.8.2)(yaml@2.9.1)
       '@virtonetwork/signer':
         specifier: 1.3.3
         version: 1.3.3(postcss@8.5.28)(rxjs@7.8.2)(yaml@2.9.1)
@@ -1423,6 +1426,9 @@ packages:
     engines: {node: '>=16.20.0'}
     cpu: [x64]
     os: [win32]
+
+  '@virtonetwork/authenticators-webauthn@1.2.7':
+    resolution: {integrity: sha512-baEYTkbODcxhLE34ylDaMwojtKkwaRuJNyc02jk0fxMOB7a20pCvnhFb5+wtZaKVZNr8MW36sl7yuodgFa73OA==}
 
   '@virtonetwork/signer@1.3.3':
     resolution: {integrity: sha512-5C5DXvaC0d+lwIpf5Jq7606u59Qo1/qaZj8x78nRKF3KZjfoGnzGAakvS4jhn4BVoejwkIiW7p+vMP+jk8K7/g==}
@@ -4016,6 +4022,21 @@ snapshots:
 
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
+
+  '@virtonetwork/authenticators-webauthn@1.2.7(postcss@8.5.28)(rxjs@7.8.2)(yaml@2.9.1)':
+    dependencies:
+      '@virtonetwork/signer': 1.3.3(postcss@8.5.28)(rxjs@7.8.2)(yaml@2.9.1)
+    transitivePeerDependencies:
+      - '@microsoft/api-extractor'
+      - '@swc/core'
+      - bufferutil
+      - jiti
+      - postcss
+      - rxjs
+      - supports-color
+      - tsx
+      - utf-8-validate
+      - yaml
 
   '@virtonetwork/signer@1.3.3(postcss@8.5.28)(rxjs@7.8.2)(yaml@2.9.1)':
     dependencies:
