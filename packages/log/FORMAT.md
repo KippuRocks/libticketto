@@ -203,7 +203,111 @@ is reported at the checkpoint's sequence. Publishing checkpoints where the log's
 author cannot quietly replace them is the deployment's obligation (`AD-16`),
 not part of this format.
 
-## 5. Test vectors
+## 5. Export
+
+An export carries a deployment's complete ledger state from one backend to
+another (`REQ-MG-3`): every record up to a checkpoint, that checkpoint, and a
+snapshot of state at it. Import does not re-execute history; the receiving
+backend appends the records verbatim — at the same sequences, with the same
+hashes — loads the snapshot, and its observable state is then verified against
+the export (§5.4). Nothing derivable from other parts is carried, and no
+backend-specific value is: a backend recomputes its own bookkeeping from the
+snapshot, and renders its own cursors from sequences.
+
+### 5.1 Stream
+
+```
+Export = magic "ticketto/v0/export" (18 ASCII bytes), version u8 = 0, Item*
+Item   = tag u8, body Vec<u8>
+```
+
+A decoder MUST refuse any other magic or version. The export is the
+concatenation of the stream's chunks: chunk boundaries carry no meaning.
+
+| Tag | Item | Body |
+|---|---|---|
+| `1` | record | a `LogRecord` (§2) |
+| `2` | checkpoint | a `Checkpoint` (§4) |
+| `3` | event | `Event` (§5.2) |
+| `4` | ticket | `Ticket` (§5.2) |
+| `5` | credential | `registration Vec<u8>` |
+| `6` | cancellation holder | `ticket [u8;32], holder [u8;32]` |
+| `7` | consumed pass | `ticket [u8;32], pass [u8;16], retainUntil u64` |
+| `8` | operation | `operationId [u8;16], expiresAt u64, digest [u8;32], sequence u64` |
+| `0` | end | eight `Compact` counts: of items with tags `1` to `8`, in tag order |
+
+Items appear in ascending tag order, section by section — any section may be
+empty — and exactly one `end` item closes the export, with nothing after it.
+A decoder MUST refuse an item with an unknown tag, an item out of order, a body
+that is not the canonical encoding of its item or has trailing bytes, an `end`
+whose counts differ from the items read, and a stream that ends before `end` or
+inside an item.
+
+### 5.2 Snapshot items
+
+Identifiers are their `C2` bytes (`@ticketto/profile-v0`); enumerations,
+`ClassId`, `Zone`, `Placement`, `AttendancePolicy` and `TicketRestrictions` are
+their `C2` encodings.
+
+```
+Event  = id [u8;32], owner [u8;32], status u8 (Active 0, Sealed 1, Cancelled 2, Finished 3),
+         maxCapacity Option<Compact>, issued Compact, zones Compact count ‖ Zone*
+Ticket = id [u8;32], event [u8;32], holder [u8;32], class ClassId,
+         provenance u8 (Purchased 0, Granted 1), zone [u8;32], placement Placement,
+         policy AttendancePolicy, restrictions TicketRestrictions, attendances Compact
+```
+
+- A **credential** carries its registration only; its account and credential id
+  are the ones the profile derives from it (`C2`).
+- A **cancellation holder** is carried for every ticket of a `Cancelled` event,
+  and for no other ticket: the holder that event's cancellation fixed.
+- A **consumed pass** is carried while it is within its retention; an
+  **operation** while it is within its expiry. An operation's `digest` is
+  BLAKE2b-256 of its command's signed-input framing (§2.2), and `sequence` is
+  that of the record the operation produced.
+
+### 5.3 Consistency
+
+A decoder MUST also refuse an export whose parts disagree:
+
+1. The records form a chain from sequence `0` (§3). There is a checkpoint
+   exactly when there is at least one record, and it is at the last record,
+   with that record's hash. A reader given the publication key's registration
+   also requires the checkpoint to be valid under it (§4.2).
+2. Events and tickets are in strictly ascending order of id; cancellation
+   holders of ticket; consumed passes of ticket, then pass; operations of
+   operation id. Credentials are in ascending order of account — within one
+   account, in registration order — and no account carries the same credential
+   twice. Every credential's registration derives an account.
+3. Every ticket's event, and every consumed pass's ticket, is in the snapshot.
+   Cancellation holders are carried for exactly the tickets of `Cancelled`
+   events.
+4. Every operation's `sequence` names a record carrying a signed command whose
+   operation id and expiry are the operation's, and whose signed-input framing
+   hashes to its `digest`.
+
+An encoder sorts each section, so equal state always exports to equal bytes.
+
+### 5.4 Verifying an import
+
+After a backend imports an export, a verifier checks, through the SDK's backend
+port alone, and reports the first disagreement:
+
+1. **`log`** — the log read from the start, each record re-linked as §2–§3 lay
+   it out, is exactly the exported records, and no more;
+2. **`head`** — it ends at the checkpoint's `headHash` (or is empty when there is
+   no checkpoint);
+3. **`event`**, **`ticket`** — `getEvent` and `getTicket` answer every snapshot
+   event and ticket with an equal encoding (§5.2);
+4. **`credential`** — `getCredential` answers every credential's account and id
+   with its registration;
+5. **`cancellationHolder`** — `getCancellationHolder` answers every ticket of a
+   `Cancelled` event with its carried holder.
+
+Consumed passes and operations cannot be observed through queries; a backend's
+own tests probe them by resubmission.
+
+## 6. Test vectors
 
 [`vectors/v0.json`](vectors/v0.json), generated by `pnpm --filter @ticketto/log
 vectors:generate`:
