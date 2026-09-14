@@ -1,0 +1,45 @@
+name: Release
+
+# Changesets release pipeline for @ticketto/*.
+#
+# On `main`, changesets/action opens a "Version Packages" pull request from
+# pending changesets and, once that is merged, publishes. Publishing is OFF
+# until the registry is decided: the job runs only when the repository variable
+# TICKETTO_RELEASES_ENABLED is "true", and needs the registry configured
+# (`publishConfig` / `.npmrc`) and a token in the NPM_TOKEN secret.
+#
+# The canary job in ci.yml proves on every change that a snapshot of every
+# package installs into a client, without publishing.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Version or publish
+    if: vars.TICKETTO_RELEASES_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: changesets/action@v2
+        with:
+          version-script: pnpm version-packages
+          publish-script: pnpm release
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

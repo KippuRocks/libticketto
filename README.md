@@ -40,7 +40,11 @@ pnpm format       # Biome: apply safe fixes and formatting
 pnpm test         # Vitest: every package and tool, plus workspace checks (build first)
 pnpm boundaries   # package dependency rules (tools/boundaries)
 pnpm hermes       # Metro + hermesc bundle of the React Native path (tools/hermes-bundle)
+pnpm canary       # snapshot release, packed and installed into a throwaway client
 ```
+
+Releases use Changesets; see [`.changeset/README.md`](.changeset/README.md).
+Nothing is published yet.
 
 CI (`.github/workflows/ci.yml`, Node 24) runs all of these on every pull request
 and on `main`.

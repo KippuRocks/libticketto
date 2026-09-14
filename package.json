@@ -16,10 +16,15 @@
     "format": "biome check --write .",
     "test": "vitest run",
     "boundaries": "node tools/boundaries/dist/cli.js",
-    "hermes": "pnpm --filter @libticketto/hermes-bundle hermes"
+    "hermes": "pnpm --filter @libticketto/hermes-bundle hermes",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build && changeset publish",
+    "canary": "pnpm --filter @libticketto/canary canary"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.13",
+    "@changesets/cli": "3.0.2",
     "@types/node": "24.13.4",
     "typescript": "7.0.2",
     "vitest": "5.0.0"
