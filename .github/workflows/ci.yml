@@ -30,6 +30,10 @@ jobs:
       - run: pnpm spec:check
       - run: pnpm typecheck
       - run: pnpm lint
+      # T-002-09 — features/002-sdk/plan.md §5.6: no switch over Command kinds or
+      # TickettoErrorCode without a default, so beyond-V0 additions never break
+      # a consumer. Biome cannot see types; tools/switch-default checks it.
+      - run: pnpm lint:switches
       - run: pnpm test
       - run: pnpm boundaries
 
