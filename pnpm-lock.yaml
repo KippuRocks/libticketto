@@ -33,6 +33,9 @@ importers:
         specifier: workspace:*
         version: link:../sdk
     devDependencies:
+      '@ticketto/conformance':
+        specifier: workspace:*
+        version: link:../conformance
       '@ticketto/profile-v0':
         specifier: workspace:*
         version: link:../profile-v0

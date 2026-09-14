@@ -4,10 +4,10 @@ The in-memory reference backend, independent of the hosted one, and the slow-bac
 
 Owned by `F-005`. Serves `REQ-MG-1`.
 
-**Status:** the in-memory `C3` capabilities (`T-005-01`) and the `C8` port over
-`ledger-rules` (`T-005-02`) are implemented. The log reader, assurance
-declaration, test controls, export and the slow decorator are not yet: the log
-reader and assurance throw until their tasks land.
+**Status:** the in-memory `C3` capabilities (`T-005-01`), the `C8` port over
+`ledger-rules` (`T-005-02`) and the test controls (`T-005-05`) are implemented.
+The log reader, assurance declaration, export and the slow decorator are not
+yet: the log reader and assurance throw until their tasks land.
 
 ## Backend (`C8`)
 
@@ -39,6 +39,17 @@ Nothing is persisted, and nothing past its retention is forgotten.
 |---|---|
 | Runs on | Node 24, CI |
 | May depend on | `sdk`, `ledger-rules` and `log`. Must never depend on `binding-offchain`. |
+
+## Test controls (`/testing`)
+
+For tests and the conformance suite only (plan §5.4). `createTestMemoryBackend({
+profile, start?, seed? })` returns the backend with the conformance suite's
+`TestControls`:
+
+| | |
+|---|---|
+| `clock` | The clock the rules read: `now`, `set`, `advance`. Starts at `TEST_EPOCH` unless told otherwise, and never moves backwards (`REQ-SDK-3`) |
+| `randomBytes(length)` | A seeded, deterministic source for operation and pass ids — the same seed, the same sequence. Not for keys |
 
 Part of [libticketto](../../README.md). Behaviour is specified in `SPEC.md` and
 the package's design in `PLAN.md` and `features/`, in
