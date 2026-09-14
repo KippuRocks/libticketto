@@ -19,7 +19,8 @@ import type {
 } from "@ticketto/sdk";
 import { createC4Client } from "../../src/client.js";
 import { fromHex } from "../../src/hex.js";
-import { C4Defect, createOffchainSubmit, type RetryPolicy } from "../../src/submit.js";
+import type { RetryPolicy } from "../../src/retry.js";
+import { C4Defect, createOffchainSubmit } from "../../src/submit.js";
 import { BASE_URL } from "../fake-fetch.js";
 import {
   FakeService,
@@ -39,7 +40,7 @@ type Body = {
 
 const WAIT = 25_000;
 
-interface Fixtures {
+export interface Fixtures {
   readonly createEvent: SubmitInput;
   readonly transfer: SubmitInput;
   readonly conflicting: SubmitInput;
@@ -50,7 +51,7 @@ interface Fixtures {
   readonly bodies: ReadonlyMap<SubmitInput, string>;
 }
 
-function fixtures(vectors: C4Vectors): Fixtures {
+export function fixtures(vectors: C4Vectors): Fixtures {
   const body = (name: string): Body => {
     const exchange = vectors.exchanges.find((e) => e.name === name);
     assert(exchange !== undefined, `no vector named ${name}`);
@@ -90,13 +91,15 @@ function fixtures(vectors: C4Vectors): Fixtures {
   return { createEvent, transfer, conflicting, pass, sponsorships, bodies };
 }
 
-interface Run {
+export interface Run {
   readonly service: FakeService;
   readonly timers: InstantTimers;
   readonly submit: (input: SubmitInput, sponsorship?: Sponsorship) => Submission<Receipt>;
 }
 
-function setUp(options: FakeServiceOptions & { readonly retry?: Partial<RetryPolicy> } = {}): Run {
+export function setUp(
+  options: FakeServiceOptions & { readonly retry?: Partial<RetryPolicy> } = {},
+): Run {
   const timers = new InstantTimers();
   const service = new FakeService({ ...options, onHang: () => timers.expire() });
   const client = createC4Client({ url: BASE_URL, fetch: service.fetch });
@@ -111,7 +114,7 @@ function setUp(options: FakeServiceOptions & { readonly retry?: Partial<RetryPol
 }
 
 /** Every state a submission goes through, and how it ends. */
-async function complete(
+export async function complete(
   submission: Submission<Receipt>,
 ): Promise<{ states: SubmissionState[]; result: Result<Receipt> | undefined; failure?: unknown }> {
   const states: SubmissionState[] = [];

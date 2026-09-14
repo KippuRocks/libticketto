@@ -50,8 +50,24 @@ the write settles or is rejected — however long that takes (`NFR-9`).
 - **A poll times out** after `wait` plus a margin (10 s by default) and is
   repeated; a `pending` answer is progress and never backed off.
 - **When the retry budget is spent**, the submission rejects with
-  `ERR-LedgerUnavailable`. A response that fits no row of `C4.md` §4.3 fails the
-  submission with `C4Defect`, and is never retried.
+  `ERR-LedgerUnavailable` — before or after `submitted`. A response that fits no
+  row of `C4.md` §4.3 fails the submission with `C4Defect`, and is never retried.
+
+## Unavailability
+
+`createRetrier({ retry?, timers? })` holds the one retry mechanism every `C4`
+exchange uses. Each retry row of `C4.md` §4.3 — a transport failure, a timeout,
+`503 unavailable`, a `5xx` without a C4 body — and each resubmission spends one
+budget (`DEFAULT_RETRY`: 8 attempts, backoff from 250 ms doubling to 10 s, never
+sooner than `Retry-After`). An answer that is not a retry row refills it. When it
+is spent, the ledger could not be reached, and the binding reports
+`LEDGER_UNAVAILABLE` — `{ code: "ERR-LedgerUnavailable" }`, with no detail
+(amendment 0003 G8, `REQ-SDK-2`). `retrier.read` does the same for a
+side-effect-free exchange, for the reads of the port.
+
+`ERR-LedgerUnavailable` is retryable: a submission rejected with it may still be
+recorded, and resubmitting the same signed input is safe — the service answers
+with the first attempt's outcome (`REQ-CM-1`).
 
 Because the profile's codecs use `scale-ts`, a React Native app installs a
 `TextDecoder` before importing this package, as it does for `profile-v0`.

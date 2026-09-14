@@ -12,6 +12,7 @@ import { runSuites } from "../harness.js";
 import { clientSuite } from "../suites/client.suite.js";
 import { submitSuite } from "../suites/submit.suite.js";
 import { translationSuite } from "../suites/translation.suite.js";
+import { unavailableSuite } from "../suites/unavailable.suite.js";
 import { type C4Vectors, vectorsSuite } from "../suites/vectors.suite.js";
 
 declare const print: (line: string) => void;
@@ -22,7 +23,13 @@ if (vectors === undefined) {
   print(`HERMES-SUMMARY ${JSON.stringify({ passed: 0, failed: 1, error: "no vectors" })}`);
 } else {
   runSuites(
-    [vectorsSuite(vectors), clientSuite, submitSuite(vectors), translationSuite(vectors)],
+    [
+      vectorsSuite(vectors),
+      clientSuite,
+      submitSuite(vectors),
+      translationSuite(vectors),
+      unavailableSuite(vectors),
+    ],
     print,
   ).then(
     (summary) => print(`HERMES-SUMMARY ${JSON.stringify(summary)}`),
