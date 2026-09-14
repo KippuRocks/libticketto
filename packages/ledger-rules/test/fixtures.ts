@@ -6,6 +6,7 @@ import { type SoftwareCredential, softwareP256Signer } from "@ticketto/profile-v
 import type {
   AccountId,
   Command,
+  CreateEvent,
   CredentialId,
   EventId,
   OperationId,
@@ -77,4 +78,26 @@ export const eventId = (): EventId => id32<EventId>();
 /** An envelope valid until `expiresAt`. */
 export function envelope(expiresAt: Timestamp = 60_000) {
   return { operationId: operationId(), expiresAt };
+}
+
+/** A `createEvent` whose id is the profile's derivation from `creator` and `salt`. */
+export function createEventCommand(
+  creator: AccountId,
+  options: {
+    readonly salt?: Uint8Array;
+    readonly zones?: CreateEvent["zones"];
+    readonly capacity?: CreateEvent["capacity"];
+    readonly expiresAt?: Timestamp;
+  } = {},
+): CreateEvent {
+  const salt = options.salt ?? new Uint8Array([7, 7, 7]);
+  return {
+    ...envelope(options.expiresAt),
+    kind: "createEvent",
+    event: profile.eventId(creator, salt),
+    salt,
+    zones: options.zones ?? [],
+    capacity: options.capacity ?? null,
+    metadata: null,
+  };
 }
