@@ -1,0 +1,24 @@
+{
+  "name": "@libticketto/boundaries",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Checks the package dependency rules of features/001-workspace/plan.md §5.2",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "ticketto-boundaries": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "oxc-parser": "0.149.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.4"
+  }
+}

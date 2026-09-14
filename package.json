@@ -14,7 +14,8 @@
     "typecheck": "tsc -p tsconfig.json && pnpm -r typecheck",
     "lint": "biome ci .",
     "format": "biome check --write .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "boundaries": "node tools/boundaries/dist/cli.js"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.13",
