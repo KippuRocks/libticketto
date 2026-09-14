@@ -7,17 +7,17 @@ import { eventId, id32, profile } from "../test/fixtures.js";
 import { query } from "./query.js";
 
 describe("query", () => {
-  it("answers getEvent with the recorded event", async () => {
+  it("answers getEvent with the recorded event, without the rules' bookkeeping", async () => {
     const caps = createFakeCapabilities();
     const event: Event = {
       id: eventId(),
       owner: id32<AccountId>(),
       status: "Active",
       maxCapacity: null,
-      issued: 0,
-      zones: [],
+      issued: 1,
+      zones: [{ id: id32<ZoneId>(), kind: "Seated" }],
     };
-    await caps.registry.putEvent(event);
+    await caps.registry.putEvent({ ...event, zonesInUse: [event.zones[0]?.id ?? id32<ZoneId>()] });
     expect(await query(caps, profile, { kind: "getEvent", event: event.id })).toEqual({
       ok: true,
       value: event,

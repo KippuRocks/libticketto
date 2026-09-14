@@ -10,6 +10,7 @@ runs the checks every signed command passes (`T-008-02`, `T-008-13`).
 | Command | Handler |
 |---|---|
 | `createEvent` | Implemented (`T-008-03`) |
+| `addZone`, `removeZone` | Implemented (`T-008-06`) |
 | Every other command, access passes, `canAttend`, `getCancellationHolder` | Not yet — each throws until its task lands |
 
 | | |
@@ -52,7 +53,7 @@ A store supplies the rules with `Capabilities` (`REQ-SDK-3`):
 
 | | |
 |---|---|
-| `registry` | Ledger state in domain terms: events, credential registrations by account, tickets and their facts, consumed pass ids with retention, operation ids with expiry and a digest of the signed input, and appending logical log records (with a pass's claimed `presentedAt`) |
+| `registry` | Ledger state in domain terms: events (as `EventRecord`, with the zones in which a ticket has been issued), credential registrations by account, tickets and their facts, consumed pass ids with retention, operation ids with expiry and a digest of the signed input, and appending logical log records (with a pass's claimed `presentedAt`) |
 | `clock` | A monotonic current timestamp |
 | `value` | Declared for settlement beyond V0; nothing implements it in V0 |
 | `transaction(fn)` | Runs `fn` in one serialisable transaction: its writes commit together when `fn` resolves, and none does when it rejects |

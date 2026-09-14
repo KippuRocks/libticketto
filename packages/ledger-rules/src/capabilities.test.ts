@@ -9,11 +9,13 @@ import type {
   Ticket,
   TicketId,
   Timestamp,
+  ZoneId,
 } from "@ticketto/sdk";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import type {
   Capabilities,
   Clock,
+  EventRecord,
   LogAppend,
   OperationRecord,
   Registry,
@@ -45,7 +47,12 @@ describe("C3 capability interfaces (REQ-SDK-3)", () => {
   });
 
   it("reads and writes events and tickets in domain terms", () => {
-    expectTypeOf<Registry["getEvent"]>().toEqualTypeOf<(id: EventId) => Promise<Event | null>>();
+    expectTypeOf<Registry["getEvent"]>().toEqualTypeOf<
+      (id: EventId) => Promise<EventRecord | null>
+    >();
+    expectTypeOf<Registry["putEvent"]>().parameter(0).toEqualTypeOf<EventRecord>();
+    expectTypeOf<EventRecord>().toExtend<Event>();
+    expectTypeOf<EventRecord["zonesInUse"]>().toEqualTypeOf<readonly ZoneId[]>();
     expectTypeOf<Registry["getTicket"]>().returns.toEqualTypeOf<Promise<TicketRecord | null>>();
     expectTypeOf<Registry["insertTicket"]>().parameter(0).toEqualTypeOf<Ticket>();
     expectTypeOf<Registry["insertTicket"]>().returns.toEqualTypeOf<

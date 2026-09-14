@@ -1,10 +1,11 @@
 // T-008-03: createEvent (features/008-ledger-rules/plan.md §5.2; SPEC.md US-A1,
 // REQ-EV-3, REQ-EV-9, REQ-ID-7).
 
-import type { Event, Receipt, Result, Zone } from "@ticketto/sdk";
+import type { Receipt, Result, Zone } from "@ticketto/sdk";
 import { describe, expect, it } from "vitest";
 import { createFakeCapabilities } from "../../test/fake-capabilities.js";
 import { createEventCommand, profile, registered, sign, zoneId } from "../../test/fixtures.js";
+import type { EventRecord } from "../capabilities.js";
 import { execute } from "../execute.js";
 
 function codeOf(result: Result<unknown>): string {
@@ -24,13 +25,14 @@ describe("createEvent", () => {
     const result = await execute(caps, profile, await sign(organiser, command));
 
     expect(result.ok).toBe(true);
-    expect(await caps.registry.getEvent(command.event)).toEqual<Event>({
+    expect(await caps.registry.getEvent(command.event)).toEqual<EventRecord>({
       id: command.event,
       owner: organiser.account,
       status: "Active",
       maxCapacity: 500,
       issued: 0,
       zones,
+      zonesInUse: [],
     });
   });
 

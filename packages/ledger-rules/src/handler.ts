@@ -7,12 +7,11 @@ import type {
   AccountId,
   Command,
   CommandKind,
-  Event,
   Profile,
   TickettoError,
   Timestamp,
 } from "@ticketto/sdk";
-import type { Registry, TicketRecord } from "./capabilities.js";
+import type { EventRecord, Registry, TicketRecord } from "./capabilities.js";
 
 /** What a command's handler sees, once the checks common to every command have passed. */
 export interface CommandContext<C extends Command> {
@@ -25,7 +24,7 @@ export interface CommandContext<C extends Command> {
    * The event the command names, as recorded; `null` only for a command that
    * names an event yet to exist (`createEvent`), or none (`registerCredential`).
    */
-  readonly event: Event | null;
+  readonly event: EventRecord | null;
   /** The existing ticket the command names; `null` when it names none. */
   readonly ticket: TicketRecord | null;
   /** The capabilities' clock, read once for the whole input. */

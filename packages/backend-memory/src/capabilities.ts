@@ -14,6 +14,7 @@ import type {
   Capabilities,
   Clock,
   CredentialRegistration,
+  EventRecord,
   LogAppend,
   OperationRecord,
   Registry,

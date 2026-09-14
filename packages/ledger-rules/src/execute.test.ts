@@ -15,6 +15,7 @@ import { describe, expect, it, vi } from "vitest";
 import { commandOf, EVENT_COMMAND_KINDS, ticketIn } from "../test/commands.js";
 import { createFakeCapabilities, type FakeCapabilities } from "../test/fake-capabilities.js";
 import { credential, eventId, profile, registered, sign } from "../test/fixtures.js";
+import type { EventRecord } from "./capabilities.js";
 import { createExecute, execute, handlers as v0Handlers } from "./execute.js";
 import { accept, type CommandHandler, type CommandHandlers, reject } from "./handler.js";
 
@@ -32,6 +33,7 @@ function acceptingHandlers(spy: () => void = () => {}): CommandHandlers {
           maxCapacity: null,
           issued: 0,
           zones: [],
+          zonesInUse: [],
         });
       }
     });
@@ -39,8 +41,8 @@ function acceptingHandlers(spy: () => void = () => {}): CommandHandlers {
   return Object.fromEntries(Object.keys(v0Handlers).map((kind) => [kind, handler])) as never;
 }
 
-function event(id: EventId, owner: AccountId, status: Event["status"]): Event {
-  return { id, owner, status, maxCapacity: null, issued: 0, zones: [] };
+function event(id: EventId, owner: AccountId, status: Event["status"]): EventRecord {
+  return { id, owner, status, maxCapacity: null, issued: 0, zones: [], zonesInUse: [] };
 }
 
 function expectError(result: Result<unknown>, code: string) {

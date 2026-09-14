@@ -11,7 +11,6 @@ import type {
   AccountId,
   Count,
   Cursor,
-  Event,
   EventId,
   LogRecord,
   OperationId,
@@ -24,6 +23,7 @@ import type {
   Capabilities,
   Clock,
   CredentialRegistration,
+  EventRecord,
   LogAppend,
   OperationRecord,
   Registry,
@@ -62,7 +62,7 @@ export interface FakeCapabilities extends Capabilities {
 }
 
 interface State {
-  readonly events: Map<EventId, Event>;
+  readonly events: Map<EventId, EventRecord>;
   readonly registrations: Map<AccountId, readonly CredentialRegistration[]>;
   readonly tickets: Map<TicketId, TicketRecord>;
   /** Keyed by ticket and pass id; the value is the retention time. */
