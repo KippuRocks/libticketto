@@ -20,7 +20,14 @@ install will pick it up). Installing on an older Node fails by design.
 pnpm install
 pnpm build        # every package, in dependency order
 pnpm typecheck
+pnpm lint         # Biome: lint and formatting, read-only
+pnpm format       # Biome: apply safe fixes and formatting
+pnpm test         # Vitest: every package and tool, plus workspace checks
 ```
+
+Vitest runs one project per package and tool. `test/workspace.test.ts` holds the
+conventions every member must keep: ESM only, Node 24 as the engine floor, the
+shared strict TypeScript base, and at least one test of its own.
 
 The workspace is ESM only and TypeScript strict. Every package extends
 `tsconfig.base.json`, which loads no ambient type packages (`"types": []`), so a
