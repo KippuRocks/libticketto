@@ -22,6 +22,7 @@ export type {
   TestClock,
   TestControls,
 } from "./harness.js";
+export { SCOPE_V0, type Scope, type ScopedId, SPEC_IDS, scopeProblems } from "./scope.v0.js";
 export { runSuites, type Suite, type SuiteTest, suite } from "./suite.js";
 export { createWorld, HarnessError, OPERATION_LIFETIME, register, type World } from "./world.js";
 
