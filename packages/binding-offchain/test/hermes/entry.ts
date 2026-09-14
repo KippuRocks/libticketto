@@ -11,6 +11,7 @@ import "ticketto-c4-vectors";
 import { runSuites } from "../harness.js";
 import { clientSuite } from "../suites/client.suite.js";
 import { submitSuite } from "../suites/submit.suite.js";
+import { translationSuite } from "../suites/translation.suite.js";
 import { type C4Vectors, vectorsSuite } from "../suites/vectors.suite.js";
 
 declare const print: (line: string) => void;
@@ -20,7 +21,10 @@ const vectors = (globalThis as { __TICKETTO_C4_VECTORS__?: C4Vectors }).__TICKET
 if (vectors === undefined) {
   print(`HERMES-SUMMARY ${JSON.stringify({ passed: 0, failed: 1, error: "no vectors" })}`);
 } else {
-  runSuites([vectorsSuite(vectors), clientSuite, submitSuite(vectors)], print).then(
+  runSuites(
+    [vectorsSuite(vectors), clientSuite, submitSuite(vectors), translationSuite(vectors)],
+    print,
+  ).then(
     (summary) => print(`HERMES-SUMMARY ${JSON.stringify(summary)}`),
     (error: unknown) =>
       print(`HERMES-SUMMARY ${JSON.stringify({ passed: 0, failed: 1, error: String(error) })}`),

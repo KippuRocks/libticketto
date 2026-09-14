@@ -14,29 +14,38 @@ import { BASE_URL, scriptedFetch } from "../test/fake-fetch.js";
 import { FakeService } from "../test/fake-service.js";
 import { clientSuite } from "../test/suites/client.suite.js";
 import { submitSuite } from "../test/suites/submit.suite.js";
+import { assertMapped, translationSuite } from "../test/suites/translation.suite.js";
 import { type C4Vectors, type Exchange, vectorsSuite } from "../test/suites/vectors.suite.js";
 import { createC4Client } from "./client.js";
 import { fromHex, toHex } from "./hex.js";
 import { createOffchainSubmit } from "./submit.js";
+import { WIRE_CODES, WIRE_TRANSLATION, type WireCode } from "./translation.js";
+import { ENDPOINTS } from "./wire.js";
 
 const dir = join(import.meta.dirname, "..", "test", "c4");
 const raw = readFileSync(join(dir, "c4-v0.json"));
+const document = readFileSync(join(dir, "C4.md"), "utf8");
 const source = JSON.parse(readFileSync(join(dir, "source.json"), "utf8")) as {
   repository: string;
   commit: string;
-  path: string;
-  sha256: string;
+  files: { path: string; file: string; sha256: string }[];
 };
 const vectors = JSON.parse(raw.toString("utf8")) as C4Vectors & {
   exchanges: (Exchange & { decoded?: Record<string, unknown> })[];
 };
 
 describe("T-007-01 vendored C4 vectors", () => {
-  it("are the file recorded in test/c4/source.json", () => {
+  it("are the files recorded in test/c4/source.json", () => {
     expect(source.repository).toBe("https://github.com/KippuRocks/ticketto-offchain.git");
-    expect(source.path).toBe("protocol/vectors/c4-v0.json");
     expect(source.commit).toMatch(/^[0-9a-f]{40}$/);
-    expect(createHash("sha256").update(raw).digest("hex")).toBe(source.sha256);
+    expect(source.files.map((f) => f.path).sort()).toEqual([
+      "protocol/C4.md",
+      "protocol/vectors/c4-v0.json",
+    ]);
+    for (const file of source.files) {
+      const bytes = readFileSync(join(dir, file.file));
+      expect(createHash("sha256").update(bytes).digest("hex"), file.file).toBe(file.sha256);
+    }
   });
 
   const sdkJson = (value: unknown) =>
@@ -79,6 +88,73 @@ describe("T-007-01 vendored C4 vectors", () => {
       const rejection = (e.response.body as { rejection: { code: string } }).rejection;
       expect(result.ok ? undefined : result.error.code, e.name).toBe(rejection.code);
     }
+  });
+});
+
+describe("T-007-04 error translation against C4.md", () => {
+  const section = (from: string, to: string) =>
+    document.slice(document.indexOf(from), document.indexOf(to, document.indexOf(from)));
+  const rows = (text: string) =>
+    text
+      .split("\n")
+      .filter((line) => line.startsWith("| ") && !line.startsWith("|---"))
+      .map((line) =>
+        line
+          .slice(1, -1)
+          .split(" | ")
+          .map((cell) => cell.trim()),
+      );
+
+  it("§4.2 lists exactly the wire codes and statuses the table maps", () => {
+    const documented = rows(section("### 4.2 Wire errors", "### 4.3"))
+      .slice(1)
+      .map(([status, code]) => `${code?.replaceAll("`", "")}:${status?.replaceAll("`", "")}`);
+    assertMapped(
+      documented.map((entry) => entry.split(":")[0] as string),
+      "C4.md §4.2",
+    );
+    const mapped = Object.entries(WIRE_TRANSLATION).flatMap(([code, entry]) =>
+      entry.statuses.map((status) => `${code}:${status}`),
+    );
+    expect(documented.sort()).toEqual(mapped.sort());
+  });
+
+  it("§4.2 sends each endpoint-specific code only from the endpoint its section names", () => {
+    const sections = Object.fromEntries(
+      rows(section("## 2. Endpoints", "## 3."))
+        .slice(1)
+        .map(([endpoint, , ref]) => [ref?.replaceAll("`", ""), endpoint?.replaceAll("`", "")]),
+    ) as Record<string, string>;
+    for (const [, code, raised] of rows(section("### 4.2 Wire errors", "### 4.3")).slice(1)) {
+      const name = (code ?? "").replaceAll("`", "") as WireCode;
+      const ref = /^(§3\.\d)/.exec(raised ?? "")?.[1];
+      const endpoints = WIRE_TRANSLATION[name].endpoints;
+      if (ref === undefined) expect(endpoints, name).toEqual(ENDPOINTS);
+      else expect(endpoints, name).toEqual([sections[ref]]);
+    }
+  });
+
+  it("§4.3 gives each wire code the row the table does", () => {
+    let checked = 0;
+    for (const [received, surface] of rows(section("### 4.3 Translation", "## 5.")).slice(1)) {
+      for (const match of (received ?? "").matchAll(/`(\d{3}) ([a-z-]+)`/g)) {
+        const code = match[2] as string;
+        if (!Object.hasOwn(WIRE_TRANSLATION, code)) continue; // `422 rejection`, `200 pending`, …
+        const { translation } = WIRE_TRANSLATION[code as WireCode];
+        const text = surface ?? "";
+        if (text.includes("**Defect.**")) expect(translation, code).toEqual({ row: "defect" });
+        else if (text.startsWith("Retry")) expect(translation, code).toEqual({ row: "retry" });
+        else if (text.startsWith("Resubmit"))
+          expect(translation, code).toEqual({ row: "resubmit" });
+        else {
+          const rejected = /^`rejected` with `(ERR-[A-Za-z]+)`/.exec(text)?.[1];
+          expect(rejected, `${code}: ${text}`).toBeDefined();
+          expect(translation, code).toEqual({ row: "rejected", code: rejected });
+        }
+        checked++;
+      }
+    }
+    expect(checked).toBe(Object.values(WIRE_CODES).flat().length);
   });
 });
 
@@ -126,3 +202,4 @@ describe("T-007-01 C4 client on Node", () => {
 vectorsSuite(vectors)({ describe, it });
 clientSuite({ describe, it });
 submitSuite(vectors)({ describe, it });
+translationSuite(vectors)({ describe, it });

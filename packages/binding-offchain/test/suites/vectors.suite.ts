@@ -26,8 +26,8 @@ import {
   translateOperation,
   translateQuery,
   translateSubmit,
-  WIRE_CODES,
 } from "../../src/translate.js";
+import { WIRE_CODES } from "../../src/translation.js";
 import {
   assuranceRequest,
   ENDPOINTS,
