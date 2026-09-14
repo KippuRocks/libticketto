@@ -11,3 +11,9 @@ export type Authorisation = Brand<Uint8Array, "Authorisation">;
 
 /** What registers a credential to an account (`REQ-CP-6`). Opaque. */
 export type Registration = Brand<Uint8Array, "Registration">;
+
+/** A sponsor's undertaking to relay a command and bear its cost (`REQ-SP-1`). Opaque. */
+export type Sponsorship = Brand<Uint8Array, "Sponsorship">;
+
+/** Identifies one credential among those registered to an account (`REQ-CP-6`). */
+export type CredentialId = Brand<string, "CredentialId">;
