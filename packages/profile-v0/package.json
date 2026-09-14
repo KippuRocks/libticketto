@@ -39,6 +39,7 @@
     "metro": "0.87.1"
   },
   "dependencies": {
+    "@noble/curves": "2.4.0",
     "@noble/hashes": "2.4.0",
     "@ticketto/sdk": "workspace:*",
     "scale-ts": "1.6.1"
