@@ -26,5 +26,15 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@ticketto/profile-v0": "workspace:*",
+    "@ticketto/sdk": "workspace:*"
+  },
+  "peerDependencies": {
+    "vitest": "5.0.0"
+  },
+  "devDependencies": {
+    "vitest": "5.0.0"
   }
 }
