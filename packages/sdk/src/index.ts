@@ -2,6 +2,13 @@
 // Design: features/002-sdk/plan.md in KippuRocks/kippu-docs.
 
 export type {
+  CredentialAccount,
+  Profile,
+  SignedCommand,
+  Signer,
+  Sponsor,
+} from "./capabilities.js";
+export type {
   AccessPass,
   AddZone,
   AttendanceVerdict,
@@ -26,7 +33,7 @@ export type {
   SignedAccessPass,
   TransferTicket,
 } from "./commands.js";
-export type { Authorisation, Registration } from "./credentials.js";
+export type { Authorisation, CredentialId, Registration, Sponsorship } from "./credentials.js";
 export type {
   AttendancePolicy,
   Event,

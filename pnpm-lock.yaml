@@ -38,7 +38,11 @@ importers:
 
   packages/rx: {}
 
-  packages/sdk: {}
+  packages/sdk:
+    devDependencies:
+      '@types/node':
+        specifier: 24.13.4
+        version: 24.13.4
 
   tools/boundaries:
     dependencies:
