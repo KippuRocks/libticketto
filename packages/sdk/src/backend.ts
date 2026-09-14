@@ -12,6 +12,7 @@ import type { Sponsorship } from "./credentials.js";
 import type { Result } from "./errors.js";
 import type { Timestamp } from "./identifiers.js";
 import type { LogReader } from "./log.js";
+import type { Migration } from "./migration.js";
 import type { Receipt, Submission } from "./submission.js";
 
 /**
@@ -38,4 +39,9 @@ export interface Backend {
   readonly log: LogReader;
   /** Which invariants this backend enforces and which it attests (`REQ-SDK-6`). */
   readonly assurance: AssuranceDeclaration;
+  /**
+   * Export and import of complete ledger state (`REQ-MG-3`, plan §5.8a). Optional:
+   * an operator's tool, used through `@ticketto/sdk/migration`.
+   */
+  readonly migration?: Migration;
 }
