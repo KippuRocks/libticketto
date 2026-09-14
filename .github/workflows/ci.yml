@@ -67,3 +67,66 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm canary
+
+  # T-001-08 — REQ-SDK-7, NFR-8: the conformance suite runs once per registered
+  # backend package. A backend registers by defining a `conformance` script
+  # (tools/conformance-matrix). With zero registered backends the matrix is
+  # skipped and the `Conformance` check passes, reporting zero; once any are
+  # registered, a failure in any of them turns `Conformance` red.
+  conformance-discover:
+    name: Conformance — discover backends
+    runs-on: ubuntu-latest
+    outputs:
+      backends: ${{ steps.discover.outputs.backends }}
+      count: ${{ steps.discover.outputs.count }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @libticketto/conformance-matrix build
+      - id: discover
+        run: pnpm conformance-matrix discover
+
+  conformance-backend:
+    name: Conformance — ${{ matrix.backend }}
+    needs: conformance-discover
+    if: needs.conformance-discover.outputs.count != '0'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: ${{ fromJSON(needs.conformance-discover.outputs.backends) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm conformance-matrix run "${{ matrix.backend }}"
+
+  conformance:
+    name: Conformance
+    needs: [conformance-discover, conformance-backend]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @libticketto/conformance-matrix build
+      - run: >-
+          pnpm conformance-matrix verdict
+          "${{ needs.conformance-discover.result }}"
+          "${{ needs.conformance-discover.outputs.count || 0 }}"
+          "${{ needs.conformance-backend.result }}"
