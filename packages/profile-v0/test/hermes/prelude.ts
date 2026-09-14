@@ -36,7 +36,27 @@ class Utf8Decoder {
   }
 }
 
-const scope = globalThis as { TextDecoder?: unknown };
+const scope = globalThis as { TextDecoder?: unknown; crypto?: { getRandomValues?: unknown } };
 if (scope.TextDecoder === undefined) scope.TextDecoder = Utf8Decoder;
+
+// A React Native app provides `crypto.getRandomValues` through a native module
+// (for example `react-native-get-random-values`). Here, where nothing secret is
+// generated, a seeded generator stands in for it. It is not cryptographically
+// secure and must never be used outside this harness.
+if (scope.crypto?.getRandomValues === undefined) {
+  let state = 0x2545f491;
+  scope.crypto = {
+    getRandomValues<T extends ArrayBufferView>(array: T): T {
+      const bytes = new Uint8Array(array.buffer, array.byteOffset, array.byteLength);
+      for (let i = 0; i < bytes.length; i++) {
+        state ^= state << 13;
+        state ^= state >>> 17;
+        state ^= state << 5;
+        bytes[i] = state & 255;
+      }
+      return array;
+    },
+  };
+}
 
 export {};
