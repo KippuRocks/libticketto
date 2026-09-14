@@ -176,6 +176,8 @@ function registryOver(state: State, assertOpen: () => void): Registry {
         recordedAt: append.recordedAt,
         event,
         entry: append.entry,
+        // LogAppend does not carry presentedAt yet; T-008-01's follow-up adds it.
+        presentedAt: null,
       };
       state.log.push(record);
       return record;

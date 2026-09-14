@@ -1510,8 +1510,10 @@ pass through free.
 | `ERR-OperationExpired` | A command submitted after its own expiry (`REQ-CM-1`) |
 | `ERR-InvalidAuthorisation` | A command whose authorisation does not verify, or does not come from a credential registered to the signing account (`REQ-CP-6`) |
 | `ERR-LedgerUnavailable` | The ledger could not be reached. Retryable, and carries no backend detail (`REQ-SDK-2`) |
+| `ERR-OperationConflict` | A command reusing an operation id already recorded for a different command (`REQ-CM-1`) |
+| `ERR-SponsorshipRefused` | The operation is outside every sponsorship entitlement (`REQ-SP-3`), or its sponsorship is missing or invalid. Not retryable |
 
-**Errors by where they arise.** Every error above is raised by the ledger's rules, except two groups. `ERR-UnknownClass` and `ERR-ClassQuotaExceeded` are **platform errors**: classes and their quotas never reach the ledger (`REQ-TC-2`), so Kippu raises them. `ERR-LedgerUnavailable` is raised by a backend binding that cannot reach its ledger. Neither group can be produced by a ledger, and `REQ-SDK-7` does not require it.
+**Errors by where they arise.** Every error above is raised by the ledger's rules, except two groups. `ERR-UnknownClass` and `ERR-ClassQuotaExceeded` are **platform errors**: classes and their quotas never reach the ledger (`REQ-TC-2`), so Kippu raises them. `ERR-LedgerUnavailable` is raised by a backend binding that cannot reach its ledger. `ERR-SponsorshipRefused` is raised by Kippu's sponsorship relay, or by a backend refusing a submission whose sponsorship is missing or invalid, before any rule runs. Neither group can be produced by a ledger, and `REQ-SDK-7` does not require it.
 
 ---
 

@@ -2,7 +2,7 @@
 // Design: features/002-sdk/plan.md in KippuRocks/kippu-docs.
 
 export type { Assurance, AssuranceDeclaration } from "./assurance.js";
-export type { Backend } from "./backend.js";
+export type { Backend, SubmitInput } from "./backend.js";
 export type {
   CredentialAccount,
   Profile,
@@ -14,6 +14,7 @@ export {
   type CommandInput,
   createTicketto,
   type Derived,
+  type PassPresentation,
   type Ticketto,
   type TickettoOptions,
 } from "./client.js";

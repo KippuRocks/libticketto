@@ -1,6 +1,6 @@
 /// <reference types="node" />
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 import {
   type AccountId,
   type AssuranceDeclaration,
@@ -16,6 +16,7 @@ import {
   INVARIANT_IDS,
   type OperationId,
   type PassId,
+  type PassPresentation,
   type Profile,
   type Receipt,
   type Result,
@@ -24,8 +25,11 @@ import {
   type Signer,
   type Sponsor,
   type Sponsorship,
+  type SubmitInput,
   type TicketId,
+  type Ticketto,
   type TickettoError,
+  type Timestamp,
   type ZoneId,
 } from "./index.js";
 
@@ -62,7 +66,7 @@ function signerFor(account: string): Signer & { payloads: Uint8Array[] } {
 }
 
 interface Submitted {
-  readonly input: SignedCommand | SignedAccessPass;
+  readonly input: SubmitInput;
   readonly sponsorship: Sponsorship | undefined;
 }
 
@@ -76,15 +80,18 @@ function fakeBackend() {
       submitted.push({ input, sponsorship });
       const { submission, submitted: accepted, settled, rejected } = createSubmission();
       const operationId =
-        "command" in input ? input.command.operationId : (input.pass.id as string as OperationId);
+        input.kind === "command"
+          ? input.signed.command.operationId
+          : (input.signed.pass.id as string as OperationId);
       queueMicrotask(() => {
         accepted(operationId);
-        if ("command" in input && input.command.kind === "createEvent") {
-          if (events.has(input.command.event)) {
+        if (input.kind === "command" && input.signed.command.kind === "createEvent") {
+          const { event } = input.signed.command;
+          if (events.has(event)) {
             rejected({ code: "ERR-EventIdExists" });
             return;
           }
-          events.add(input.command.event);
+          events.add(event);
         }
         position += 1;
         settled({ operationId, cursor: `c${position}` as Cursor });
@@ -123,8 +130,10 @@ function fakeSponsor(
 
 function commandAt(submitted: readonly Submitted[], index: number): Command {
   const entry = submitted[index];
-  if (entry === undefined || !("command" in entry.input)) throw new Error(`no command at ${index}`);
-  return entry.input.command;
+  if (entry === undefined || entry.input.kind !== "command") {
+    throw new Error(`no command at ${index}`);
+  }
+  return entry.input.signed.command;
 }
 
 function setup(options: { refusal?: TickettoError } = {}) {
@@ -160,6 +169,11 @@ function accessPass(): SignedAccessPass {
 
 const organiser = signerFor("organiser");
 const zone = { id: "z1" as ZoneId, kind: "Unseated" as const };
+const transferInput = {
+  event: "e" as EventId,
+  ticket: "t" as TicketId,
+  receiver: "friend" as AccountId,
+};
 const eventInput = {
   salt: encoder.encode("spring-gala"),
   zones: [zone],
@@ -178,7 +192,7 @@ describe("createTicketto (REQ-EV-9, REQ-CM-1, REQ-SP-1)", () => {
     expect(await first.submission).toMatchObject({ ok: true });
     expect(await replay.submission).toEqual({ ok: false, error: { code: "ERR-EventIdExists" } });
 
-    const commands = submitted.map((s) => (s.input as SignedCommand).command as CreateEvent);
+    const commands = submitted.map((_, index) => commandAt(submitted, index) as CreateEvent);
     expect(commands.map((c) => c.event)).toEqual([first.id, first.id]);
   });
 
@@ -196,7 +210,7 @@ describe("createTicketto (REQ-EV-9, REQ-CM-1, REQ-SP-1)", () => {
     await ticketto.setEventStatus(organiser, { event, status: "Sealed" });
     await ticketto.setEventCapacity(organiser, { event, capacity: 80, proof: null });
 
-    const envelopes = submitted.map((s) => (s.input as SignedCommand).command);
+    const envelopes = submitted.map((_, index) => commandAt(submitted, index));
     expect(envelopes.map((c) => c.expiresAt)).toEqual([121_000, 121_000, 121_000]);
     expect(envelopes.map((c) => c.operationId)).toEqual([
       "01".repeat(16),
@@ -227,7 +241,8 @@ describe("createTicketto (REQ-EV-9, REQ-CM-1, REQ-SP-1)", () => {
     expect(result.ok).toBe(true);
 
     const [sent] = submitted;
-    const signed = sent?.input as SignedCommand;
+    expect(sent?.input.kind).toBe("command");
+    const signed = sent?.input.signed as SignedCommand;
     expect(signer.payloads).toEqual([fakeProfile.encodeCommand(signed.command)]);
     expect(hex(signed.authorisation)).toBe(
       hex(encoder.encode(`signed-by:holder:${signer.payloads[0]?.length}`)),
@@ -296,17 +311,46 @@ describe("createTicketto (REQ-EV-9, REQ-CM-1, REQ-SP-1)", () => {
   it("REQ-SP-1: submits an access pass as it is, unsigned by anyone else, with the sponsor's sponsorship", async () => {
     const { ticketto, submitted, sponsor } = setup();
     const pass = accessPass();
-    expect(await ticketto.submitAccessPass(pass)).toEqual({
+    expect(await ticketto.submitAccessPass(pass, { presentedAt: 30_000 })).toEqual({
       ok: true,
       value: { operationId: "p1", cursor: "c1" },
     });
     expect(sponsor.sponsored).toEqual([pass]);
-    expect(submitted).toEqual([{ input: pass, sponsorship: encoder.encode("sponsored") }]);
+    expect(submitted).toEqual([
+      {
+        input: { kind: "pass", signed: pass, presentedAt: 30_000 },
+        sponsorship: encoder.encode("sponsored"),
+      },
+    ]);
+  });
+
+  it("REQ-AP-3: delivers the pass's presentedAt to the backend as given, not the client's clock", async () => {
+    const { ticketto, submitted } = setup();
+    await ticketto.submitAccessPass(accessPass(), { presentedAt: 42_000 });
+    const [sent] = submitted;
+    expect(sent?.input.kind === "pass" && sent.input.presentedAt).toBe(42_000);
+  });
+
+  it("requires presentedAt for an access pass, and offers no way to give a command one", () => {
+    expectTypeOf<Parameters<Ticketto["submitAccessPass"]>>().toEqualTypeOf<
+      [pass: SignedAccessPass, presentation: PassPresentation]
+    >();
+    expectTypeOf<PassPresentation["presentedAt"]>().toEqualTypeOf<Timestamp>();
+    // Type-level only: never called.
+    const misuse = (ticketto: Ticketto) => [
+      // @ts-expect-error — presentedAt is required.
+      ticketto.submitAccessPass(accessPass(), {}),
+      // @ts-expect-error — nor may the presentation be omitted.
+      ticketto.submitAccessPass(accessPass()),
+      // @ts-expect-error — a command's input has no presentedAt.
+      ticketto.transferTicket(organiser, { ...transferInput, presentedAt: 1 }),
+    ];
+    expect(misuse).toBeTypeOf("function");
   });
 
   it("REQ-SP-1: submits no access pass the sponsor refuses, and reports its error", async () => {
     const { ticketto, submitted } = setup({ refusal: { code: "ERR-LedgerUnavailable" } });
-    expect(await ticketto.submitAccessPass(accessPass())).toEqual({
+    expect(await ticketto.submitAccessPass(accessPass(), { presentedAt: 30_000 })).toEqual({
       ok: false,
       error: { code: "ERR-LedgerUnavailable" },
     });

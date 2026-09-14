@@ -25,6 +25,8 @@ describe("generated error codes (SPEC.md §10)", () => {
       "ERR-OperationExpired",
       "ERR-InvalidAuthorisation",
       "ERR-LedgerUnavailable",
+      "ERR-OperationConflict",
+      "ERR-SponsorshipRefused",
     ]) {
       expect(TICKETTO_ERROR_CODES).toContain(code);
     }
@@ -35,8 +37,9 @@ describe("generated error codes (SPEC.md §10)", () => {
     const by = (origin: string) =>
       TICKETTO_ERROR_CODES.filter((code) => TICKETTO_ERROR_ORIGINS[code] === origin).sort();
     expect(by("platform")).toEqual(["ERR-ClassQuotaExceeded", "ERR-UnknownClass"]);
-    expect(by("binding")).toEqual(["ERR-LedgerUnavailable"]);
-    expect(by("ledger")).toHaveLength(TICKETTO_ERROR_CODES.length - 3);
+    expect(by("binding")).toEqual(["ERR-LedgerUnavailable", "ERR-SponsorshipRefused"]);
+    expect(by("ledger")).toContain("ERR-OperationConflict");
+    expect(by("ledger")).toHaveLength(TICKETTO_ERROR_CODES.length - 4);
   });
 });
 

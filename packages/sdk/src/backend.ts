@@ -10,13 +10,28 @@ import type { SignedCommand } from "./capabilities.js";
 import type { Query, QueryResult, SignedAccessPass } from "./commands.js";
 import type { Sponsorship } from "./credentials.js";
 import type { Result } from "./errors.js";
+import type { Timestamp } from "./identifiers.js";
 import type { LogReader } from "./log.js";
 import type { Receipt, Submission } from "./submission.js";
 
+/**
+ * What crosses the port on a write: a signed command, or a signed access pass
+ * with the time it was presented at the gate. `presentedAt` is claimed by the
+ * submitter, and the rules bound it rather than trust it (`REQ-AP-3`); a
+ * command never carries one.
+ */
+export type SubmitInput =
+  | { readonly kind: "command"; readonly signed: SignedCommand }
+  | {
+      readonly kind: "pass";
+      readonly signed: SignedAccessPass;
+      readonly presentedAt: Timestamp;
+    };
+
 /** A ledger backend, as the SDK sees it. Swapping one changes nothing above this port (`REQ-SDK-1`). */
 export interface Backend {
-  /** Submits a signed command, or a signed access pass, with the sponsorship relaying it. */
-  submit(command: SignedCommand | SignedAccessPass, sponsorship?: Sponsorship): Submission<Receipt>;
+  /** Submits a signed command, or a signed access pass and when it was presented, with the sponsorship relaying it. */
+  submit(input: SubmitInput, sponsorship?: Sponsorship): Submission<Receipt>;
   /** Answers a point query (`REQ-MG-5`). */
   query<Q extends Query>(query: Q): Promise<Result<QueryResult<Q>>>;
   /** The deployment's log (`REQ-SDK-5`). */

@@ -90,6 +90,20 @@ describe("parseSpec", () => {
     });
   });
 
+  it("tags an error raised by Kippu or by a backend refusing a submission as binding", () => {
+    const surface = parseSpec(
+      minimal(
+        "| `ERR-A` | A |\n| `ERR-D` | D |",
+        "**Errors by where they arise.** Every error above is raised by the ledger's rules. " +
+          "`ERR-D` is raised by Kippu's relay, or by a backend refusing a submission.",
+      ),
+    );
+    expect(surface.errors.map((e) => [e.id, e.origin])).toEqual([
+      ["ERR-A", "ledger"],
+      ["ERR-D", "binding"],
+    ]);
+  });
+
   it("refuses a spec whose §10 has lost its note on where errors arise", () => {
     expect(() => parseSpec(minimal("| `ERR-A` | A |", ""))).toThrow(SpecParseError);
   });
@@ -107,6 +121,7 @@ describe("parseSpec", () => {
       ["ERR-ClassQuotaExceeded", "platform"],
       ["ERR-UnknownClass", "platform"],
       ["ERR-LedgerUnavailable", "binding"],
+      ["ERR-SponsorshipRefused", "binding"],
     ]);
     expect(surface.errors.map((e) => e.id)).not.toContain("ERR-BalanceLow");
     expect(surface.invariants.map((i) => i.id)).not.toContain("INV-9");
