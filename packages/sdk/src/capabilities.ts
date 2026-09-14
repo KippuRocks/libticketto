@@ -53,9 +53,10 @@ export interface Signer {
 }
 
 /**
- * Relays a signed command and bears whatever cost the ledger imposes on it
- * (`REQ-SP-1`, `AD-18` A). Holds no right to act for anyone (`REQ-SP-2`).
+ * Relays a signed command or a signed access pass and bears whatever cost the
+ * ledger imposes on it (`REQ-SP-1`, `AD-18` A). Holds no right to act for
+ * anyone (`REQ-SP-2`).
  */
 export interface Sponsor {
-  sponsor(command: SignedCommand): Promise<Result<Sponsorship>>;
+  sponsor(input: SignedCommand | SignedAccessPass): Promise<Result<Sponsorship>>;
 }

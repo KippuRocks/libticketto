@@ -39,7 +39,7 @@ export interface Derived<Id> {
 export interface TickettoOptions {
   readonly backend: Backend;
   readonly profile: Profile;
-  /** Relays and bears the cost of every signed command (`REQ-SP-1`). */
+  /** Relays and bears the cost of every signed command and access pass (`REQ-SP-1`). */
   readonly sponsor: Sponsor;
   /** How long an assembled command stays valid, in milliseconds (`AD-15`). */
   readonly operationLifetime: number;
@@ -65,7 +65,10 @@ export interface Ticketto {
     signer: Signer,
     input: CommandInput<"registerCredential">,
   ): Submission<Receipt>;
-  /** `US-E1`, `US-E3`. The pass carries its holder's authorisation; nobody else signs (`REQ-OP-2`). */
+  /**
+   * `US-E1`, `US-E3`. The pass carries its holder's authorisation; nobody else signs
+   * (`REQ-OP-2`). It is sponsored as a command is (`REQ-SP-1`).
+   */
   submitAccessPass(pass: SignedAccessPass): Submission<Receipt>;
 
   getEvent(event: EventId): Promise<Result<Event>>;
@@ -89,17 +92,24 @@ export function createTicketto(options: TickettoOptions): Ticketto {
     expiresAt: now() + operationLifetime,
   });
 
+  /** Sponsors a signed command or pass, then submits it with that sponsorship (`REQ-SP-1`). */
+  const relay = async (
+    signed: SignedCommand | SignedAccessPass,
+    controller: ReturnType<typeof createSubmission>,
+  ): Promise<void> => {
+    const sponsorship = await sponsor.sponsor(signed);
+    if (!sponsorship.ok) {
+      controller.rejected(sponsorship.error);
+      return;
+    }
+    await forward(backend.submit(signed, sponsorship.value), controller);
+  };
+
   const write = (signer: Signer, command: Command): Submission<Receipt> => {
     const controller = createSubmission();
     (async () => {
       const authorisation = await signer.sign(profile.encodeCommand(command));
-      const signed: SignedCommand = { command, authorisation };
-      const sponsorship = await sponsor.sponsor(signed);
-      if (!sponsorship.ok) {
-        controller.rejected(sponsorship.error);
-        return;
-      }
-      await forward(backend.submit(signed, sponsorship.value), controller);
+      await relay({ command, authorisation }, controller);
     })().catch((reason: unknown) => controller.failed(reason));
     return controller.submission;
   };
@@ -134,9 +144,7 @@ export function createTicketto(options: TickettoOptions): Ticketto {
       write(signer, { ...input, kind: "registerCredential", ...envelope() }),
     submitAccessPass(pass) {
       const controller = createSubmission();
-      forward(backend.submit(pass), controller).catch((reason: unknown) =>
-        controller.failed(reason),
-      );
+      relay(pass, controller).catch((reason: unknown) => controller.failed(reason));
       return controller.submission;
     },
 

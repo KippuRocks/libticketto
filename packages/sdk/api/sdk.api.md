@@ -448,7 +448,7 @@ export interface Signer {
 // @public
 export interface Sponsor {
     // (undocumented)
-    sponsor(command: SignedCommand): Promise<Result<Sponsorship>>;
+    sponsor(input: SignedCommand | SignedAccessPass): Promise<Result<Sponsorship>>;
 }
 
 // @public

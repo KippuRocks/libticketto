@@ -107,12 +107,14 @@ function fakeBackend() {
   return { backend, submitted };
 }
 
-function fakeSponsor(refusal?: TickettoError): Sponsor & { sponsored: SignedCommand[] } {
-  const sponsored: SignedCommand[] = [];
+function fakeSponsor(
+  refusal?: TickettoError,
+): Sponsor & { sponsored: (SignedCommand | SignedAccessPass)[] } {
+  const sponsored: (SignedCommand | SignedAccessPass)[] = [];
   return {
     sponsored,
-    async sponsor(command): Promise<Result<Sponsorship>> {
-      sponsored.push(command);
+    async sponsor(input): Promise<Result<Sponsorship>> {
+      sponsored.push(input);
       if (refusal !== undefined) return { ok: false, error: refusal };
       return { ok: true, value: encoder.encode("sponsored") as Sponsorship };
     },
@@ -141,6 +143,19 @@ function setup(options: { refusal?: TickettoError } = {}) {
     },
   });
   return { ticketto, submitted, sponsor };
+}
+
+function accessPass(): SignedAccessPass {
+  return {
+    pass: {
+      ticket: "t" as TicketId,
+      holder: "holder" as AccountId,
+      id: "p1" as PassId,
+      notBefore: 0,
+      notAfter: 60_000,
+    },
+    authorisation: encoder.encode("holder-signature") as Authorisation,
+  };
 }
 
 const organiser = signerFor("organiser");
@@ -278,24 +293,24 @@ describe("createTicketto (REQ-EV-9, REQ-CM-1, REQ-SP-1)", () => {
     expect(submitted).toEqual([]);
   });
 
-  it("submits an access pass as it is, unsigned by anyone else and unsponsored", async () => {
+  it("REQ-SP-1: submits an access pass as it is, unsigned by anyone else, with the sponsor's sponsorship", async () => {
     const { ticketto, submitted, sponsor } = setup();
-    const pass: SignedAccessPass = {
-      pass: {
-        ticket: "t" as TicketId,
-        holder: "holder" as AccountId,
-        id: "p1" as PassId,
-        notBefore: 0,
-        notAfter: 60_000,
-      },
-      authorisation: encoder.encode("holder-signature") as Authorisation,
-    };
+    const pass = accessPass();
     expect(await ticketto.submitAccessPass(pass)).toEqual({
       ok: true,
       value: { operationId: "p1", cursor: "c1" },
     });
-    expect(submitted).toEqual([{ input: pass, sponsorship: undefined }]);
-    expect(sponsor.sponsored).toEqual([]);
+    expect(sponsor.sponsored).toEqual([pass]);
+    expect(submitted).toEqual([{ input: pass, sponsorship: encoder.encode("sponsored") }]);
+  });
+
+  it("REQ-SP-1: submits no access pass the sponsor refuses, and reports its error", async () => {
+    const { ticketto, submitted } = setup({ refusal: { code: "ERR-LedgerUnavailable" } });
+    expect(await ticketto.submitAccessPass(accessPass())).toEqual({
+      ok: false,
+      error: { code: "ERR-LedgerUnavailable" },
+    });
+    expect(submitted).toEqual([]);
   });
 
   it("answers queries, the log and the assurance declaration through the backend", async () => {
