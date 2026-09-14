@@ -9,6 +9,7 @@ import type { SignedCommand } from "./capabilities.js";
 import type { Query, QueryResult, SignedAccessPass } from "./commands.js";
 import type { Sponsorship } from "./credentials.js";
 import type { Result } from "./errors.js";
+import type { LogReader } from "./log.js";
 import type { Receipt, Submission } from "./submission.js";
 
 /** A ledger backend, as the SDK sees it. Swapping one changes nothing above this port (`REQ-SDK-1`). */
@@ -17,4 +18,6 @@ export interface Backend {
   submit(command: SignedCommand | SignedAccessPass, sponsorship?: Sponsorship): Submission<Receipt>;
   /** Answers a point query (`REQ-MG-5`). */
   query<Q extends Query>(query: Q): Promise<Result<QueryResult<Q>>>;
+  /** The deployment's log (`REQ-SDK-5`). */
+  readonly log: LogReader;
 }

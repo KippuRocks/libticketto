@@ -5,6 +5,7 @@ import {
   type AccountId,
   type Authorisation,
   type Backend,
+  type Cursor,
   createSubmission,
   type EventId,
   type OperationId,
@@ -35,17 +36,24 @@ function scriptedBackend(latency: number, script: Script): Backend {
       if (script !== "settle-without-submitted") setTimeout(() => submitted(operationId), 0);
       setTimeout(() => {
         if (script === "reject") rejected(rejection);
-        else settled({ operationId });
+        else settled({ operationId, cursor: `after-${operationId}` as Cursor });
       }, latency);
       return submission;
     },
     async query() {
       return { ok: false, error: { code: "ERR-LedgerUnavailable" } };
     },
+    log: {
+      async read(from) {
+        return { ok: true, value: { records: [], next: from } };
+      },
+      async *hints() {},
+    },
   };
 }
 
 const operationId = "0f".repeat(16) as OperationId;
+const receipt: Receipt = { operationId, cursor: `after-${operationId}` as Cursor };
 const signed: SignedCommand = {
   command: {
     kind: "setEventStatus",
@@ -89,9 +97,9 @@ describe.each([
     await vi.runAllTimersAsync();
     const expected: SubmissionState[] = [
       { state: "submitted", operationId },
-      { state: "settled", receipt: { operationId } },
+      { state: "settled", receipt },
     ];
-    expect(result).toEqual({ ok: true, value: { operationId } });
+    expect(result).toEqual({ ok: true, value: receipt });
     expect(await submission).toEqual(result);
     expect(await early).toEqual(expected);
     expect(await collect(submission)).toEqual(expected);
@@ -104,7 +112,7 @@ describe.each([
     await vi.runAllTimersAsync();
     const expected: SubmissionState[] = [
       { state: "submitted", operationId },
-      { state: "settled", receipt: { operationId } },
+      { state: "settled", receipt },
     ];
     expect(await early).toEqual(expected);
     expect(await collect(submission)).toEqual(expected);
@@ -128,7 +136,7 @@ describe("createSubmission", () => {
   it("ends at the first terminal state and refuses later reports", () => {
     const controller = createSubmission();
     controller.rejected(rejection);
-    expect(() => controller.settled({ operationId })).toThrow(/already ended/);
+    expect(() => controller.settled(receipt)).toThrow(/already ended/);
     expect(() => controller.submitted(operationId)).toThrow(/already ended/);
   });
 
@@ -155,8 +163,8 @@ describe("createSubmission", () => {
       expect(state.state).toBe("submitted");
       break;
     }
-    controller.settled({ operationId });
-    expect(await controller.submission).toEqual({ ok: true, value: { operationId } });
+    controller.settled(receipt);
+    expect(await controller.submission).toEqual({ ok: true, value: receipt });
   });
 });
 

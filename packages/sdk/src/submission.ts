@@ -8,6 +8,7 @@
 
 import type { Result, TickettoError } from "./errors.js";
 import type { OperationId } from "./identifiers.js";
+import type { Cursor } from "./log.js";
 
 /**
  * What a backend returns once a write is recorded.
@@ -17,6 +18,11 @@ import type { OperationId } from "./identifiers.js";
  */
 export interface Receipt {
   readonly operationId: OperationId;
+  /**
+   * The log cursor of the record this write produced: once a reader of the log
+   * has read it, the reader reflects the write (`NFR-11`).
+   */
+  readonly cursor: Cursor;
 }
 
 /** One step of a write's completion. */
