@@ -29,9 +29,17 @@ export async function query<Q extends Query>(
         const ticket = await caps.registry.getTicket(q.ticket);
         return ticket === null ? err("ERR-TicketNotFound") : ok(publicTicket(ticket));
       }
-      case "canAttend":
-      case "getCancellationHolder":
-        throw new Error(`${q.kind} is not implemented yet (T-008-09)`);
+      case "canAttend": {
+        if ((await caps.registry.getEvent(q.event)) === null) return err("ERR-EventNotFound");
+        // A ticket of another event does not exist in the event named (INV-1, plan §5.7a).
+        const ticket = await caps.registry.getTicket(q.ticket);
+        if (ticket === null || ticket.event !== q.event) return err("ERR-TicketNotFound");
+        throw new Error("canAttend is not implemented yet (T-008-09)");
+      }
+      case "getCancellationHolder": {
+        if ((await caps.registry.getTicket(q.ticket)) === null) return err("ERR-TicketNotFound");
+        throw new Error("getCancellationHolder is not implemented yet (T-008-09)");
+      }
       default:
         throw new Error(`unknown query ${(q as Query).kind}`);
     }

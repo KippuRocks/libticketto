@@ -9,6 +9,7 @@ import type {
   EventId,
   ProofId,
   Registration,
+  Ticket,
   TicketId,
   Timestamp,
 } from "@ticketto/sdk";
@@ -67,6 +68,39 @@ export function commandOf(
       throw new Error(`no fixture for ${kind}`);
   }
 }
+
+/** A granted, unrestricted ticket of `event`, held by `holder`. */
+export function ticketIn(event: EventId, id: TicketId, holder: AccountId): Ticket {
+  return {
+    id,
+    event,
+    holder,
+    class: "01" as ClassId,
+    provenance: "Granted",
+    zone: zoneId(),
+    placement: { kind: "Unseated", discriminator: "0".repeat(32) as Discriminator },
+    policy: { kind: "Single" },
+    restrictions: { cannotResale: false, cannotTransfer: false },
+    attendances: 0,
+  };
+}
+
+/** Every command kind that names an existing event. */
+export const EXISTING_EVENT_COMMAND_KINDS: readonly CommandKind[] = [
+  "setEventStatus",
+  "setEventCapacity",
+  "addZone",
+  "removeZone",
+  "issueTicket",
+  "transferTicket",
+  "removeRestriction",
+];
+
+/** Every command kind that names an existing ticket. */
+export const EXISTING_TICKET_COMMAND_KINDS: readonly CommandKind[] = [
+  "transferTicket",
+  "removeRestriction",
+];
 
 /** Every command kind that names an event. */
 export const EVENT_COMMAND_KINDS: readonly CommandKind[] = [
