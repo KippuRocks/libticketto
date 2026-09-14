@@ -37,6 +37,7 @@ import type {
 } from "@ticketto/sdk";
 import type { Capabilities, Registry } from "./capabilities.js";
 import { createEvent } from "./commands/create-event.js";
+import { issueTicket } from "./commands/issue-ticket.js";
 import { addZone, removeZone } from "./commands/zones.js";
 import type { CommandHandler, CommandHandlers } from "./handler.js";
 import { err, ok } from "./result.js";
@@ -204,7 +205,7 @@ export const handlers: CommandHandlers = {
   setEventCapacity: notImplemented("setEventCapacity", "T-008-05"),
   addZone,
   removeZone,
-  issueTicket: notImplemented("issueTicket", "T-008-07"),
+  issueTicket,
   transferTicket: notImplemented("transferTicket", "T-008-08"),
   removeRestriction: notImplemented("removeRestriction", "T-008-12"),
   registerCredential: notImplemented("registerCredential", "T-008-14"),
