@@ -22,17 +22,20 @@
       "types": "./dist/testing/index.d.ts",
       "default": "./dist/testing/index.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./vectors/v0.json": "./vectors/v0.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "vectors"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json && tsc -p test/hermes/tsconfig.json",
     "test:hermes": "node test/hermes/run.ts",
     "bench": "BENCH=1 vitest run --root . --silent=false --reporter=verbose src/pass.bench.test.ts",
-    "bench:hermes": "node test/hermes/run.ts bench"
+    "bench:hermes": "node test/hermes/run.ts bench",
+    "vectors:generate": "TICKETTO_WRITE_VECTORS=1 vitest run --root . src/vectors.test.ts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",

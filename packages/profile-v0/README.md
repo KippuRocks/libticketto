@@ -144,6 +144,27 @@ compiles them with the `hermesc` React Native ships, and executes the bytecode
 on a VM built from the same `facebook/hermes` release. CI does the same in the
 `Hermes run` job.
 
+## Test vectors (`C2`)
+
+`vectors/v0.json` is the contract: identifiers (holder and `p256` accounts,
+device ids, `EventId`, `TicketId`), credential registrations, two commands of
+every kind with their bytes, valid and invalid authorisations, signed passes
+with their expected verdict, and malformed inputs. It ships in the package
+(`@ticketto/profile-v0/vectors/v0.json`); `binding-offchain`, `ticketto-offchain`
+and any other implementation must reproduce every vector. Byte strings are
+lower-case hex.
+
+The file is generated from seeded inputs by `test/vectors/vectors.ts`:
+
+```sh
+pnpm --filter @ticketto/profile-v0 vectors:generate
+```
+
+`pnpm test` and the Hermes run check that the file is exactly what the current
+code generates, and reproduce each vector from its inputs, so a codec change
+without regenerated vectors fails CI. After `M0`, changing a vector is a profile
+revision and needs `features/003-profile-v0/plan.md` updated (plan §6).
+
 ## Benchmarks
 
 `test/bench/pass.bench.ts` measures the presented size, QR version (byte mode,

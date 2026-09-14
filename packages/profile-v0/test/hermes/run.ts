@@ -13,7 +13,7 @@
 // (benchmark results) is written to stdout unchanged.
 
 import { execFile } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
@@ -48,6 +48,16 @@ function hermesVm(): string {
   return vm;
 }
 
+const VECTORS_MODULE = "ticketto-vectors";
+
+/** Writes the vectors module before Metro crawls the file system, and returns its path. */
+function writeVectorsModule(): string {
+  const path = join(outDir, "vectors-data.js");
+  const json = readFileSync(join(packageRoot, "vectors", "v0.json"), "utf8");
+  writeFileSync(path, `globalThis.__TICKETTO_VECTORS__ = ${json.trim()};\n`);
+  return path;
+}
+
 async function bundle(entryName: string): Promise<string> {
   const entry = join(hermesDir, `${entryName}.ts`);
   const out = join(outDir, `${entryName}.js`);
@@ -60,6 +70,9 @@ async function bundle(entryName: string): Promise<string> {
         nodeModulesPaths: [join(packageRoot, "node_modules")],
         // Sources import siblings as `./x.js` (Node ESM resolution); the file is `x.ts`.
         resolveRequest: (context, moduleName, platform) => {
+          // The checked-in C2 vectors, as a module that publishes them on globalThis.
+          if (moduleName === VECTORS_MODULE)
+            return { type: "sourceFile", filePath: join(outDir, "vectors-data.js") };
           if (moduleName.startsWith(".") && moduleName.endsWith(".js")) {
             const candidate = resolve(
               dirname(context.originModulePath),
@@ -85,6 +98,7 @@ async function main(): Promise<void> {
   rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });
 
+  writeVectorsModule();
   const source = await bundle(entryName);
   const bytecode = source.replace(/\.js$/, ".hbc");
   await run(hermesc(), ["-emit-binary", "-O", "-out", bytecode, source]);
