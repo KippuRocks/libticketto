@@ -4,13 +4,41 @@ The ledger's rules — commands, invariants and errors — implemented once over
 
 Contract `C3`. Owned by `F-008`.
 
-**Status:** the `C3` capability interfaces are declared (`T-008-01`). No command
-handler is implemented yet.
+**Status:** the `C3` capability interfaces are declared (`T-008-01`), and
+`execute` runs the checks every signed command passes (`T-008-02`). Command
+handlers, access passes, `canAttend` and `getCancellationHolder` follow.
 
 | | |
 |---|---|
 | Runs on | Node 24, React Native (Hermes) |
-| May depend on | `sdk` (types) and `profile-v0`. Must never depend on a backend, nor perform I/O. |
+| May depend on | `sdk` (types) and `profile-v0` (the operation digest). Must never depend on a backend, nor perform I/O. |
+
+## Executing an input
+
+```ts
+import { execute, query } from "@ticketto/ledger-rules";
+
+const result = await execute(caps, profile, signedCommand); // Result<Receipt>
+const event = await query(caps, profile, { kind: "getEvent", event: id });
+```
+
+`execute` runs the whole input in one `caps.transaction`. Every signed command
+passes, in this order (plan §5.2):
+
+1. Its envelope has not expired → `ERR-OperationExpired`.
+2. Its operation id is not recorded. An identical replay — same id, same digest
+   of the profile's signed-input framing — returns the original receipt and
+   changes nothing; the same id with a different input is
+   `ERR-OperationConflict` (`REQ-CM-1`).
+3. Its authorisation verifies, over `profile.encodeCommand(command)`, against a
+   credential registered to the account it claims → `ERR-InvalidAuthorisation`
+   (`REQ-CP-6`).
+4. The event it names is not `Finished` → `ERR-EventFinished` (`INV-16`).
+5. The command's own checks.
+
+An accepted command's writes, its log record (carrying the signed input) and its
+operation record commit together. A rejected command writes nothing. A defect —
+something no rule can judge — throws, and the transaction rolls back.
 
 ## Capabilities (`C3`)
 
