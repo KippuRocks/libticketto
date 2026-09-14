@@ -118,6 +118,21 @@ compiles them with the `hermesc` React Native ships, and executes the bytecode
 on a VM built from the same `facebook/hermes` release. CI does the same in the
 `Hermes run` job.
 
+## Benchmarks
+
+`test/bench/pass.bench.ts` measures the presented size, QR version (byte mode,
+level M) and verification time of a signed pass, for `pass-webauthn` and, for
+comparison, `ed25519` (`NFR-1`, `AD-10`, `AD-23`):
+
+```sh
+pnpm --filter @ticketto/profile-v0 bench                       # Node
+HERMES_VM=… pnpm --filter @ticketto/profile-v0 bench:hermes    # Hermes
+```
+
+CI prints both in the `Hermes run` job. These are Node and Hermes numbers on
+development and CI machines only: the reference-device measurement `AD-23`
+requires has not been made.
+
 Part of [libticketto](../../README.md). Behaviour is specified in `SPEC.md` and
 the package's design in `PLAN.md` and `features/`, in
 [`kippurocks/kippu-docs`](https://github.com/KippuRocks/kippu-docs).

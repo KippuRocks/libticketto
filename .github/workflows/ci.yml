@@ -86,6 +86,13 @@ jobs:
           fi
           packages/profile-v0/test/hermes/build-vm.sh ~/.cache/hermes-vm
       - run: HERMES_VM="$HOME/.cache/hermes-vm/bin/hermes" pnpm --filter @ticketto/profile-v0 test:hermes
+      # T-003-09: pass size and verification time on Node and Hermes, printed
+      # for the benchmark report. Informational; a pass that fails to verify fails.
+      - name: Pass benchmark (Node, Hermes)
+        run: |
+          set -o pipefail
+          pnpm --filter @ticketto/profile-v0 bench | grep -o 'BENCH {.*'
+          HERMES_VM="$HOME/.cache/hermes-vm/bin/hermes" pnpm --filter @ticketto/profile-v0 bench:hermes | grep -o 'BENCH {.*'
 
   canary:
     # T-001-07: a Changesets snapshot of every @ticketto/* package, packed with
