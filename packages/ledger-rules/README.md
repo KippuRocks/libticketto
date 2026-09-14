@@ -13,6 +13,7 @@ runs the checks every signed command passes (`T-008-02`, `T-008-13`).
 | `addZone`, `removeZone` | Implemented (`T-008-06`) |
 | `issueTicket` | Implemented (`T-008-07`) |
 | `registerCredential` | Implemented (`T-008-14`) |
+| Queries: `getEvent`, `getTicket`, `getCredential` | Implemented (`T-008-02`, `T-008-15`) |
 | Every other command, access passes, `canAttend`, `getCancellationHolder` | Not yet — each throws until its task lands |
 
 | | |
