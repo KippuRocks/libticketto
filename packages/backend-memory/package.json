@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@ticketto/ledger-rules": "workspace:*",
+    "@ticketto/log": "workspace:*",
     "@ticketto/sdk": "workspace:*"
   },
   "devDependencies": {

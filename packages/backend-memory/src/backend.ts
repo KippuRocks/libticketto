@@ -7,11 +7,10 @@
 // only because settlement is immediate fails against this backend too, not
 // first against the network (NFR-9).
 
-import { type Capabilities, type Clock, execute, query } from "@ticketto/ledger-rules";
+import { type Clock, execute, query } from "@ticketto/ledger-rules";
 import {
   type Backend,
   createSubmission,
-  type LogReader,
   type OperationId,
   type Profile,
   type Query,
@@ -22,7 +21,8 @@ import {
   type SubmitInput,
 } from "@ticketto/sdk";
 import { MEMORY_ASSURANCE } from "./assurance.js";
-import { createMemoryCapabilities } from "./capabilities.js";
+import { createMemoryStore, type MemoryStore } from "./capabilities.js";
+import { createLogReader } from "./log.js";
 
 /** Options for {@link createMemoryBackend}. */
 export interface MemoryBackendOptions {
@@ -48,22 +48,15 @@ function operationIdOf(input: SubmitInput): OperationId {
  */
 export function createMemoryBackend(options: MemoryBackendOptions): Backend {
   const { profile, clock } = options;
-  return backendOver(createMemoryCapabilities(clock === undefined ? {} : { clock }), profile);
+  return backendOver(createMemoryStore(clock === undefined ? {} : { clock }), profile);
 }
 
 /**
- * The port over given capabilities. Not exported from the package: whoever
- * holds the capabilities can write ledger state around the rules (`REQ-SDK-9`).
+ * The port over a given store. Not exported from the package: whoever holds the
+ * store's capabilities can write ledger state around the rules (`REQ-SDK-9`).
  */
-export function backendOver(caps: Capabilities, profile: Profile): Backend {
-  const log: LogReader = {
-    read: async () => {
-      throw new Error("the in-memory log reader is not implemented yet (T-005-03)");
-    },
-    hints: () => {
-      throw new Error("the in-memory log hints are not implemented yet (T-005-03)");
-    },
-  };
+export function backendOver(store: MemoryStore, profile: Profile): Backend {
+  const caps = store.capabilities;
 
   return {
     submit(input: SubmitInput): Submission<Receipt> {
@@ -86,7 +79,7 @@ export function backendOver(caps: Capabilities, profile: Profile): Backend {
       return query(caps, profile, q);
     },
 
-    log,
+    log: createLogReader(store),
 
     assurance: MEMORY_ASSURANCE,
   };

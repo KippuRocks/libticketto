@@ -7,7 +7,7 @@
 import type { Clock } from "@ticketto/ledger-rules";
 import type { Backend, Profile, Timestamp } from "@ticketto/sdk";
 import { backendOver } from "../backend.js";
-import { createMemoryCapabilities } from "../capabilities.js";
+import { createMemoryStore } from "../capabilities.js";
 
 /** A clock a test moves by hand. It never moves backwards: the ledger's clock is monotonic (`REQ-SDK-3`). */
 export interface ControlledClock extends Clock {
@@ -98,7 +98,7 @@ export function seededRandomBytes(seed = 0): (length: number) => Uint8Array {
 /** A fresh, empty in-memory backend under test controls. */
 export function createTestMemoryBackend(options: TestMemoryBackendOptions): TestMemoryBackend {
   const clock = createControlledClock(options.start);
-  const backend = backendOver(createMemoryCapabilities({ clock }), options.profile);
+  const backend = backendOver(createMemoryStore({ clock }), options.profile);
   return {
     submit: (input, sponsorship) => backend.submit(input, sponsorship),
     query: (q) => backend.query(q),

@@ -19,7 +19,7 @@ import {
 } from "@ticketto/sdk";
 import { describe, expect, it } from "vitest";
 import { backendOver } from "./backend.js";
-import { createMemoryCapabilities } from "./capabilities.js";
+import { createMemoryStore } from "./capabilities.js";
 import { createMemoryBackend } from "./index.js";
 
 const profile = createProfileV0({ rpId: "backend-memory.ticketto.test" });
@@ -57,7 +57,8 @@ const ticketId = "33".repeat(32) as TicketId;
 
 describe("in-memory backend: the C8 port", () => {
   it("REQ-SDK-1: createTicketto creates an event end to end", async () => {
-    const caps = createMemoryCapabilities({ clock: { now: () => 1_000 } });
+    const store = createMemoryStore({ clock: { now: () => 1_000 } });
+    const caps = store.capabilities;
     // The organiser's credential, registered as the ledger records one (REQ-CP-6).
     const claimed = profile.registrationAccount(organiser.registration);
     if (!claimed.ok) throw new Error(claimed.error.code);
@@ -65,7 +66,7 @@ describe("in-memory backend: the C8 port", () => {
       credential: claimed.value.credential,
       registration: organiser.registration,
     });
-    const ticketto = clientOver(backendOver(caps, profile));
+    const ticketto = clientOver(backendOver(store, profile));
 
     const { id, submission } = ticketto.createEvent(organiser.signer, {
       salt: new Uint8Array(32).fill(1),
@@ -198,15 +199,15 @@ describe("in-memory backend: the C8 port", () => {
   });
 
   it("fails a submission, loudly, when the rules or the store throw", async () => {
-    const caps = createMemoryCapabilities({ clock: { now: () => 1_000 } });
+    const store = createMemoryStore({ clock: { now: () => 1_000 } });
     const defect = new Error("the store broke");
     const broken: Capabilities = {
-      ...caps,
+      ...store.capabilities,
       transaction: async () => {
         throw defect;
       },
     };
-    const ticketto = clientOver(backendOver(broken, profile));
+    const ticketto = clientOver(backendOver({ ...store, capabilities: broken }, profile));
     const { submission } = ticketto.createEvent(organiser.signer, {
       salt: new Uint8Array(32),
       zones: [zone],

@@ -5,9 +5,10 @@ The in-memory reference backend, independent of the hosted one, and the slow-bac
 Owned by `F-005`. Serves `REQ-MG-1`.
 
 **Status:** the in-memory `C3` capabilities (`T-005-01`), the `C8` port over
-`ledger-rules` (`T-005-02`), the assurance declaration (`T-005-04`) and the test
-controls (`T-005-05`) are implemented. The log reader, export and the slow
-decorator are not yet: the log reader throws until its task lands.
+`ledger-rules` (`T-005-02`), log production and the log reader
+(`T-005-03`), the assurance declaration (`T-005-04`) and the test controls
+(`T-005-05`) are implemented. Export and import, and the slow decorator, are not
+yet.
 
 ## Backend (`C8`)
 
@@ -18,6 +19,7 @@ process, over fresh in-memory capabilities (`AD-25`):
 |---|---|
 | `submit` | Reports `submitted` before it returns — with the command's operation id, or a pass's id — and settles only on a later microtask, never synchronously (plan §5.2, `NFR-9`). A §10 error from the rules rejects the submission; a defect fails it |
 | `query` | The rules' point queries |
+| `log` | `read(from, limit)` returns the records after a cursor in the total order; a cursor this log never issued, or a limit that is not a positive integer, throws. `hints()` yields the current head on subscribing, then the latest head after each commit that moves it, coalesced — cursors only, never records, as the hosted service's hint stream (`AD-17`) |
 | `assurance` | `SPEC.md` §4.4's hosted column, and never more (plan §5.3): `INV-6` and `INV-7` enforced by the single in-process authority; every other invariant attested |
 
 A sponsorship is accepted and not verified: that is the hosted ledger service's
@@ -34,6 +36,9 @@ concern (`F-010`).
 | `registry` | Outside a transaction, reads see the committed state and each write is a transaction of its own |
 | `clock` | The clock given, or the system clock held monotonic |
 
+Every log append is linked onto `@ticketto/log`'s hash chain (`C7`) inside its
+transaction; the chain's head moves only when the transaction commits, and an
+input the log cannot carry (`NFR-6`) throws, rolling the transaction back.
 Nothing is persisted, and nothing past its retention is forgotten.
 
 | | |
