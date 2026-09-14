@@ -54,6 +54,17 @@ export {
   p256AccountId,
   ticketId,
 } from "./derive.js";
+export {
+  type Clock,
+  DEFAULT_PASS_WINDOW,
+  decodePass,
+  encodePass,
+  encodeSignedPass,
+  PASS_LENGTH,
+  type PassRequest,
+  producePass,
+  verifyPass,
+} from "./pass.js";
 export { codecs };
 
 export const packageName = "@ticketto/profile-v0";

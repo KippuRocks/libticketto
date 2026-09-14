@@ -32,6 +32,13 @@ describe("@ticketto/profile-v0", () => {
     expect(Object.keys(profile).some((name) => /simulated/i.test(name))).toBe(false);
   });
 
+  it("exports the access pass codec, production and verification", () => {
+    expect(profile.PASS_LENGTH).toBe(97);
+    expect(profile.DEFAULT_PASS_WINDOW).toBe(60_000);
+    expect(typeof profile.producePass).toBe("function");
+    expect(typeof profile.verifyPass).toBe("function");
+  });
+
   it("exports identifier derivation", () => {
     expect(typeof profile.eventId).toBe("function");
     expect(typeof profile.ticketId).toBe("function");

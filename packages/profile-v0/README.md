@@ -75,11 +75,28 @@ accepted for an account only through a command authorised under `REQ-CP-6`.
 `p256` signatures are `r ‖ s` with low S; `normaliseP256Signature` turns a DER signature
 (as a KMS returns) into that form. A high-S signature is refused.
 
+## Access passes
+
+```
+AccessPass       = version u8, ticket [u8;32], holder [u8;32], passId [u8;16],
+                   notBefore u64, notAfter u64                  (97 bytes)
+SignedAccessPass = pass, authorisation (length-prefixed bytes)
+```
+
+`producePass` is a pure function plus a `Signer`, with no network (`NFR-3`); the
+window defaults to 60 s (`NFR-5`). `verifyPass` checks that the authorisation
+comes from the pass's holder account through the given registration, that the
+signature verifies, and that the supplied clock is inside `[notBefore, notAfter]`:
+`ERR-InvalidPass` or `ERR-PassExpired` otherwise. Whether the holder still holds
+the ticket, and whether the pass was already consumed, are the ledger rules'.
+
 ## Runtime requirements
 
 `scale-ts` constructs a `TextDecoder` when it is imported. Hermes does not
 provide one, so a React Native app must install a `TextDecoder` polyfill before
-importing this package, as apps using `polkadot-api` already do.
+importing this package, as apps using `polkadot-api` already do. `producePass`'s
+default pass id uses `crypto.getRandomValues`, which React Native apps provide
+through a native module such as `react-native-get-random-values`.
 
 ## Tests
 
