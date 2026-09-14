@@ -1,0 +1,30 @@
+{
+  "name": "@ticketto/sdk",
+  "version": "0.0.0",
+  "description": "The Ticketto SDK surface: commands, queries, errors, write completion, the log reader, and the backend port.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KippuRocks/libticketto.git",
+    "directory": "packages/sdk"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}

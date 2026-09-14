@@ -1,0 +1,30 @@
+{
+  "name": "@ticketto/rx",
+  "version": "0.0.0",
+  "description": "Optional RxJS adapter exposing SDK write completion as an Observable, so the SDK itself never depends on RxJS.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KippuRocks/libticketto.git",
+    "directory": "packages/rx"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json"
+  }
+}
