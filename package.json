@@ -27,7 +27,8 @@
     "version-packages": "changeset version",
     "release": "pnpm build && changeset publish",
     "canary": "pnpm --filter @libticketto/canary canary",
-    "conformance-matrix": "node tools/conformance-matrix/dist/cli.js"
+    "conformance-matrix": "node tools/conformance-matrix/dist/cli.js",
+    "trace": "node tools/trace/dist/cli.js"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.13",

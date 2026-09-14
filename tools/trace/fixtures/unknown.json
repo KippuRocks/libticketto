@@ -1,0 +1,13 @@
+{
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [],
+          "title": "INV-99: an invariant the spec never defined",
+          "status": "passed"
+        }
+      ]
+    }
+  ]
+}
