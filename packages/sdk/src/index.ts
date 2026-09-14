@@ -1,6 +1,7 @@
 // @ticketto/sdk — the Ticketto SDK surface (C1) and backend port (C8).
 // Design: features/002-sdk/plan.md in KippuRocks/kippu-docs.
 
+export type { Backend } from "./backend.js";
 export type {
   CredentialAccount,
   Profile,
@@ -70,5 +71,13 @@ export type {
   Timestamp,
   ZoneId,
 } from "./identifiers.js";
+
+export {
+  createSubmission,
+  type Receipt,
+  type Submission,
+  type SubmissionController,
+  type SubmissionState,
+} from "./submission.js";
 
 export const packageName = "@ticketto/sdk";
