@@ -144,6 +144,16 @@ importers:
         specifier: 24.13.4
         version: 24.13.4
 
+  tools/switch-default:
+    dependencies:
+      oxc-parser:
+        specifier: 0.149.0
+        version: 0.149.0
+    devDependencies:
+      '@types/node':
+        specifier: 24.13.4
+        version: 24.13.4
+
 packages:
 
   '@babel/code-frame@7.29.7':

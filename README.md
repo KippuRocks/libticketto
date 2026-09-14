@@ -37,6 +37,7 @@ pnpm build        # every package, in dependency order
 pnpm typecheck
 pnpm lint         # Biome: lint and formatting, read-only
 pnpm format       # Biome: apply safe fixes and formatting
+pnpm lint:switches  # no default-less switch over Command or TickettoErrorCode (tools/switch-default)
 pnpm test         # Vitest: every package and tool, plus workspace checks (build first)
 pnpm boundaries   # package dependency rules (tools/boundaries)
 pnpm spec:check   # generated SDK error codes and invariant ids match spec/SPEC.md (tools/spec-codegen)

@@ -13,6 +13,7 @@
     "build": "pnpm -r build",
     "typecheck": "tsc -p tsconfig.json && pnpm -r typecheck",
     "lint": "biome ci .",
+    "lint:switches": "node tools/switch-default/dist/cli.js",
     "format": "biome check --write .",
     "test": "vitest run",
     "boundaries": "node tools/boundaries/dist/cli.js",
