@@ -7,8 +7,10 @@ import type {
   ClassId,
   Command,
   CommandKind,
+  CredentialId,
   Event,
   EventId,
+  GetCredential,
   IssueTicket,
   OperationEnvelope,
   OperationId,
@@ -122,11 +124,27 @@ describe("queries (plan §5.5)", () => {
     expectTypeOf<
       QueryResult<{ kind: "getCancellationHolder"; ticket: TicketId }>
     >().toEqualTypeOf<AccountId | null>();
+    expectTypeOf<
+      QueryResult<{ kind: "getCredential"; account: AccountId; credential: CredentialId }>
+    >().toEqualTypeOf<Registration | null>();
+  });
+
+  it("looks a credential up by account and credential id, and answers opaque bytes (REQ-CP-6)", () => {
+    expectTypeOf<keyof GetCredential>().toEqualTypeOf<"kind" | "account" | "credential">();
+    expectTypeOf<GetCredential["account"]>().toEqualTypeOf<AccountId>();
+    expectTypeOf<GetCredential["credential"]>().toEqualTypeOf<CredentialId>();
+    const confused: GetCredential = {
+      kind: "getCredential",
+      account: "a" as AccountId,
+      // @ts-expect-error — an account id is not a credential id.
+      credential: "a" as AccountId,
+    };
+    expect(confused).toBeDefined();
   });
 
   it("offers point lookups only — nothing enumerates (REQ-MG-5)", () => {
     expectTypeOf<Query["kind"]>().toEqualTypeOf<
-      "getEvent" | "getTicket" | "canAttend" | "getCancellationHolder"
+      "getEvent" | "getTicket" | "canAttend" | "getCancellationHolder" | "getCredential"
     >();
   });
 

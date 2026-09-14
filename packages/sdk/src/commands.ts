@@ -10,7 +10,7 @@
 // pass itself carries its holder's authorisation (REQ-OP-2). It is submitted as
 // a `SignedAccessPass`.
 
-import type { Authorisation, Registration } from "./credentials.js";
+import type { Authorisation, CredentialId, Registration } from "./credentials.js";
 import type {
   AttendancePolicy,
   Event,
@@ -209,8 +209,19 @@ export interface GetCancellationHolder {
   readonly ticket: TicketId;
 }
 
+/**
+ * The registration of one credential registered to an account (`REQ-CP-6`). A
+ * verifier other than the ledger reads it here to check a holder's proof of
+ * control: a registration obtained from anywhere else proves nothing.
+ */
+export interface GetCredential {
+  readonly kind: "getCredential";
+  readonly account: AccountId;
+  readonly credential: CredentialId;
+}
+
 /** Every V0 query. Point lookups only: nothing enumerates (`REQ-MG-5`). */
-export type Query = GetEvent | GetTicket | CanAttend | GetCancellationHolder;
+export type Query = GetEvent | GetTicket | CanAttend | GetCancellationHolder | GetCredential;
 
 /** What each query kind answers. */
 export interface QueryResults {
@@ -219,6 +230,8 @@ export interface QueryResults {
   readonly canAttend: AttendanceVerdict;
   /** `null` while no holder has been fixed — the ticket's event is not `Cancelled`. */
   readonly getCancellationHolder: AccountId | null;
+  /** `null` when the credential is not registered to the account, or the account does not exist. */
+  readonly getCredential: Registration | null;
 }
 
 /** The answer to query `Q`. */

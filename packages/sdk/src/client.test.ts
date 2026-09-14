@@ -9,6 +9,7 @@ import {
   type ClassId,
   type Command,
   type CreateEvent,
+  type CredentialId,
   type Cursor,
   createSubmission,
   createTicketto,
@@ -18,7 +19,9 @@ import {
   type PassId,
   type PassPresentation,
   type Profile,
+  type Query,
   type Receipt,
+  type Registration,
   type Result,
   type SignedAccessPass,
   type SignedCommand,
@@ -73,6 +76,7 @@ interface Submitted {
 /** Records submissions; refuses a second event with an existing id, as the authority would. */
 function fakeBackend() {
   const submitted: Submitted[] = [];
+  const queried: Query[] = [];
   const events = new Set<EventId>();
   let position = 0;
   const backend: Backend = {
@@ -99,6 +103,7 @@ function fakeBackend() {
       return submission;
     },
     async query(query) {
+      queried.push(query);
       return { ok: false, error: { code: "ERR-EventNotFound", detail: query.kind } };
     },
     log: {
@@ -111,7 +116,7 @@ function fakeBackend() {
       INVARIANT_IDS.map((id) => [id, "attested"]),
     ) as AssuranceDeclaration,
   };
-  return { backend, submitted };
+  return { backend, submitted, queried };
 }
 
 function fakeSponsor(
@@ -357,6 +362,35 @@ describe("createTicketto (REQ-EV-9, REQ-CM-1, REQ-SP-1)", () => {
     expect(submitted).toEqual([]);
   });
 
+  it("REQ-CP-6: asks the backend for a credential's registration, and returns it or null", async () => {
+    const { backend, queried } = fakeBackend();
+    const registration = encoder.encode("registration") as Registration;
+    const ticketto = createTicketto({
+      backend: {
+        ...backend,
+        async query(query) {
+          queried.push(query);
+          if (query.kind !== "getCredential") return backend.query(query);
+          const found = query.account === "holder" && query.credential === "device";
+          return { ok: true, value: found ? registration : null } as never;
+        },
+      },
+      profile: fakeProfile,
+      sponsor: fakeSponsor(),
+      operationLifetime: 120_000,
+    });
+
+    const known = await ticketto.getCredential("holder" as AccountId, "device" as CredentialId);
+    const unknown = await ticketto.getCredential("holder" as AccountId, "other" as CredentialId);
+    expect(known).toEqual({ ok: true, value: registration });
+    expect(unknown).toEqual({ ok: true, value: null });
+    expect(queried).toEqual([
+      { kind: "getCredential", account: "holder", credential: "device" },
+      { kind: "getCredential", account: "holder", credential: "other" },
+    ]);
+    expectTypeOf(known).toEqualTypeOf<Result<Registration | null>>();
+  });
+
   it("answers queries, the log and the assurance declaration through the backend", async () => {
     const { ticketto } = setup();
     expect(await ticketto.getEvent("e" as EventId)).toEqual({
@@ -366,6 +400,9 @@ describe("createTicketto (REQ-EV-9, REQ-CM-1, REQ-SP-1)", () => {
     expect(await ticketto.canAttend("e" as EventId, "t" as TicketId)).toMatchObject({ ok: false });
     expect(await ticketto.getTicket("t" as TicketId)).toMatchObject({ ok: false });
     expect(await ticketto.getCancellationHolder("t" as TicketId)).toMatchObject({ ok: false });
+    expect(
+      await ticketto.getCredential("holder" as AccountId, "device" as CredentialId),
+    ).toMatchObject({ ok: false });
     expect(Object.keys(ticketto.assurance())).toHaveLength(INVARIANT_IDS.length);
     expect(await ticketto.log.read("" as Cursor, 10)).toEqual({
       ok: true,

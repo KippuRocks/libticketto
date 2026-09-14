@@ -15,6 +15,7 @@ import type {
   OperationEnvelope,
   SignedAccessPass,
 } from "./commands.js";
+import type { CredentialId, Registration } from "./credentials.js";
 import type { Event, Ticket } from "./domain.js";
 import type { Result } from "./errors.js";
 import type { AccountId, EventId, OperationId, TicketId, Timestamp } from "./identifiers.js";
@@ -82,6 +83,12 @@ export interface Ticketto {
   getTicket(ticket: TicketId): Promise<Result<Ticket>>;
   canAttend(event: EventId, ticket: TicketId): Promise<Result<AttendanceVerdict>>;
   getCancellationHolder(ticket: TicketId): Promise<Result<AccountId | null>>;
+  /**
+   * The registration of `credential`, if it is registered to `account`; `null`
+   * otherwise (`REQ-CP-6`). What a verifier checks a holder's proof of control
+   * against (`REQ-SP-4`).
+   */
+  getCredential(account: AccountId, credential: CredentialId): Promise<Result<Registration | null>>;
   assurance(): AssuranceDeclaration;
   readonly log: LogReader;
 }
@@ -161,6 +168,8 @@ export function createTicketto(options: TickettoOptions): Ticketto {
     getTicket: (ticket) => backend.query({ kind: "getTicket", ticket }),
     canAttend: (event, ticket) => backend.query({ kind: "canAttend", event, ticket }),
     getCancellationHolder: (ticket) => backend.query({ kind: "getCancellationHolder", ticket }),
+    getCredential: (account, credential) =>
+      backend.query({ kind: "getCredential", account, credential }),
     assurance: () => backend.assurance,
     log: backend.log,
   };
