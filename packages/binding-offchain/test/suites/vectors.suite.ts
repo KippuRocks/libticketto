@@ -168,10 +168,7 @@ function responseText(response: Exclude<Exchange["response"], { transport: strin
 }
 
 /** The surface form of a client outcome, as the vectors' `binding` column spells it. */
-async function surfaceOf(
-  endpoint: Endpoint,
-  outcome: { readonly outcome: string } & object,
-): Promise<unknown> {
+async function surfaceOf(outcome: { readonly outcome: string } & object): Promise<unknown> {
   const o = outcome as Record<string, unknown> & { outcome: string };
   switch (o.outcome) {
     case "submitted":
@@ -181,12 +178,7 @@ async function surfaceOf(
     case "rejected":
       return { surface: "rejected", error: json(o.error) };
     case "value":
-      // The vectors record the assurance row's value as the response body, which
-      // wraps the declaration the client returns; every other value is as returned.
-      return {
-        surface: "value",
-        value: json(endpoint === "GET /v0/assurance" ? { assurance: o.value } : o.value),
-      };
+      return { surface: "value", value: json(o.value) };
     case "hints":
       return {
         surface: "hints",
@@ -374,7 +366,7 @@ export function vectorsSuite(vectors: C4Vectors): Suite {
               "Retry-After",
             );
           }
-          assertEqual(await surfaceOf(e.endpoint, outcome), e.binding, "binding surface");
+          assertEqual(await surfaceOf(outcome), e.binding, "binding surface");
         });
       }
 

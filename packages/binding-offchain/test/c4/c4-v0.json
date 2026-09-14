@@ -2,7 +2,7 @@
   "protocol": "C4",
   "version": "v0",
   "source": {
-    "libticketto": "f605901aad54a50a71420af1b11b1b17e2b8911a"
+    "libticketto": "2f2b7e8f2c0bd7f221b0b26ac198108bf2bcf291"
   },
   "rpId": "kippu.example",
   "parties": [
@@ -1803,34 +1803,29 @@
             "INV-12": "attested",
             "INV-13": "attested",
             "INV-14": "attested",
-            "INV-16": "attested",
-            "INV-15": "attested"
+            "INV-15": "attested",
+            "INV-16": "attested"
           }
         }
       },
-      "illustrative": [
-        "response.body.assurance"
-      ],
       "binding": {
         "surface": "value",
         "value": {
-          "assurance": {
-            "INV-1": "attested",
-            "INV-2": "attested",
-            "INV-3": "attested",
-            "INV-4": "attested",
-            "INV-5": "attested",
-            "INV-6": "enforced",
-            "INV-7": "enforced",
-            "INV-8": "attested",
-            "INV-10": "attested",
-            "INV-11": "attested",
-            "INV-12": "attested",
-            "INV-13": "attested",
-            "INV-14": "attested",
-            "INV-16": "attested",
-            "INV-15": "attested"
-          }
+          "INV-1": "attested",
+          "INV-2": "attested",
+          "INV-3": "attested",
+          "INV-4": "attested",
+          "INV-5": "attested",
+          "INV-6": "enforced",
+          "INV-7": "enforced",
+          "INV-8": "attested",
+          "INV-10": "attested",
+          "INV-11": "attested",
+          "INV-12": "attested",
+          "INV-13": "attested",
+          "INV-14": "attested",
+          "INV-15": "attested",
+          "INV-16": "attested"
         }
       }
     },
