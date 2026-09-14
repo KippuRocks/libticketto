@@ -53,6 +53,36 @@ jobs:
       - name: Self-test — a Node-only API in sdk must fail the bundle
         run: pnpm vitest run --project @libticketto/hermes-bundle
 
+  hermes-run:
+    # features/003-profile-v0/plan.md §7: the profile's portable suites run on
+    # Node (Vitest) and here, under the Hermes VM, from bytecode compiled by the
+    # hermesc React Native ships. The VM is built once from the matching
+    # facebook/hermes release and cached.
+    name: Hermes run (profile-v0 suites)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - id: hermes
+        working-directory: packages/profile-v0
+        run: echo "version=$(node -p 'require("hermes-compiler/package.json").version')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/hermes-vm
+          key: hermes-vm-${{ runner.os }}-${{ steps.hermes.outputs.version }}
+      - name: Build the Hermes VM (skipped when cached)
+        run: |
+          if [ ! -x ~/.cache/hermes-vm/bin/hermes ]; then
+            sudo apt-get update && sudo apt-get install -y ninja-build libicu-dev
+          fi
+          packages/profile-v0/test/hermes/build-vm.sh ~/.cache/hermes-vm
+      - run: HERMES_VM="$HOME/.cache/hermes-vm/bin/hermes" pnpm --filter @ticketto/profile-v0 test:hermes
+
   canary:
     # T-001-07: a Changesets snapshot of every @ticketto/* package, packed with
     # `pnpm pack` and installed into a throwaway client outside the workspace,
