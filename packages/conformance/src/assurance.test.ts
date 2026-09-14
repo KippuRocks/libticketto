@@ -43,4 +43,5 @@ runSuites(
     ...profileV0Fixtures(),
   },
   [requirementSdk6],
+  { through: "M1" },
 );
