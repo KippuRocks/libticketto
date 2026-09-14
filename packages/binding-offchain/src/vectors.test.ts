@@ -8,12 +8,16 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { decodeSignedAccessPass, decodeSignedCommand } from "@ticketto/profile-v0";
+import type { Sponsorship } from "@ticketto/sdk";
 import { describe, expect, it } from "vitest";
-import { scriptedFetch } from "../test/fake-fetch.js";
+import { BASE_URL, scriptedFetch } from "../test/fake-fetch.js";
+import { FakeService } from "../test/fake-service.js";
 import { clientSuite } from "../test/suites/client.suite.js";
+import { submitSuite } from "../test/suites/submit.suite.js";
 import { type C4Vectors, type Exchange, vectorsSuite } from "../test/suites/vectors.suite.js";
 import { createC4Client } from "./client.js";
 import { fromHex, toHex } from "./hex.js";
+import { createOffchainSubmit } from "./submit.js";
 
 const dir = join(import.meta.dirname, "..", "test", "c4");
 const raw = readFileSync(join(dir, "c4-v0.json"));
@@ -78,6 +82,27 @@ describe("T-007-01 vendored C4 vectors", () => {
   });
 });
 
+describe("T-007-02 submit on Node", () => {
+  it("REQ-CM-1: retries on the platform's own timers, resending the identical request", async () => {
+    const service = new FakeService({ faults: ["drop-after", "drop-before"] });
+    const submit = createOffchainSubmit({
+      client: createC4Client({ url: BASE_URL, fetch: service.fetch }),
+      retry: { initialDelay: 1, maxDelay: 2 },
+    });
+    const exchange = vectors.exchanges.find((e) => e.name.includes("transferTicket by the holder"));
+    const body = exchange?.request.body as { input: { bytes: string }; sponsorship: string };
+    const decoded = decodeSignedCommand(fromHex(body.input.bytes));
+    if (!decoded.ok) throw new Error("the vector does not decode");
+    const result = await submit(
+      { kind: "command", signed: decoded.value },
+      fromHex(body.sponsorship) as Sponsorship,
+    );
+    expect(result.ok).toBe(true);
+    expect(service.recorded).toHaveLength(1);
+    expect(new Set(service.submits).size).toBe(1);
+  });
+});
+
 describe("T-007-01 C4 client on Node", () => {
   it("uses the platform's fetch when given none", async () => {
     const scripted = scriptedFetch([{ status: 200, text: '{"head":"","checkpoint":null}' }]);
@@ -100,3 +125,4 @@ describe("T-007-01 C4 client on Node", () => {
 
 vectorsSuite(vectors)({ describe, it });
 clientSuite({ describe, it });
+submitSuite(vectors)({ describe, it });

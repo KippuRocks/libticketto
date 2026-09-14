@@ -45,6 +45,9 @@ importers:
 
   packages/binding-offchain:
     dependencies:
+      '@ticketto/profile-v0':
+        specifier: workspace:*
+        version: link:../profile-v0
       '@ticketto/sdk':
         specifier: workspace:*
         version: link:../sdk
@@ -61,9 +64,6 @@ importers:
       '@react-native/metro-config':
         specifier: 0.87.1
         version: 0.87.1(@babel/core@7.29.7)
-      '@ticketto/profile-v0':
-        specifier: workspace:*
-        version: link:../profile-v0
       '@types/node':
         specifier: 24.13.4
         version: 24.13.4
