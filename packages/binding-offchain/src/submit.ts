@@ -23,28 +23,16 @@ import {
   type SubmissionController,
   type SubmitInput,
 } from "@ticketto/sdk";
-import type { AbortSignalLike, C4Client } from "./client.js";
+import type { C4Client } from "./client.js";
+import {
+  createRetrier,
+  LEDGER_UNAVAILABLE,
+  type RetryPolicy,
+  TIMED_OUT,
+  type Timers,
+} from "./retry.js";
 import type { OperationOutcome, SubmitOutcome } from "./translate.js";
-import { UNAVAILABLE_CODE } from "./translation.js";
 import { type SignedInputBytes, WAIT_DEFAULT, WAIT_MAX } from "./wire.js";
-
-/** How transient failures are retried. */
-export interface RetryPolicy {
-  /** Consecutive failed exchanges retried before the budget is spent. */
-  readonly attempts: number;
-  /** The first backoff, in milliseconds; each further one doubles. */
-  readonly initialDelay: number;
-  /** The longest backoff, in milliseconds. `Retry-After` may ask for longer, and is honoured. */
-  readonly maxDelay: number;
-}
-
-export const DEFAULT_RETRY: RetryPolicy = { attempts: 8, initialDelay: 250, maxDelay: 10_000 };
-
-/** The timers the binding waits with. Defaults to the platform's. */
-export interface Timers {
-  setTimeout(callback: () => void, milliseconds: number): unknown;
-  clearTimeout(handle: unknown): void;
-}
 
 export interface OffchainSubmitOptions {
   readonly client: C4Client;
@@ -65,34 +53,6 @@ export class C4Defect extends Error {
     super(`C4 protocol defect: ${reason}`);
     this.name = "C4Defect";
   }
-}
-
-const TIMED_OUT = Symbol("timed out");
-
-function platformTimers(): Timers {
-  const scope = globalThis as unknown as {
-    setTimeout?: (callback: () => void, milliseconds: number) => unknown;
-    clearTimeout?: (handle: unknown) => void;
-  };
-  const { setTimeout, clearTimeout } = scope;
-  if (setTimeout === undefined || clearTimeout === undefined) {
-    throw new Error("this platform has no timers; pass them to createOffchainSubmit");
-  }
-  return {
-    setTimeout: (callback, milliseconds) => setTimeout(callback, milliseconds),
-    clearTimeout: (handle) => clearTimeout(handle),
-  };
-}
-
-interface AbortControllerLike {
-  readonly signal: AbortSignalLike;
-  abort(): void;
-}
-
-function abortController(): AbortControllerLike | undefined {
-  const Controller = (globalThis as unknown as { AbortController?: new () => AbortControllerLike })
-    .AbortController;
-  return Controller === undefined ? undefined : new Controller();
 }
 
 /** The operation id C4 reports for an input: a command's own, or a pass's id (`AD-15`). */
@@ -122,49 +82,16 @@ export function createOffchainSubmit(
   options: OffchainSubmitOptions,
 ): (input: SubmitInput, sponsorship?: Sponsorship) => Submission<Receipt> {
   const { client } = options;
-  const retry: RetryPolicy = { ...DEFAULT_RETRY, ...options.retry };
   const wait = options.wait ?? WAIT_DEFAULT;
   if (!Number.isSafeInteger(wait) || wait < 0 || wait > WAIT_MAX) {
     throw new RangeError(`wait is 0 to ${WAIT_MAX}`);
   }
   const margin = options.timeoutMargin ?? 10_000;
-  const timers = options.timers ?? platformTimers();
-
-  const sleep = (milliseconds: number) =>
-    new Promise<void>((resolve) => {
-      timers.setTimeout(resolve, milliseconds);
-    });
-
-  /** Runs one exchange, abandoning it after `milliseconds`: an abandoned exchange is a transport failure. */
-  async function timed<T>(
-    exchange: (signal: AbortSignalLike | undefined) => Promise<T>,
-    milliseconds: number,
-  ): Promise<T | typeof TIMED_OUT> {
-    const controller = abortController();
-    let timedOut = false;
-    let handle: unknown;
-    const timeout = new Promise<typeof TIMED_OUT>((resolve) => {
-      handle = timers.setTimeout(() => {
-        timedOut = true;
-        controller?.abort();
-        resolve(TIMED_OUT);
-      }, milliseconds);
-    });
-    try {
-      return await Promise.race([exchange(controller?.signal), timeout]);
-    } catch (error) {
-      if (timedOut) return TIMED_OUT;
-      throw error;
-    } finally {
-      timers.clearTimeout(handle);
-    }
-  }
-
-  /** The delay before retry `attempt` (1-based), honouring `Retry-After`. */
-  function backoff(attempt: number, retryAfter: number | null): number {
-    const exponential = Math.min(retry.maxDelay, retry.initialDelay * 2 ** (attempt - 1));
-    return Math.max(exponential, retryAfter === null ? 0 : retryAfter * 1000);
-  }
+  const retrier = createRetrier({
+    ...(options.retry === undefined ? {} : { retry: options.retry }),
+    ...(options.timers === undefined ? {} : { timers: options.timers }),
+  });
+  const { timed } = retrier;
 
   async function run(
     input: SubmitInput,
@@ -177,18 +104,13 @@ export function createOffchainSubmit(
     const sponsorshipBytes = sponsorship ?? null;
     let reported = false;
     let token: string | undefined;
-    let failures = 0;
+    const budget = retrier.budget();
 
-    /** Counts a failed exchange against the budget; `false` once it is spent. */
+    /** Counts a failed exchange against the budget; once it is spent, G8's rejection. */
     const spend = async (retryAfter: number | null, delay: boolean): Promise<boolean> => {
-      failures += 1;
-      if (failures > retry.attempts) {
-        // Amendment 0003 G8: the ledger could not be reached.
-        controller.rejected({ code: UNAVAILABLE_CODE });
-        return false;
-      }
-      if (delay) await sleep(backoff(failures, retryAfter));
-      return true;
+      if (await budget.spend(retryAfter, delay)) return true;
+      controller.rejected(LEDGER_UNAVAILABLE);
+      return false;
     };
 
     for (;;) {
@@ -249,7 +171,7 @@ export function createOffchainSubmit(
       }
       switch (outcome.outcome) {
         case "pending":
-          failures = 0;
+          budget.progress();
           break;
         case "settled":
           controller.settled(outcome.receipt);

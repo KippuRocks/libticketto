@@ -19,13 +19,17 @@ export {
 } from "./client.js";
 export { HintParser, HintStreamDefect } from "./hints.js";
 export {
-  C4Defect,
-  createOffchainSubmit,
+  createRetrier,
   DEFAULT_RETRY,
-  type OffchainSubmitOptions,
+  LEDGER_UNAVAILABLE,
+  type Retrier,
+  type RetryBudget,
+  type RetryOptions,
   type RetryPolicy,
+  TIMED_OUT,
   type Timers,
-} from "./submit.js";
+} from "./retry.js";
+export { C4Defect, createOffchainSubmit, type OffchainSubmitOptions } from "./submit.js";
 export {
   type AssuranceOutcome,
   type CheckpointOutcome,
