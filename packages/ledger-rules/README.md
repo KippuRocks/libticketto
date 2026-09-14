@@ -11,6 +11,7 @@ runs the checks every signed command passes (`T-008-02`, `T-008-13`).
 |---|---|
 | `createEvent` | Implemented (`T-008-03`) |
 | `addZone`, `removeZone` | Implemented (`T-008-06`) |
+| `issueTicket` | Implemented (`T-008-07`) |
 | Every other command, access passes, `canAttend`, `getCancellationHolder` | Not yet — each throws until its task lands |
 
 | | |

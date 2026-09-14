@@ -122,7 +122,7 @@ describe("commands against what does not exist", () => {
     const id = eventId();
     await caps.registry.putEvent(activeEvent(id, organiser.account));
     const signed = await sign(organiser, commandOf("issueTicket", id));
-    await expect(execute(caps, profile, signed)).rejects.toThrow("not implemented");
+    expect(codeOf(await execute(caps, profile, signed))).not.toBe("ERR-TicketNotFound");
   });
 });
 
