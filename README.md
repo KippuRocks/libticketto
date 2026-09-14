@@ -40,6 +40,7 @@ pnpm format       # Biome: apply safe fixes and formatting
 pnpm lint:switches  # no default-less switch over Command or TickettoErrorCode (tools/switch-default)
 pnpm test         # Vitest: every package and tool, plus workspace checks (build first)
 pnpm boundaries   # package dependency rules (tools/boundaries)
+pnpm api:check    # the SDK's exported surface matches packages/sdk/api/sdk.api.md (api:update to acknowledge)
 pnpm spec:check   # generated SDK error codes and invariant ids match spec/SPEC.md (tools/spec-codegen)
 pnpm hermes       # Metro + hermesc bundle of the React Native path (tools/hermes-bundle)
 pnpm canary       # snapshot release, packed and installed into a throwaway client
