@@ -1,6 +1,3 @@
 packages:
   - packages/*
   - tools/*
-
-# Refuse to install on an engine outside `engines` (Node 24 or later).
-engineStrict: true
