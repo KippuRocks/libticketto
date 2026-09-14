@@ -55,6 +55,16 @@ describe("@ticketto/profile-v0", () => {
     expect(profile.SIGNED_INPUT_KIND_INDEX).toEqual({ command: 0, accessPass: 1 });
   });
 
+  it("exports the proof-of-control payload, signing and verification", () => {
+    expect(typeof profile.proofOfControlSigningPayload).toBe("function");
+    expect(typeof profile.signProofOfControl).toBe("function");
+    expect(typeof profile.verifyProofOfControl).toBe("function");
+    expect(profile.PROOF_OF_CONTROL_NONCE_LENGTH).toBe(32);
+    expect(new TextDecoder().decode(profile.PROOF_OF_CONTROL_TAG)).toBe(
+      "ticketto/v0/proof-of-control",
+    );
+  });
+
   it("exports createProfileV0", () => {
     const v0 = profile.createProfileV0({ rpId: "kippu.example" });
     expect(Object.keys(v0).sort()).toEqual([
