@@ -41,6 +41,7 @@ pnpm test         # Vitest: every package and tool, plus workspace checks (build
 pnpm boundaries   # package dependency rules (tools/boundaries)
 pnpm hermes       # Metro + hermesc bundle of the React Native path (tools/hermes-bundle)
 pnpm canary       # snapshot release, packed and installed into a throwaway client
+pnpm conformance-matrix discover   # backends registered for the conformance suite
 ```
 
 Releases use Changesets; see [`.changeset/README.md`](.changeset/README.md).

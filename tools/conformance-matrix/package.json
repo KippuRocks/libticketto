@@ -1,0 +1,21 @@
+{
+  "name": "@libticketto/conformance-matrix",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Discovers registered backend packages and runs the conformance suite once per backend in CI",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "conformance-matrix": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.4"
+  }
+}
