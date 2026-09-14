@@ -4,9 +4,9 @@ The published log: record and checkpoint format, hash chain, export and import.
 
 Contract `C7`. Owned by `F-006`.
 
-**Status:** being built by `F-006` for `M0`. The record codec, its hash and the
-`NFR-6` allow-list are in place; the chain builder, checkpoints and the format
-document follow.
+**Status:** being built by `F-006` for `M0`. The record codec, its hash, the
+`NFR-6` allow-list and the chain builder are in place; checkpoints and the
+format document follow.
 
 | | |
 |---|---|
@@ -40,6 +40,21 @@ encoding of a record is accepted.
   field of a record or its input that the allow-list does not name — per
   command kind, and for every nested value — rather than letting the encoding
   drop it silently.
+
+## Chain
+
+One total `sequence` per deployment, from 0 (`INV-15`), and one `eventSequence`
+per event, from 0 for its first record (`REQ-MG-4`). The first record's
+`prevHash` is 32 zero bytes (`GENESIS_HASH`).
+
+- `linkRecord(head, entry, eventSequence)` is pure: a store keeps the head and
+  each event's next sequence in its own transaction, and commits the linked
+  record's bytes. Its entry is the rules' `LogAppend`, field for field.
+- `LogChain` keeps both in memory, and resumes from a saved `state()`.
+- `verifyChain(records, from?)` recomputes every hash and checks both orders,
+  reporting the first record it rejects: a removed or reordered record at the
+  position it left (`sequence`), a changed record at its successor (`link`).
+  It does not check authorisations.
 
 Part of [libticketto](../../README.md). Behaviour is specified in `SPEC.md` and
 the package's design in `PLAN.md` and `features/`, in
