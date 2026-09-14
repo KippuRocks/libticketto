@@ -9,6 +9,7 @@ import {
   encodePass,
   encodeSignedPass,
   PASS_LENGTH,
+  passSigningPayload,
   producePass,
   verifyPass,
 } from "../../src/pass.js";
@@ -107,7 +108,7 @@ export const passSuite: Suite = ({ describe, it }) => {
           notBefore: T0,
           notAfter: T0 + 60_000,
         };
-        const forged = { pass, authorisation: await other.signer.sign(encodePass(pass)) };
+        const forged = { pass, authorisation: await other.signer.sign(passSigningPayload(pass)) };
         for (const registration of [holder.registration, other.registration]) {
           assertEqual(code(verifyPass(forged, registration, at(T0), CONFIG)), "ERR-InvalidPass");
         }

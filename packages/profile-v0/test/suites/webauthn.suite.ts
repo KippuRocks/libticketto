@@ -1,5 +1,6 @@
 // T-003-04 — `pass-webauthn` attestation and assertion codecs, and assertion
-// verification against a registered device (REQ-SP-4, REQ-CP-6, REQ-SDK-4).
+// verification against a registered device (REQ-SP-4, REQ-CP-6, REQ-SDK-4), with
+// the registration challenge and user presence checks of plan §5.7.
 
 import type { Authorisation, Registration } from "@ticketto/sdk";
 import { fromHex, toHex } from "../../src/bytes.js";
@@ -17,10 +18,12 @@ import {
   assertionCodec,
   attestationCodec,
   checkWebAuthnAssertion,
+  checkWebAuthnRegistration,
   KREIVO_AUTHORITY_ID,
   webAuthnChallenge,
 } from "../../src/credential/webauthn.js";
-import { hashedUserId, holderAccountId } from "../../src/derive.js";
+import { blake2b256, hashedUserId, holderAccountId } from "../../src/derive.js";
+import { registrationChallenge } from "../../src/signing.js";
 import {
   type CeremonyOverrides,
   SimulatedWebAuthnAuthenticator,
@@ -40,12 +43,15 @@ function device(random: Random, rpId = RP_ID): SimulatedWebAuthnAuthenticator {
   });
 }
 
-function register(userId: string, authenticator: SimulatedWebAuthnAuthenticator): Registration {
-  const hashed = hashedUserId(userId);
+function register(
+  userId: string,
+  authenticator: SimulatedWebAuthnAuthenticator,
+  challenge = registrationChallenge(holderAccountId(userId)),
+): Registration {
   return encodeRegistration({
     kind: "passWebAuthn",
-    hashedUserId: hashed,
-    attestation: authenticator.attest(fromHex(holderAccountId(userId))),
+    hashedUserId: hashedUserId(userId),
+    attestation: authenticator.attest(challenge),
   });
 }
 
@@ -138,6 +144,11 @@ export const webAuthnSuite: Suite = ({ describe, it }) => {
         () => authorise(userId, authenticator, payload, { rpId: "evil.example" }),
       ],
       [
+        "missing user presence",
+        "user-presence",
+        () => authorise(userId, authenticator, payload, { userPresent: false }),
+      ],
+      [
         "missing user verification",
         "user-verification",
         () => authorise(userId, authenticator, payload, { userVerified: false }),
@@ -225,6 +236,45 @@ export const webAuthnSuite: Suite = ({ describe, it }) => {
         assert(!result.ok && result.error.code === "ERR-InvalidAuthorisation");
         assert(!verify(bad, payload, authorise(userId, authenticator, payload), CONFIG));
       }
+    });
+
+    describe("plan §5.7: a registration's challenge binds it to its account", () => {
+      const refused = (reg: Registration, reason: string) => {
+        const result = registrationAccount(reg);
+        assert(!result.ok && result.error.code === "ERR-InvalidAuthorisation", "refused");
+        const decoded = decodeRegistration(reg);
+        if (decoded.kind !== "passWebAuthn") throw new Error("kind");
+        assertEqual(checkWebAuthnRegistration(decoded), reason, "for that reason");
+        const authorisation = authorise(userId, authenticator, payload);
+        assert(!verify(reg, payload, authorisation, CONFIG), "nothing verifies against it");
+      };
+
+      it('the challenge is BLAKE2b-256("ticketto/v0/registration" ‖ account)', () => {
+        const decoded = decodeRegistration(registration);
+        if (decoded.kind !== "passWebAuthn") throw new Error("kind");
+        assertEqual(checkWebAuthnRegistration(decoded), null);
+      });
+
+      it("an attestation with a wrong challenge fails", () => {
+        refused(register(userId, authenticator, random.bytes(32)), "challenge");
+      });
+
+      it("an attestation over another account's challenge fails", () => {
+        const elsewhere = registrationChallenge(holderAccountId(random.hex(32)));
+        refused(register(userId, authenticator, elsewhere), "challenge");
+      });
+
+      it("an attestation over the untagged BLAKE2b-256(account) fails", () => {
+        const untagged = blake2b256(fromHex(holderAccountId(userId)));
+        refused(register(userId, authenticator, untagged), "challenge");
+      });
+
+      it("an attestation whose client data is not JSON fails", () => {
+        const decoded = decodeRegistration(registration);
+        if (decoded.kind !== "passWebAuthn") throw new Error("kind");
+        const attestation = { ...decoded.attestation, client_data: Uint8Array.of(0xff) };
+        refused(encodeRegistration({ ...decoded, attestation }), "client-data");
+      });
     });
 
     it("credentials of different kinds never verify each other", () => {

@@ -3,11 +3,11 @@
 // SDK sees identifiers, opaque bytes and results.
 
 import type { Profile } from "@ticketto/sdk";
-import { encodeCommand } from "./codec/command.js";
 import { accountOf, registrationAccount, verify } from "./credential/credential.js";
 import type { WebAuthnConfig } from "./credential/webauthn.js";
 import { eventId, ticketId } from "./derive.js";
-import { decodePass, encodePass } from "./pass.js";
+import { decodePass, passSigningPayload } from "./pass.js";
+import { commandSigningPayload } from "./signing.js";
 
 /** Deployment configuration of the V0 profile. */
 export interface ProfileV0Config {
@@ -30,12 +30,14 @@ export function createProfileV0(config: ProfileV0Config): Profile {
   return {
     eventId,
     ticketId,
-    encodeCommand,
+    // What a signer authorises: the command and pass bytes behind their domain
+    // tags (plan §5.7). Sign and verify these, never the untagged bytes.
+    encodeCommand: commandSigningPayload,
     accountOf,
     registrationAccount,
     verify: (registration, payload, authorisation) =>
       verify(registration, payload, authorisation, credentialConfig),
-    encodePass,
+    encodePass: passSigningPayload,
     decodePass,
   };
 }

@@ -1,10 +1,12 @@
 // T-003-06 — the V0 profile wired to F-002's `Profile` interface (REQ-CP-2).
 
 import type { PassId, Profile } from "@ticketto/sdk";
-import { decodeCommand } from "../../src/codec/command.js";
+import { concatBytes } from "../../src/bytes.js";
+import { decodeCommand, encodeCommand } from "../../src/codec/command.js";
 import { eventId, ticketId } from "../../src/derive.js";
-import { encodeSignedPass, producePass } from "../../src/pass.js";
+import { encodePass, encodeSignedPass, producePass } from "../../src/pass.js";
 import { createProfileV0 } from "../../src/profile.js";
+import { COMMAND_SIGNING_TAG, PASS_SIGNING_TAG } from "../../src/signing.js";
 import { assert, assertEqual, assertThrows, type Suite } from "../harness.js";
 import { Random } from "../random.js";
 import { p256Credential, webAuthnCredential } from "../signers.js";
@@ -26,10 +28,12 @@ export const profileSuite: Suite = ({ describe, it }) => {
       assertEqual(profile.ticketId(event, zone, placement), ticketId(event, zone, placement));
     });
 
-    it("encodes commands canonically", () => {
+    it("encodes commands canonically, behind the command signing tag", () => {
       for (let run = 0; run < 20; run++) {
         const command = random.command();
-        assertEqual(decodeCommand(profile.encodeCommand(command)), command);
+        const payload = profile.encodeCommand(command);
+        assertEqual(payload, concatBytes(COMMAND_SIGNING_TAG, encodeCommand(command)));
+        assertEqual(decodeCommand(payload.subarray(COMMAND_SIGNING_TAG.length)), command);
       }
     });
 
@@ -64,7 +68,11 @@ export const profileSuite: Suite = ({ describe, it }) => {
           },
           signer,
         );
-        assertEqual(profile.encodePass(signed.pass).length, 97);
+        assertEqual(
+          profile.encodePass(signed.pass),
+          concatBytes(PASS_SIGNING_TAG, encodePass(signed.pass)),
+        );
+        assertEqual(encodePass(signed.pass).length, 97);
         assertEqual(profile.decodePass(encodeSignedPass(signed)), { ok: true, value: signed });
         const bad = profile.decodePass(Uint8Array.of(1, 2, 3));
         assert(!bad.ok && bad.error.code === "ERR-InvalidPass");

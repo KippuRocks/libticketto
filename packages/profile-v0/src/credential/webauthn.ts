@@ -10,16 +10,20 @@
 //   AssertionMeta   = { authority_id [u8;32], user_id [u8;32], context u32 }
 //   Assertion       = { meta, authenticator_data Vec<u8>, client_data Vec<u8>, signature Vec<u8> }
 //
-// The hosted ledger has no blocks, so `context` is 0 in V0 and a challenge is
-// BLAKE2b-256(payload); freshness comes from the operation envelope's expiry
-// and the pass window, which the rules enforce.
+// The hosted ledger has no blocks, so `context` is 0 in V0. An assertion's
+// challenge is BLAKE2b-256(payload), where the payload is already
+// domain-separated (`signing.ts`); a registration's challenge is
+// BLAKE2b-256("ticketto/v0/registration" ‖ account) (plan §5.7). Freshness comes
+// from the operation envelope's expiry and the pass window, which the rules
+// enforce.
 
 import { p256 } from "@noble/curves/nist.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { type Codec, Struct, u32 } from "scale-ts";
 import { ascii, concatBytes, equalBytes, fromHex, toBase64Url, utf8Decode } from "../bytes.js";
 import { boundedBytes, fixedBytes } from "../codec/scale.js";
-import { blake2b256 } from "../derive.js";
+import { blake2b256, holderAccountFromHashedUserId } from "../derive.js";
+import { registrationChallenge } from "../signing.js";
 import { normaliseP256Signature } from "./p256.js";
 
 /** `"kreivo_p"`, zero-padded to 32 bytes: papi-signers' `KREIVO_AUTHORITY_ID`. */
@@ -104,7 +108,11 @@ export interface WebAuthnConfig {
   readonly rpId: string;
 }
 
-/** The WebAuthn challenge for `payload`: `BLAKE2b-256(payload)` (plan §5.2). */
+/**
+ * The WebAuthn challenge for `payload`: `BLAKE2b-256(payload)` (plan §5.2). The
+ * payload is a signing payload — `commandSigningPayload` or
+ * `passSigningPayload` — which carries its domain tag (plan §5.7).
+ */
 export function webAuthnChallenge(payload: Uint8Array): Uint8Array {
   return blake2b256(payload);
 }
@@ -129,6 +137,7 @@ export function p256PointFromSpki(spki: Uint8Array): Uint8Array | null {
 }
 
 /** Authenticator data flags (WebAuthn §6.1). */
+const FLAG_USER_PRESENT = 0x01;
 const FLAG_USER_VERIFIED = 0x04;
 const RP_ID_HASH_LENGTH = 32;
 const FLAGS_OFFSET = 32;
@@ -145,17 +154,41 @@ export type WebAuthnFailure =
   | "type"
   | "challenge"
   | "rp-id"
+  | "user-presence"
   | "user-verification"
   | "signature";
 
-/** Checks a registration on its own: authority, context and public key. */
+/** The `challenge` of client data JSON bytes, or `null` when they are not client data. */
+function clientDataChallenge(
+  clientData: Uint8Array,
+): { readonly type: unknown; readonly challenge: unknown } | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(utf8Decode(clientData));
+  } catch {
+    return null;
+  }
+  if (typeof parsed !== "object" || parsed === null) return null;
+  const { type, challenge } = parsed as { type?: unknown; challenge?: unknown };
+  return { type, challenge };
+}
+
+/**
+ * Checks a registration on its own: authority, context, public key, and that its
+ * challenge is `BLAKE2b-256("ticketto/v0/registration" ‖ account)` for the
+ * account its hashed user id names (plan §5.7, ruling 1).
+ */
 export function checkWebAuthnRegistration(
   registration: WebAuthnRegistration,
 ): WebAuthnFailure | null {
-  const { meta, public_key } = registration.attestation;
+  const { meta, public_key, client_data } = registration.attestation;
   if (!equalBytes(meta.authority_id, KREIVO_AUTHORITY_ID)) return "authority";
   if (meta.context !== V0_CONTEXT) return "context";
   if (p256PointFromSpki(public_key) === null) return "public-key";
+  const clientData = clientDataChallenge(client_data);
+  if (clientData === null) return "client-data";
+  const account = holderAccountFromHashedUserId(registration.hashedUserId);
+  if (clientData.challenge !== toBase64Url(registrationChallenge(account))) return "challenge";
   return null;
 }
 
@@ -184,18 +217,12 @@ export function checkWebAuthnAssertion(
   if (publicKey === null) return "public-key";
 
   // 3. clientDataJSON is a `webauthn.get` over the payload hash.
-  let clientData: unknown;
-  try {
-    clientData = JSON.parse(utf8Decode(assertion.client_data));
-  } catch {
-    return "client-data";
-  }
-  if (typeof clientData !== "object" || clientData === null) return "client-data";
-  const { type, challenge } = clientData as { type?: unknown; challenge?: unknown };
-  if (type !== "webauthn.get") return "type";
-  if (challenge !== toBase64Url(webAuthnChallenge(payload))) return "challenge";
+  const clientData = clientDataChallenge(assertion.client_data);
+  if (clientData === null) return "client-data";
+  if (clientData.type !== "webauthn.get") return "type";
+  if (clientData.challenge !== toBase64Url(webAuthnChallenge(payload))) return "challenge";
 
-  // 4. The RP id hash is the deployment's, and the user was verified.
+  // 4. The RP id hash is the deployment's, and the user was present and verified.
   const authData = assertion.authenticator_data;
   if (authData.length < MIN_AUTHENTICATOR_DATA_LENGTH) return "rp-id";
   let rpIdHash: Uint8Array;
@@ -205,7 +232,9 @@ export function checkWebAuthnAssertion(
     return "rp-id";
   }
   if (!equalBytes(authData.subarray(0, RP_ID_HASH_LENGTH), rpIdHash)) return "rp-id";
-  if (((authData[FLAGS_OFFSET] ?? 0) & FLAG_USER_VERIFIED) === 0) return "user-verification";
+  const flags = authData[FLAGS_OFFSET] ?? 0;
+  if ((flags & FLAG_USER_PRESENT) === 0) return "user-presence";
+  if ((flags & FLAG_USER_VERIFIED) === 0) return "user-verification";
 
   // 5. ECDSA P-256 over authenticatorData ‖ SHA-256(clientDataJSON), DER normalised to low S.
   let signature: Uint8Array;

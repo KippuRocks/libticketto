@@ -6,11 +6,12 @@
 import { p256 } from "@noble/curves/nist.js";
 import { randomBytes } from "@noble/hashes/utils.js";
 import type { AccountId, Authorisation, Registration, Signer } from "@ticketto/sdk";
-import { fromHex, toHex } from "../bytes.js";
+import { toHex } from "../bytes.js";
 import { encodeAuthorisation, encodeRegistration } from "../credential/credential.js";
 import { p256AuthorisationDigest, p256RegistrationDigest } from "../credential/p256.js";
 import { webAuthnChallenge } from "../credential/webauthn.js";
 import { hashedUserId, holderAccountId, p256AccountId } from "../derive.js";
+import { registrationChallenge } from "../signing.js";
 import { SimulatedWebAuthnAuthenticator } from "./webauthn-authenticator.js";
 
 /** A signer together with the registration that registers its credential (`REQ-CP-6`). */
@@ -33,7 +34,11 @@ export interface SoftwareP256Options {
   readonly secretKey?: Uint8Array;
 }
 
-/** A `p256` credential in software: the kind Kippu's server keys use. */
+/**
+ * A `p256` credential in software: the kind Kippu's server keys use. Like every
+ * signer, it signs the payload it is given — pass it `Profile.encodeCommand` or
+ * `Profile.encodePass` output, which carries the domain tag (plan §5.7).
+ */
 export interface SoftwareP256Credential extends SoftwareCredential {
   /** Compressed public key. */
   readonly publicKey: Uint8Array;
@@ -81,8 +86,9 @@ export interface SimulatedWebAuthnCredential extends SoftwareCredential {
 
 /**
  * A holder credential on a simulated passkey device. Its registration carries
- * an attestation whose challenge is `BLAKE2b-256(account)`; the profile does not
- * interpret it. Each `sign` is a full WebAuthn assertion ceremony.
+ * an attestation whose challenge is `BLAKE2b-256("ticketto/v0/registration" ‖
+ * account)`, as the profile requires (plan §5.7). Each `sign` is a full WebAuthn
+ * assertion ceremony whose challenge is `BLAKE2b-256(payload)`.
  */
 export function simulatedWebAuthnSigner(
   options: SimulatedWebAuthnOptions,
@@ -110,7 +116,7 @@ export function simulatedWebAuthnSigner(
     registration: encodeRegistration({
       kind: "passWebAuthn",
       hashedUserId: hashed,
-      attestation: authenticator.attest(webAuthnChallenge(fromHex(account))),
+      attestation: authenticator.attest(registrationChallenge(account)),
     }),
   };
 }

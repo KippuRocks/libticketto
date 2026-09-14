@@ -151,7 +151,10 @@ export const command: Codec<Command> = createCodec(
   }),
 );
 
-/** The canonical bytes a signer authorises for `value` (`Profile.encodeCommand`). */
+/**
+ * The canonical bytes of `value`. A signer authorises them behind a domain tag:
+ * see `commandSigningPayload` (`Profile.encodeCommand`).
+ */
 export function encodeCommand(value: Command): Uint8Array {
   return encodeVersioned(command, value);
 }
