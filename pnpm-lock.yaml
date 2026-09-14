@@ -33,7 +33,36 @@ importers:
         specifier: workspace:*
         version: link:../sdk
 
-  packages/binding-offchain: {}
+  packages/binding-offchain:
+    dependencies:
+      '@ticketto/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+    devDependencies:
+      '@babel/core':
+        specifier: 7.29.7
+        version: 7.29.7
+      '@babel/runtime':
+        specifier: 7.29.7
+        version: 7.29.7
+      '@react-native/babel-preset':
+        specifier: 0.87.1
+        version: 0.87.1(@babel/core@7.29.7)
+      '@react-native/metro-config':
+        specifier: 0.87.1
+        version: 0.87.1(@babel/core@7.29.7)
+      '@ticketto/profile-v0':
+        specifier: workspace:*
+        version: link:../profile-v0
+      '@types/node':
+        specifier: 24.13.4
+        version: 24.13.4
+      hermes-compiler:
+        specifier: 250829098.0.17
+        version: 250829098.0.17
+      metro:
+        specifier: 0.87.1
+        version: 0.87.1
 
   packages/conformance:
     dependencies:

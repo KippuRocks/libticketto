@@ -3,5 +3,6 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src"]
+  "include": ["src", "test"],
+  "exclude": ["test/hermes/run.ts"]
 }
