@@ -123,10 +123,12 @@ describe("interfaces the SDK consumes (plan §5.7)", () => {
     expectTypeOf<ReturnType<Profile["decodePass"]>>().toEqualTypeOf<Result<SignedAccessPass>>();
   });
 
-  it("signs asynchronously for one account, and sponsors a signed command", () => {
+  it("signs asynchronously for one account, and sponsors a signed command or pass", () => {
     expectTypeOf<Signer["account"]>().toEqualTypeOf<AccountId>();
     expectTypeOf<ReturnType<Signer["sign"]>>().toEqualTypeOf<Promise<Authorisation>>();
-    expectTypeOf<Sponsor["sponsor"]>().parameter(0).toEqualTypeOf<SignedCommand>();
+    expectTypeOf<Sponsor["sponsor"]>()
+      .parameter(0)
+      .toEqualTypeOf<SignedCommand | SignedAccessPass>();
     expectTypeOf<ReturnType<Sponsor["sponsor"]>>().toEqualTypeOf<Promise<Result<Sponsorship>>>();
   });
 });
