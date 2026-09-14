@@ -10,6 +10,13 @@ export type {
   Signer,
   Sponsor,
 } from "./capabilities.js";
+export {
+  type CommandInput,
+  createTicketto,
+  type Derived,
+  type Ticketto,
+  type TickettoOptions,
+} from "./client.js";
 export type {
   AccessPass,
   AddZone,
