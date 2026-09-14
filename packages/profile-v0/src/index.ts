@@ -6,6 +6,16 @@ import * as codecs from "./codec/identity.js";
 
 export { COMMAND_INDEX, decodeCommand, encodeCommand } from "./codec/command.js";
 export { DecodeError, FORMAT_VERSION } from "./codec/scale.js";
+export {
+  blake2b256,
+  deviceId,
+  eventId,
+  hashedUserId,
+  holderAccountFromHashedUserId,
+  holderAccountId,
+  p256AccountId,
+  ticketId,
+} from "./derive.js";
 export { codecs };
 
 export const packageName = "@ticketto/profile-v0";

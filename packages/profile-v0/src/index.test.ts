@@ -12,4 +12,12 @@ describe("@ticketto/profile-v0", () => {
     expect(typeof profile.codecs.placement.enc).toBe("function");
     expect(profile.FORMAT_VERSION).toBe(0);
   });
+
+  it("exports identifier derivation", () => {
+    expect(typeof profile.eventId).toBe("function");
+    expect(typeof profile.ticketId).toBe("function");
+    expect(typeof profile.holderAccountId).toBe("function");
+    expect(typeof profile.p256AccountId).toBe("function");
+    expect(typeof profile.deviceId).toBe("function");
+  });
 });

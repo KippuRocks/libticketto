@@ -31,6 +31,16 @@ value.
 | Enumerations | one-byte index, in the order the SDK declares the variants |
 | Command | version, `operationId`, `expiresAt`, kind index, body |
 
+## Identifiers
+
+| Identifier | Derivation |
+|---|---|
+| Holder `AccountId` | `BLAKE2b-256(0³² ‖ SHA-256(userId))`, Kreivo's `kreivoPassDefaultAddressGenerator`; `userId` is 32 random bytes as lower-case hex |
+| `p256` `AccountId` | `BLAKE2b-256("ticketto/v0/account/p256" ‖ compressed public key)` |
+| WebAuthn `deviceId` | `BLAKE2b-256(credential rawId)` |
+| `EventId` | `BLAKE2b-256("ticketto/v0/event" ‖ creator ‖ salt)` |
+| `TicketId` | `BLAKE2b-256("ticketto/v0/ticket" ‖ SCALE(eventId, zoneId, placement))` |
+
 ## Runtime requirements
 
 `scale-ts` constructs a `TextDecoder` when it is imported. Hermes does not
