@@ -64,7 +64,7 @@ export interface Backend {
     readonly assurance: AssuranceDeclaration;
     readonly log: LogReader;
     query<Q extends Query>(query: Q): Promise<Result<QueryResult<Q>>>;
-    submit(command: SignedCommand | SignedAccessPass, sponsorship?: Sponsorship): Submission<Receipt>;
+    submit(input: SubmitInput, sponsorship?: Sponsorship): Submission<Receipt>;
 }
 
 // @public
@@ -277,6 +277,7 @@ export interface LogRecord {
         readonly id: EventId;
         readonly sequence: Count;
     } | null;
+    readonly presentedAt: Timestamp | null;
     readonly recordedAt: Timestamp;
 }
 
@@ -298,6 +299,11 @@ export const packageName = "@ticketto/sdk";
 
 // @public
 export type PassId = Brand<string, "PassId">;
+
+// @public
+export interface PassPresentation {
+    readonly presentedAt: Timestamp;
+}
 
 // @public
 export type Placement = {
@@ -481,6 +487,16 @@ export type SubmissionState = {
 };
 
 // @public
+export type SubmitInput = {
+    readonly kind: "command";
+    readonly signed: SignedCommand;
+} | {
+    readonly kind: "pass";
+    readonly signed: SignedAccessPass;
+    readonly presentedAt: Timestamp;
+};
+
+// @public
 export interface Ticket {
     readonly attendances: Count;
     // (undocumented)
@@ -542,7 +558,7 @@ export interface Ticketto {
     setEventCapacity(signer: Signer, input: CommandInput<"setEventCapacity">): Submission<Receipt>;
     // (undocumented)
     setEventStatus(signer: Signer, input: CommandInput<"setEventStatus">): Submission<Receipt>;
-    submitAccessPass(pass: SignedAccessPass): Submission<Receipt>;
+    submitAccessPass(pass: SignedAccessPass, presentation: PassPresentation): Submission<Receipt>;
     // (undocumented)
     transferTicket(signer: Signer, input: CommandInput<"transferTicket">): Submission<Receipt>;
 }
@@ -618,7 +634,11 @@ export const TICKETTO_ERROR_CODES: readonly [
 /** A command whose authorisation does not verify, or does not come from a credential registered to the signing account (`REQ-CP-6`) */
 "ERR-InvalidAuthorisation",
 /** The ledger could not be reached. Retryable, and carries no backend detail (`REQ-SDK-2`) */
-"ERR-LedgerUnavailable"];
+"ERR-LedgerUnavailable",
+/** A command reusing an operation id already recorded for a different command (`REQ-CM-1`) */
+"ERR-OperationConflict",
+/** The operation is outside every sponsorship entitlement (`REQ-SP-3`), or its sponsorship is missing or invalid. Not retryable */
+"ERR-SponsorshipRefused"];
 
 // @public
 export const TICKETTO_ERROR_ORIGINS: {

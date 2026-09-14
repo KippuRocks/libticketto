@@ -127,6 +127,7 @@ describe("fake capabilities: serialisability smoke test", () => {
         recordedAt: 5,
         event: { id: eventId, sequence: 1 },
         entry: signedPass,
+        presentedAt: null,
       },
     ]);
   });

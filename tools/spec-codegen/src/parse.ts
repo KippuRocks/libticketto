@@ -89,8 +89,14 @@ function live(rows: readonly Row[]): Row[] {
 
 /**
  * Tags errors from §10's note. A sentence calling its errors "platform errors"
- * tags them `platform`; a sentence saying they are raised by a backend binding
- * tags them `binding`. Every other error is `ledger`.
+ * tags them `platform`; a sentence saying they are raised by a backend — a
+ * backend binding, or a backend refusing a submission — tags them `binding`.
+ * Every other error is `ledger`.
+ *
+ * The tags cannot say "platform or binding". An error the note says Kippu *or* a
+ * backend raises (`ERR-SponsorshipRefused`, amendment 0003) is tagged `binding`:
+ * what the tag must get right is that no ledger produces it (`REQ-SDK-7`), and a
+ * binding is where a client meets it.
  */
 function originsFromNote(body: string, live: ReadonlySet<string>): Map<string, ErrorOrigin> {
   const paragraph = body
@@ -107,7 +113,7 @@ function originsFromNote(body: string, live: ReadonlySet<string>): Map<string, E
     const ids = [...sentence.matchAll(/`(ERR-[A-Za-z0-9]+)`/g)].map((m) => m[1] as string);
     if (ids.length === 0) continue;
     const platform = /\bplatform errors?\b/i.test(sentence);
-    const binding = /\bbackend binding\b/i.test(sentence);
+    const binding = /\bbackend\b/i.test(sentence);
     if (platform === binding) {
       throw new SpecParseError(
         `§10 note: cannot tell where ${ids.join(", ")} arise: "${sentence}"`,

@@ -40,7 +40,7 @@ function fakeBackend(registrations: readonly TestCredential[]) {
   let position = 0;
 
   const backend: Backend = {
-    submit(input) {
+    submit({ signed: input }) {
       const { submission, settled, rejected } = createSubmission();
       queueMicrotask(() => {
         const authorisation = input.authorisation;
@@ -172,7 +172,7 @@ describe("T-003-06 createTicketto with the V0 profile", () => {
     );
     const decoded = decodePass(encodeSignedPass(pass));
     expect(decoded.ok).toBe(true);
-    expect((await ticketto.submitAccessPass(pass)).ok).toBe(true);
+    expect((await ticketto.submitAccessPass(pass, { presentedAt: NOW })).ok).toBe(true);
 
     const forged = await producePass(
       {
@@ -184,7 +184,7 @@ describe("T-003-06 createTicketto with the V0 profile", () => {
       organiser.signer,
     );
     const moved = { ...forged, pass: { ...forged.pass, holder: holder.signer.account } };
-    expect(await ticketto.submitAccessPass(moved)).toEqual({
+    expect(await ticketto.submitAccessPass(moved, { presentedAt: NOW })).toEqual({
       ok: false,
       error: expect.objectContaining({ code: "ERR-InvalidPass" }),
     });

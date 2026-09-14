@@ -18,7 +18,9 @@ import {
   type Sponsorship,
   type Submission,
   type SubmissionState,
+  type SubmitInput,
   type TickettoError,
+  type Timestamp,
 } from "./index.js";
 
 // NFR-9: a scripted fake backend that accepts a write at once and settles it
@@ -31,10 +33,12 @@ const rejection: TickettoError = { code: "ERR-EventSealed" };
 
 function scriptedBackend(latency: number, script: Script): Backend {
   return {
-    submit(input: SignedCommand | SignedAccessPass) {
+    submit(input: SubmitInput) {
       const { submission, submitted, settled, rejected } = createSubmission();
       const operationId =
-        "command" in input ? input.command.operationId : (input.pass.id as string as OperationId);
+        input.kind === "command"
+          ? input.signed.command.operationId
+          : (input.signed.pass.id as string as OperationId);
       if (script !== "settle-without-submitted") setTimeout(() => submitted(operationId), 0);
       setTimeout(() => {
         if (script === "reject") rejected(rejection);
@@ -89,7 +93,7 @@ describe.each([
   ["60 s", 60_000],
 ])("NFR-9: a backend at %s", (_, latency) => {
   it("presents a write identically, awaited or iterated, early or late", async () => {
-    const submission = scriptedBackend(latency, "settle").submit(signed);
+    const submission = scriptedBackend(latency, "settle").submit({ kind: "command", signed });
     let result: Result<Receipt> | undefined;
     void Promise.resolve(submission).then((r) => {
       result = r;
@@ -112,7 +116,10 @@ describe.each([
   });
 
   it("presents a backend that settles without reporting submitted identically", async () => {
-    const submission = scriptedBackend(latency, "settle-without-submitted").submit(signed);
+    const submission = scriptedBackend(latency, "settle-without-submitted").submit({
+      kind: "command",
+      signed,
+    });
     const early = collect(submission);
     await vi.runAllTimersAsync();
     const expected: SubmissionState[] = [
@@ -124,7 +131,7 @@ describe.each([
   });
 
   it("presents a rejection as a value, with its §10 error", async () => {
-    const submission = scriptedBackend(latency, "reject").submit(signed);
+    const submission = scriptedBackend(latency, "reject").submit({ kind: "command", signed });
     const early = collect(submission);
     await vi.runAllTimersAsync();
     const expected: SubmissionState[] = [
@@ -175,11 +182,27 @@ describe("createSubmission", () => {
 
 describe("the backend port (plan §5.8)", () => {
   it("submits signed commands or signed passes, with an optional sponsorship", () => {
-    expectTypeOf<Backend["submit"]>()
-      .parameter(0)
-      .toEqualTypeOf<SignedCommand | SignedAccessPass>();
+    expectTypeOf<Backend["submit"]>().parameter(0).toEqualTypeOf<SubmitInput>();
+    expectTypeOf<SubmitInput["signed"]>().toEqualTypeOf<SignedCommand | SignedAccessPass>();
     expectTypeOf<Backend["submit"]>().parameter(1).toEqualTypeOf<Sponsorship | undefined>();
     expectTypeOf<ReturnType<Backend["submit"]>>().toEqualTypeOf<Submission<Receipt>>();
+  });
+
+  it("carries presentedAt with a signed pass, required, and never with a command", () => {
+    type PassInput = Extract<SubmitInput, { kind: "pass" }>;
+    type CommandInput = Extract<SubmitInput, { kind: "command" }>;
+    expectTypeOf<PassInput["signed"]>().toEqualTypeOf<SignedAccessPass>();
+    expectTypeOf<PassInput["presentedAt"]>().toEqualTypeOf<Timestamp>();
+    expectTypeOf<CommandInput["signed"]>().toEqualTypeOf<SignedCommand>();
+    expectTypeOf<keyof CommandInput>().toEqualTypeOf<"kind" | "signed">();
+
+    // @ts-expect-error — a command cannot carry presentedAt.
+    const command: SubmitInput = { kind: "command", signed, presentedAt: 0 };
+    // @ts-expect-error — a pass cannot be submitted without it.
+    const pass: SubmitInput = { kind: "pass", signed: {} as SignedAccessPass };
+    // @ts-expect-error — nor can a command pose as a pass to carry one.
+    const posing: SubmitInput = { kind: "pass", signed, presentedAt: 0 };
+    expect([command, pass, posing]).toHaveLength(3);
   });
 
   it("types each query's result", () => {

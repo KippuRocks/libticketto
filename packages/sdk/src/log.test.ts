@@ -10,6 +10,7 @@ import {
   type Result,
   type SignedAccessPass,
   type SignedCommand,
+  type Timestamp,
 } from "./index.js";
 
 describe("the log reader (REQ-SDK-5, AD-17)", () => {
@@ -31,8 +32,14 @@ describe("the log reader (REQ-SDK-5, AD-17)", () => {
   });
 
   it("records the write as submitted, never a backend concept", () => {
-    expectTypeOf<keyof LogRecord>().toEqualTypeOf<"cursor" | "recordedAt" | "event" | "entry">();
+    expectTypeOf<keyof LogRecord>().toEqualTypeOf<
+      "cursor" | "recordedAt" | "event" | "entry" | "presentedAt"
+    >();
     expectTypeOf<LogRecord["entry"]>().toEqualTypeOf<SignedCommand | SignedAccessPass>();
+  });
+
+  it("carries a pass's claimed presentedAt, and null for a command (C7 alignment)", () => {
+    expectTypeOf<LogRecord["presentedAt"]>().toEqualTypeOf<Timestamp | null>();
   });
 
   it("starts the log at an opaque cursor", () => {

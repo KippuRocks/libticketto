@@ -29,6 +29,12 @@ export interface LogRecord {
   readonly event: { readonly id: EventId; readonly sequence: Count } | null;
   /** The write as submitted, with its authorisation. */
   readonly entry: SignedCommand | SignedAccessPass;
+  /**
+   * When an access pass was presented at the gate, as its submitter claimed it;
+   * `null` for a command, which carries none. A claim the rules bounded
+   * (`REQ-AP-3`), not a time the ledger observed.
+   */
+  readonly presentedAt: Timestamp | null;
 }
 
 /** One page of the log. */
