@@ -321,6 +321,11 @@ export function translateQuery<Q extends Query>(
       if (value !== null && !isHex(value))
         return defect("getCancellationHolder answered no account");
       break;
+    case "getCredential":
+      // A `Registration` travels as hex (§1.2, §3.3); the SDK's value is its bytes.
+      if (value === null) break;
+      if (!isHex(value) || value === "") return defect("getCredential answered no registration");
+      return { outcome: "value", value: { ok: true, value: fromHex(value) as QueryResult<Q> } };
     default:
       return defect("a query of an unknown kind");
   }

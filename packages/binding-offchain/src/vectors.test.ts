@@ -7,19 +7,23 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import type { TestBackend } from "@ticketto/conformance";
 import { decodeSignedAccessPass, decodeSignedCommand } from "@ticketto/profile-v0";
 import type { Sponsorship } from "@ticketto/sdk";
 import { describe, expect, it } from "vitest";
 import { BASE_URL, scriptedFetch } from "../test/fake-fetch.js";
 import { FakeService } from "../test/fake-service.js";
+import { backendSuite } from "../test/suites/backend.suite.js";
 import { clientSuite } from "../test/suites/client.suite.js";
 import { submitSuite } from "../test/suites/submit.suite.js";
+import { testingSuite } from "../test/suites/testing.suite.js";
 import { assertMapped, translationSuite } from "../test/suites/translation.suite.js";
 import { unavailableSuite } from "../test/suites/unavailable.suite.js";
 import { type C4Vectors, type Exchange, vectorsSuite } from "../test/suites/vectors.suite.js";
 import { createC4Client } from "./client.js";
 import { fromHex, toHex } from "./hex.js";
 import { createOffchainSubmit } from "./submit.js";
+import type { TestOffchainBackend } from "./testing/index.js";
 import { WIRE_CODES, WIRE_TRANSLATION, type WireCode } from "./translation.js";
 import { ENDPOINTS } from "./wire.js";
 
@@ -205,3 +209,9 @@ clientSuite({ describe, it });
 submitSuite(vectors)({ describe, it });
 translationSuite(vectors)({ describe, it });
 unavailableSuite(vectors)({ describe, it });
+backendSuite(vectors)({ describe, it });
+testingSuite({ describe, it });
+
+// The test controls are the conformance suite's `TestBackend`, as T-007-05 needs them.
+export type ConformanceReady = TestOffchainBackend extends TestBackend ? true : never;
+export const conformanceReady: ConformanceReady = true;

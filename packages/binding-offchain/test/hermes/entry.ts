@@ -9,8 +9,10 @@ import "./prelude.js";
 // Resolved by test/hermes/run.ts to test/c4/c4-v0.json, published on globalThis.
 import "ticketto-c4-vectors";
 import { runSuites } from "../harness.js";
+import { backendSuite } from "../suites/backend.suite.js";
 import { clientSuite } from "../suites/client.suite.js";
 import { submitSuite } from "../suites/submit.suite.js";
+import { testingSuite } from "../suites/testing.suite.js";
 import { translationSuite } from "../suites/translation.suite.js";
 import { unavailableSuite } from "../suites/unavailable.suite.js";
 import { type C4Vectors, vectorsSuite } from "../suites/vectors.suite.js";
@@ -29,6 +31,8 @@ if (vectors === undefined) {
       submitSuite(vectors),
       translationSuite(vectors),
       unavailableSuite(vectors),
+      backendSuite(vectors),
+      testingSuite,
     ],
     print,
   ).then(

@@ -44,6 +44,16 @@ interface Held {
 }
 
 export interface FakeServiceOptions {
+  /** The most records one log page carries: the service MAY return fewer than asked (C4.md §3.4). */
+  readonly pageSize?: number;
+  /** Whether hint responses stream their bodies, as Node's `fetch` does and React Native's does not. */
+  readonly streams?: boolean;
+  /** Answers `POST /v0/query`: the SDK's `Result`, as C4 carries it. */
+  readonly query?: (query: Record<string, unknown>) => unknown;
+  /** The test-mode clock's start; without it, `/v0/testing/clock` does not exist (C4.md Appendix A). */
+  readonly clock?: number;
+  /** The assurance declaration `GET /v0/assurance` answers. */
+  readonly assurance?: Record<string, string>;
   /** Pending answers each submission gets before it is recorded. */
   readonly pendingPolls?: number;
   readonly faults?: readonly Fault[];
@@ -58,6 +68,15 @@ export interface SeenExchange {
   readonly path: string;
   readonly body: string | undefined;
   readonly fault: Fault;
+}
+
+/** A log record as `GET /v0/log` carries it (C4.md §3.4). */
+export interface LogRecordJson {
+  readonly cursor: string;
+  readonly recordedAt: number;
+  readonly event: { readonly id: string; readonly sequence: number } | null;
+  readonly entry: { readonly kind: "command" | "pass"; readonly bytes: string };
+  readonly presentedAt: number | null;
 }
 
 const JSON_HEADERS: Readonly<Record<string, string>> = {
@@ -80,11 +99,17 @@ function response(
 export class FakeService {
   /** State changes the ledger recorded, in order: one per applied input. */
   readonly recorded: string[] = [];
+  /** The log, as `GET /v0/log` carries its records. */
+  readonly log: LogRecordJson[] = [];
   readonly seen: SeenExchange[] = [];
   private readonly held = new Map<string, Held>();
   private tokens = 0;
+  /** The test-mode clock, when the service is in test mode. */
+  now: number | undefined;
+  private readonly listeners = new Set<() => void>();
+  private readonly options: FakeServiceOptions;
   private readonly pendingPolls: number;
-  private readonly faults: readonly Fault[];
+  private faults: readonly Fault[];
   private readonly rules: (operationId: string) => TickettoError | undefined;
   private readonly onHang: () => void;
 
@@ -93,6 +118,38 @@ export class FakeService {
     this.faults = options.faults ?? [];
     this.rules = options.rules ?? (() => undefined);
     this.onHang = options.onHang ?? (() => {});
+    this.options = options;
+    this.now = options.clock;
+  }
+
+  /** The cursor of the latest record, or `""` for an empty log. */
+  get head(): string {
+    return this.log[this.log.length - 1]?.cursor ?? "";
+  }
+
+  /** Records an input directly, as if submitted and settled: `kind/bytes/presentedAt`. */
+  append(identity: string): string {
+    const [kind, bytes, presentedAt] = identity.split("/") as [string, string, string];
+    let event: LogRecordJson["event"] = null;
+    if (kind === "command") {
+      const decoded = decodeSignedCommand(fromHex(bytes));
+      const id = decoded.ok ? (decoded.value.command as { event?: string }).event : undefined;
+      if (id !== undefined) {
+        const sequence = this.log.filter((r) => r.event?.id === id).length;
+        event = { id, sequence };
+      }
+    }
+    this.recorded.push(identity);
+    const cursor = String(this.recorded.length);
+    this.log.push({
+      cursor,
+      recordedAt: 1_760_000_000_000 + this.log.length * 1000,
+      event,
+      entry: { kind: kind as "command" | "pass", bytes },
+      presentedAt: presentedAt === "" ? null : Number(presentedAt),
+    });
+    for (const listener of this.listeners) listener();
+    return cursor;
   }
 
   get fetch(): FetchLike {
@@ -130,12 +187,26 @@ export class FakeService {
     if (fault === "restart") {
       for (const [token, held] of this.held) if (held.state === "pending") this.held.delete(token);
     }
-    const answer =
-      init.method === "POST" && path === "/v0/submit"
-        ? this.submit(init.body ?? "")
-        : this.poll(path);
+    const answer = this.route(path, init);
     if (fault === "drop-after") throw new TypeError("fetch failed: connection reset");
     return answer;
+  }
+
+  private route(path: string, init: FetchInit): FetchResponseLike {
+    if (path === "/v0/submit" && init.method === "POST") return this.submit(init.body ?? "");
+    if (path === "/v0/query" && init.method === "POST") {
+      return response(200, { result: this.options.query?.(JSON.parse(init.body ?? "{}")) });
+    }
+    if (path.startsWith("/v0/log?")) return this.readLog(path);
+    if (path === "/v0/log/hints") return this.hints();
+    if (path === "/v0/checkpoints/latest") {
+      return response(200, { head: this.head, checkpoint: null });
+    }
+    if (path === "/v0/assurance") {
+      return response(200, { assurance: this.options.assurance ?? {} });
+    }
+    if (path === "/v0/testing/clock") return this.testClock(init);
+    return this.poll(path);
   }
 
   private submit(text: string): FetchResponseLike {
@@ -175,6 +246,78 @@ export class FakeService {
     return response(202, { operationId, submission: held.token });
   }
 
+  private readLog(path: string): FetchResponseLike {
+    const match = /^\/v0\/log\?from=([^&]*)&limit=(\d+)$/.exec(path);
+    if (match === null) return response(400, { error: { code: "malformed" } });
+    const from = match[1] as string;
+    const limit = Math.min(Number(match[2]), this.options.pageSize ?? 1000);
+    const start = from === "" ? 0 : this.log.findIndex((r) => r.cursor === from) + 1;
+    if (start === 0 && from !== "") return response(404, { error: { code: "cursor-unknown" } });
+    const records = this.log.slice(start, start + limit);
+    return response(200, { records, next: records[records.length - 1]?.cursor ?? from });
+  }
+
+  /** A live hint stream: the head on connecting, then each new head (C4.md §3.5). */
+  private hints(): FetchResponseLike {
+    const headers = { "content-type": "text/event-stream" };
+    const base = response(200, "", headers);
+    if (this.options.streams === false) return { ...base, body: null };
+    const encode = (cursor: string) =>
+      Uint8Array.from(`event: hint\ndata: {"cursor":"${cursor}"}\n\n`, (c) => c.charCodeAt(0));
+    let sent: string | undefined;
+    let closed = false;
+    let wake: (() => void) | undefined;
+    const listener = () => wake?.();
+    this.listeners.add(listener);
+    const reader = {
+      read: async (): Promise<{ done: boolean; value?: Uint8Array }> => {
+        while (!closed && sent === this.head) {
+          await new Promise<void>((resolve) => {
+            wake = resolve;
+          });
+        }
+        if (closed) return { done: true };
+        sent = this.head;
+        return { done: false, value: encode(sent) };
+      },
+      cancel: async () => {
+        closed = true;
+        this.listeners.delete(listener);
+        wake?.();
+      },
+    };
+    return { ...base, body: { getReader: () => reader } };
+  }
+
+  /** C4.md Appendix A: the test-mode clock. */
+  private testClock(init: FetchInit): FetchResponseLike {
+    if (this.now === undefined) return response(404, { error: { code: "not-found" } });
+    if (init.method === "POST") {
+      const body = JSON.parse(init.body ?? "{}") as { set?: number; advance?: number };
+      const keys = Object.keys(body);
+      if (keys.length !== 1) return response(400, { error: { code: "malformed" } });
+      if (body.set !== undefined) {
+        if (body.set < this.now) return response(400, { error: { code: "malformed" } });
+        this.now = body.set;
+      } else if (body.advance !== undefined && body.advance >= 0) {
+        this.now += body.advance;
+      } else {
+        return response(400, { error: { code: "malformed" } });
+      }
+    }
+    return response(200, { now: this.now });
+  }
+
+  /** Applies `faults` to the next requests, in order, after those already seen. */
+  inject(...faults: Fault[]): void {
+    this.faults = [...this.seen.map((): Fault => "none"), ...faults];
+  }
+
+  /** Hint streams still open. */
+  get openStreams(): number {
+    return this.listeners.size;
+  }
+
   private poll(path: string): FetchResponseLike {
     const match = /^\/v0\/operations\/([0-9a-f]+)\?submission=([^&]+)&wait=(\d+)$/.exec(path);
     if (match === null) throw new AssertionError(`the binding polled ${path}`);
@@ -187,9 +330,8 @@ export class FakeService {
       if (held.polls > this.pendingPolls) {
         const error = this.rules(held.operationId);
         if (error === undefined) {
-          this.recorded.push(held.identity);
+          held.cursor = this.append(held.identity);
           held.state = "settled";
-          held.cursor = String(this.recorded.length);
         } else {
           held.state = "rejected";
           held.error = error;

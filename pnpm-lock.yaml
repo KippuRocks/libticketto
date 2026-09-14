@@ -64,6 +64,9 @@ importers:
       '@react-native/metro-config':
         specifier: 0.87.1
         version: 0.87.1(@babel/core@7.29.7)
+      '@ticketto/conformance':
+        specifier: workspace:*
+        version: link:../conformance
       '@types/node':
         specifier: 24.13.4
         version: 24.13.4

@@ -59,6 +59,7 @@ const CURSOR = /^[A-Za-z0-9._~-]{0,128}$/;
 const TOKEN = /^[A-Za-z0-9._~-]{1,128}$/;
 const IDENTIFIER_32 = /^[0-9a-f]{64}$/;
 const OPERATION_ID = /^(?:[0-9a-f]{2})+$/;
+const CREDENTIAL_ID = /^(?:[0-9a-f]{2}){1,64}$/;
 
 /** C4.md §1.4: a cursor on the wire. The empty string is `LOG_START`. */
 export function isCursor(value: unknown): value is Cursor {
@@ -143,9 +144,7 @@ function identifier(value: unknown, name: string): string {
 
 /**
  * C4.md §3.3. The body is the SDK's `Query`, with exactly the fields of its
- * kind: the service refuses a field it does not know (§1.1). C4 version 0
- * defines four kinds; any other SDK query — `getCredential` among them — has no
- * C4 request, and is refused rather than sent.
+ * kind: the service refuses a field it does not know (§1.1).
  */
 export function queryRequest(query: Query): WireRequest {
   let body: Json;
@@ -165,6 +164,17 @@ export function queryRequest(query: Query): WireRequest {
       break;
     case "getCancellationHolder":
       body = { kind: query.kind, ticket: identifier(query.ticket, "ticket") };
+      break;
+    case "getCredential":
+      // A `CredentialId`'s width depends on its kind: 1 to 64 bytes (T-010-12).
+      if (typeof query.credential !== "string" || !CREDENTIAL_ID.test(query.credential)) {
+        refuse("credential is not a CredentialId");
+      }
+      body = {
+        kind: query.kind,
+        account: identifier(query.account, "account"),
+        credential: query.credential,
+      };
       break;
     default:
       refuse(`unknown query kind ${String((query as { kind?: unknown }).kind)}`);

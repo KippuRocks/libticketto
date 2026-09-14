@@ -4,9 +4,8 @@ The SDK binding to the hosted `ticketto-offchain` ledger service.
 
 Owned by `F-007`.
 
-**Status:** the `C4` client (`T-007-01`) and `submit` over it (`T-007-02`). The rest
-of the `C8` backend port — queries, the log reader and hints, assurance — is not
-implemented yet (`T-007-03`).
+**Status:** the `C8` backend port over `C4` — submission, queries, the log reader
+with hints, and assurance — with test controls under `/testing`.
 
 | | |
 |---|---|
@@ -34,6 +33,40 @@ those decisions, and the translation onto the SDK surface, belong to the port.
 - **The hint stream** needs a streamed response body, which Node's `fetch` has
   and React Native's does not; React Native readers poll
   `GET /v0/checkpoints/latest` instead (`F-007` §5).
+
+## The backend
+
+```ts
+const connected = await connectOffchainBackend({ url: "https://ledger.example" });
+if (connected.ok) createTicketto({ backend: connected.value, profile, sponsor, operationLifetime });
+```
+
+`connectOffchainBackend` reads the deployment's assurance declaration once — the
+port exposes it as a plain property — and answers `ERR-LedgerUnavailable` when the
+service cannot be reached.
+
+- **Queries** (`POST /v0/query`) answer the SDK's `Result` unchanged;
+  `getCredential`'s `Registration` arrives as hex and is returned as bytes.
+- **The log reader** (`GET /v0/log`) decodes each entry with `@ticketto/profile-v0`'s
+  signed-input decoders into `SignedCommand` or `SignedAccessPass`. A limit above
+  C4's 1000 is served as a shorter page, which `LogPage` allows.
+- **Hints** carry cursors only (`AD-17`). `events` reads the service's server-sent
+  stream (Node); `poll` polls `GET /v0/checkpoints/latest`'s head (React Native).
+  The default, `auto`, streams, and polls from the first time the platform's
+  `fetch` returns no streamed body. A failed transport reconnects with backoff
+  for as long as the reader iterates.
+- Reads spend a retry budget of their own and answer `ERR-LedgerUnavailable` when
+  it is spent; a defect throws `C4Defect`.
+
+## Test controls
+
+`@ticketto/binding-offchain/testing` connects to a service in test mode
+(`TICKETTO_TEST_MODE=1`, `C4.md` Appendix A) with `connectTestOffchainBackend`: the
+port plus the conformance suite's `TestControls` — a clock over
+`/v0/testing/clock` and seeded `randomBytes`. The clock is synchronous, as the
+suite expects: `now()` answers at once, and every request the port makes waits
+until the clock changes before it have reached the service. A change the service
+refuses fails the next request with `TestModeError`. For tests only.
 
 ## Submitting
 
