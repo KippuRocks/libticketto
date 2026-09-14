@@ -18,6 +18,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./migration": {
+      "types": "./dist/migration.d.ts",
+      "default": "./dist/migration.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -26,8 +30,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json",
-    "api:check": "api-extractor run",
-    "api:update": "api-extractor run --local"
+    "api:check": "api-extractor run && api-extractor run --config api-extractor.migration.json",
+    "api:update": "api-extractor run --local && api-extractor run --local --config api-extractor.migration.json"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "7.59.1",

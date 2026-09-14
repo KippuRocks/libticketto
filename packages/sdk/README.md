@@ -15,6 +15,19 @@ change, run `pnpm build && pnpm api:update` and commit the report with the
 change. After `M0`, a PR that changes the report must update
 `features/002-sdk/plan.md` in `kippurocks/kippu-docs` too.
 
+The `@ticketto/sdk/migration` entry point has its own report,
+[`api/sdk-migration.api.md`](api/sdk-migration.api.md), checked the same way.
+
+## Migration
+
+`@ticketto/sdk/migration` exports `exportLedger(backend)` and
+`importLedger(backend, stream)` over the backend port's optional `migration`
+member (plan §5.8a, `REQ-MG-3`). It is an operator's tool, not an application's:
+the stream is `@ticketto/log`'s export format, carried as opaque bytes, and
+import accepts only an empty backend. Failures are a `MigrationResult` with a
+typed reason — `unsupported`, `notEmpty` or `malformed` — never a §10 error.
+Verifying an import against its export is `@ticketto/log`'s driver.
+
 | | |
 |---|---|
 | Runs on | Node 24, React Native (Hermes), browser |

@@ -83,6 +83,15 @@ export type {
 } from "./identifiers.js";
 
 export { type Cursor, LOG_START, type LogPage, type LogReader, type LogRecord } from "./log.js";
+// The port member's types only: `exportLedger` and `importLedger` are on the
+// `@ticketto/sdk/migration` entry point.
+export type {
+  Migration,
+  MigrationExport,
+  MigrationFailure,
+  MigrationFailureReason,
+  MigrationResult,
+} from "./migration.js";
 export {
   createSubmission,
   type Receipt,

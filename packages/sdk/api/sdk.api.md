@@ -63,6 +63,7 @@ export type Authorisation = Brand<Uint8Array, "Authorisation">;
 export interface Backend {
     readonly assurance: AssuranceDeclaration;
     readonly log: LogReader;
+    readonly migration?: Migration;
     query<Q extends Query>(query: Q): Promise<Result<QueryResult<Q>>>;
     submit(input: SubmitInput, sponsorship?: Sponsorship): Submission<Receipt>;
 }
@@ -293,6 +294,41 @@ export interface LogRecord {
 
 // @public
 export type MetadataLocator = string;
+
+// @public
+export interface Migration {
+    export(): AsyncIterable<Uint8Array>;
+    import(stream: AsyncIterable<Uint8Array>): Promise<MigrationResult>;
+}
+
+// @public
+export type MigrationExport = {
+    readonly ok: true;
+    readonly stream: AsyncIterable<Uint8Array>;
+} | MigrationFailure;
+
+// @public
+export interface MigrationFailure {
+    readonly detail?: string;
+    // (undocumented)
+    readonly ok: false;
+    // (undocumented)
+    readonly reason: MigrationFailureReason;
+}
+
+// @public
+export type MigrationFailureReason =
+/** The backend offers no `migration` member. */
+"unsupported"
+/** Import was asked of a backend that already holds ledger state; import accepts only an empty one. */
+| "notEmpty"
+/** The stream is not a well-formed export, or its parts disagree with one another. */
+| "malformed";
+
+// @public
+export type MigrationResult = {
+    readonly ok: true;
+} | MigrationFailure;
 
 // @public
 export interface OperationEnvelope {
