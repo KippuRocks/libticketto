@@ -49,3 +49,21 @@ jobs:
         run: pnpm hermes
       - name: Self-test — a Node-only API in sdk must fail the bundle
         run: pnpm vitest run --project @libticketto/hermes-bundle
+
+  canary:
+    # T-001-07: a Changesets snapshot of every @ticketto/* package, packed with
+    # `pnpm pack` and installed into a throwaway client outside the workspace,
+    # where each package is imported and typechecked by name. Nothing is
+    # published.
+    name: Canary release installs in a client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm canary

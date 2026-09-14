@@ -1,0 +1,19 @@
+{
+  "name": "@libticketto/canary",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Builds a Changesets snapshot of every @ticketto/* package, packs it, and installs it into a throwaway client",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "canary": "node dist/cli.js"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.4"
+  }
+}
