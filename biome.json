@@ -6,7 +6,8 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false
+    "ignoreUnknown": false,
+    "includes": ["**", "!packages/binding-offchain/test/c4/c4-v0.json"]
   },
   "formatter": {
     "enabled": true,

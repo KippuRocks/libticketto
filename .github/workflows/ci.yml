@@ -90,6 +90,10 @@ jobs:
           fi
           packages/profile-v0/test/hermes/build-vm.sh ~/.cache/hermes-vm
       - run: HERMES_VM="$HOME/.cache/hermes-vm/bin/hermes" pnpm --filter @ticketto/profile-v0 test:hermes
+      # T-007-01: the C4 vectors and the client's suites under the same VM. The
+      # binding imports @ticketto/sdk at run time, so its dependencies are built.
+      - run: pnpm --filter "@ticketto/binding-offchain^..." build
+      - run: HERMES_VM="$HOME/.cache/hermes-vm/bin/hermes" pnpm --filter @ticketto/binding-offchain test:hermes
       # T-003-09: pass size and verification time on Node and Hermes, printed
       # for the benchmark report. Informational; a pass that fails to verify fails.
       - name: Pass benchmark (Node, Hermes)

@@ -1,0 +1,1944 @@
+{
+  "protocol": "C4",
+  "version": "v0",
+  "source": {
+    "libticketto": "f605901aad54a50a71420af1b11b1b17e2b8911a"
+  },
+  "rpId": "kippu.example",
+  "parties": [
+    {
+      "name": "organiser",
+      "account": "1c30e14919aed23e90c619e69ddfcdc77e81f703f560c24c025814482c81d405",
+      "registration": "00010253281311c3a7a3f7a821cb33ad17edc7bc0b4c3e1f9fb929130e318a4f4a15e262a78aa1afec4b634b7c7fbc73026cc3281b012d9034ef34c257b9fd4afa3fbc12119acf3226c4dcc84b050b1aae980b3a0a43155e5e4162ced5bd49c2f107e0"
+    },
+    {
+      "name": "holder",
+      "account": "e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1",
+      "registration": "00001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea156b726569766f5f70000000000000000000000000000000000000000000000000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df0000000091027f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec74500000001000000000000000000000000000000000020a1e68542121aee3aadb7b6d168a73ad7467a5e260df3be1979aa790fb464e1fca50102032620012158207534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662362258201def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee8425027b2274797065223a22776562617574686e2e637265617465222c226368616c6c656e6765223a22573164634f7257486838564a5a5758797054454778783833434c4634586b76646b67764278624445316a45222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d6d013059301306072a8648ce3d020106082a8648ce3d030107034200047534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662361def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee84"
+    },
+    {
+      "name": "publication",
+      "account": "33fdd765c2fbb49d809b2851b67d407a278e4d067a81ef8c103cfa289d1d041e",
+      "registration": "0001021c3d3af2d187aff61269074911a92c4bba6374ad977db02c1d35bb19d54e6077509a43fc650b16553d83344c2b93668a9fba2b6d65c2a2b4bf5c914553f9b53044fb32e3522f16441b5323eaeb1af12d646722e88447a0973671b3257a4771c3"
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "submit a sponsored command: createEvent by the organiser",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "sponsored command",
+        "REQ-SP-1",
+        "US-A1"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "command",
+            "bytes": "0000bd0200cb9842ff022a262d6202d043f88eb64be05331c89901000000a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b20c4c4c4c4c4c4c4c408495ae114deccd30a5376bee2bbd56d7df0e49b9e77c5dc37fe37b2dc491d6bcf00add3876998614d7b4c18731f50f97a92edceff1e13663e68425e04c1c0db4fe20101d107019068747470733a2f2f6d6574612e6b697070752e6578616d706c652f6576656e74732f63348d0100010253281311c3a7a3f7a821cb33ad17edc7bc0b4c3e1f9fb929130e318a4f4a15e20021e9595a47c2a7cbda0a72dd0629131fdff534b8f445fc8211d4031265825868134207568cf355d888c259e4b30d49306d05f3c058d7166860487d2d221ced"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f206362393834326666303232613236326436323032643034336638386562363462"
+        }
+      },
+      "response": {
+        "status": 202,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "operationId": "cb9842ff022a262d6202d043f88eb64b",
+          "submission": "sfc2a9907083fc88c2eebf6256f866441"
+        }
+      },
+      "decoded": {
+        "input": {
+          "command": {
+            "kind": "createEvent",
+            "operationId": "cb9842ff022a262d6202d043f88eb64b",
+            "expiresAt": 1760000300000,
+            "event": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+            "salt": "c4c4c4c4c4c4c4c4",
+            "zones": [
+              {
+                "id": "495ae114deccd30a5376bee2bbd56d7df0e49b9e77c5dc37fe37b2dc491d6bcf",
+                "kind": "Seated"
+              },
+              {
+                "id": "add3876998614d7b4c18731f50f97a92edceff1e13663e68425e04c1c0db4fe2",
+                "kind": "Unseated"
+              }
+            ],
+            "capacity": 500,
+            "metadata": "https://meta.kippu.example/events/c4"
+          },
+          "authorisation": "00010253281311c3a7a3f7a821cb33ad17edc7bc0b4c3e1f9fb929130e318a4f4a15e20021e9595a47c2a7cbda0a72dd0629131fdff534b8f445fc8211d4031265825868134207568cf355d888c259e4b30d49306d05f3c058d7166860487d2d221ced"
+        }
+      },
+      "illustrative": [
+        "request.body.sponsorship",
+        "response.body.submission"
+      ],
+      "binding": {
+        "surface": "submitted",
+        "operationId": "cb9842ff022a262d6202d043f88eb64b"
+      }
+    },
+    {
+      "name": "submit a sponsored command on the direct path: transferTicket by the holder",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "sponsored command",
+        "REQ-SP-1",
+        "REQ-CL-1",
+        "US-D1"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "command",
+            "bytes": "0000e901008333f96fa07b1d2cf5e3fdb00a0955ea00a231c89901000006a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f203833333366393666613037623164326366356533666462303061303935356561"
+        }
+      },
+      "response": {
+        "status": 202,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea",
+          "submission": "s880438ea4da4978ddab36e3d7e6f49c6"
+        }
+      },
+      "decoded": {
+        "input": {
+          "command": {
+            "kind": "transferTicket",
+            "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea",
+            "expiresAt": 1760000320000,
+            "event": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+            "ticket": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c",
+            "receiver": "1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a0"
+          },
+          "authorisation": "0000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+        }
+      },
+      "illustrative": [
+        "request.body.sponsorship",
+        "response.body.submission"
+      ],
+      "binding": {
+        "surface": "submitted",
+        "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea"
+      }
+    },
+    {
+      "name": "resubmit the identical transferTicket request: same operation, same token",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "idempotent resubmission",
+        "REQ-CM-1"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "command",
+            "bytes": "0000e901008333f96fa07b1d2cf5e3fdb00a0955ea00a231c89901000006a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f203833333366393666613037623164326366356533666462303061303935356561"
+        }
+      },
+      "response": {
+        "status": 202,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea",
+          "submission": "s880438ea4da4978ddab36e3d7e6f49c6"
+        }
+      },
+      "decoded": {
+        "input": {
+          "command": {
+            "kind": "transferTicket",
+            "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea",
+            "expiresAt": 1760000320000,
+            "event": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+            "ticket": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c",
+            "receiver": "1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a0"
+          },
+          "authorisation": "0000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+        }
+      },
+      "illustrative": [
+        "request.body.sponsorship",
+        "response.body.submission"
+      ],
+      "binding": {
+        "surface": "submitted",
+        "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea"
+      }
+    },
+    {
+      "name": "submit a different command under a recorded operation id: a different token",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "conflicting resubmission",
+        "REQ-CM-1",
+        "ERR-OperationConflict"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "command",
+            "bytes": "0000e901008333f96fa07b1d2cf5e3fdb00a0955ea00a231c89901000006a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c1c30e14919aed23e90c619e69ddfcdc77e81f703f560c24c025814482c81d40575050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000419027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a22503877396f61423352536875636b364c566b426f2d382d6131305f3277385741597261476f396f30476551222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1d013045022100b7735af969b2d3b1c8e5cb2a71d2a32610516ba05c4e54f10a472550502bef200220762e7bfc907fa227cc415c4645f63d1c895445aa4f7f1be7599bcd0ff91bfae0"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f203833333366393666613037623164326366356533666462303061303935356561"
+        }
+      },
+      "response": {
+        "status": 202,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea",
+          "submission": "s9d09358f60a2b65f626c1cea72949df2"
+        }
+      },
+      "decoded": {
+        "input": {
+          "command": {
+            "kind": "transferTicket",
+            "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea",
+            "expiresAt": 1760000320000,
+            "event": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+            "ticket": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c",
+            "receiver": "1c30e14919aed23e90c619e69ddfcdc77e81f703f560c24c025814482c81d405"
+          },
+          "authorisation": "0000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000419027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a22503877396f61423352536875636b364c566b426f2d382d6131305f3277385741597261476f396f30476551222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1d013045022100b7735af969b2d3b1c8e5cb2a71d2a32610516ba05c4e54f10a472550502bef200220762e7bfc907fa227cc415c4645f63d1c895445aa4f7f1be7599bcd0ff91bfae0"
+        }
+      },
+      "illustrative": [
+        "request.body.sponsorship",
+        "response.body.submission"
+      ],
+      "binding": {
+        "surface": "submitted",
+        "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea"
+      }
+    },
+    {
+      "name": "submit a sponsored access pass with presentedAt",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "sponsored access pass",
+        "REQ-SP-1",
+        "REQ-CL-3",
+        "US-E3",
+        "AD-15"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "pass",
+            "bytes": "0001850100f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8ce408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1b7cf1f815bc6951410ea8053c104e60598fa2cc899010000f8e42dc89901000071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000519027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2276677139456244425f336e6d4f71587757784174597a75773358464f493774446c643076304a53707a4467222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207bfb5beed5192796651669357e85521cac3bf7bcca83ed9571c951c26cbf0b3702200f2e1b504a7aaba61e622658bad5b420bb36595aa81bbb2beb9e9a73e22efe91"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f206237636631663831356263363935313431306561383035336331303465363035",
+          "presentedAt": 1760000016000
+        }
+      },
+      "response": {
+        "status": 202,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "operationId": "b7cf1f815bc6951410ea8053c104e605",
+          "submission": "s90c0ac812c86499c55fe7538e699be18"
+        }
+      },
+      "decoded": {
+        "input": {
+          "pass": {
+            "ticket": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c",
+            "holder": "e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1",
+            "id": "b7cf1f815bc6951410ea8053c104e605",
+            "notBefore": 1760000015000,
+            "notAfter": 1760000075000
+          },
+          "authorisation": "0000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000519027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2276677139456244425f336e6d4f71587757784174597a75773358464f493774446c643076304a53707a4467222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207bfb5beed5192796651669357e85521cac3bf7bcca83ed9571c951c26cbf0b3702200f2e1b504a7aaba61e622658bad5b420bb36595aa81bbb2beb9e9a73e22efe91"
+        },
+        "presentedAt": 1760000016000
+      },
+      "illustrative": [
+        "request.body.sponsorship",
+        "response.body.submission"
+      ],
+      "binding": {
+        "surface": "submitted",
+        "operationId": "b7cf1f815bc6951410ea8053c104e605"
+      }
+    },
+    {
+      "name": "submit without a sponsorship",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "wire error sponsorship-missing",
+        "F-010 §5.3",
+        "ERR-SponsorshipRefused"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "command",
+            "bytes": "0000e901008333f96fa07b1d2cf5e3fdb00a0955ea00a231c89901000006a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+          },
+          "sponsorship": null
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "error": {
+            "code": "sponsorship-missing"
+          }
+        }
+      },
+      "binding": {
+        "surface": "rejected",
+        "error": {
+          "code": "ERR-SponsorshipRefused"
+        }
+      }
+    },
+    {
+      "name": "submit with a sponsorship bound to another operation",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "wire error sponsorship-invalid",
+        "F-010 §5.3",
+        "ERR-SponsorshipRefused"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "command",
+            "bytes": "0000e901008333f96fa07b1d2cf5e3fdb00a0955ea00a231c89901000006a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f206362393834326666303232613236326436323032643034336638386562363462"
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "error": {
+            "code": "sponsorship-invalid",
+            "detail": "not bound to this operation"
+          }
+        }
+      },
+      "illustrative": [
+        "request.body.sponsorship"
+      ],
+      "binding": {
+        "surface": "rejected",
+        "error": {
+          "code": "ERR-SponsorshipRefused"
+        }
+      }
+    },
+    {
+      "name": "submit a pass that does not decode: the profile's ERR-InvalidPass",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "rejection at submission",
+        "ERR-InvalidPass",
+        "REQ-AP-1"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "pass",
+            "bytes": "0001850100f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8ce408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1b7cf1f815bc6951410ea8053c104e60598fa2cc899010000f8e42dc89901000071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000519027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2276677139456244425f336e6d4f71587757784174597a75773358464f493774446c643076304a53707a4467222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207bfb5beed5192796651669357e85521cac3bf7bcca83ed9571c951c26cbf0b3702200f2e1b504a7aaba61e622658bad5b420bb36595aa81bbb2beb9e9a73e22efe"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f206237636631663831356263363935313431306561383035336331303465363035",
+          "presentedAt": 1760000016000
+        }
+      },
+      "response": {
+        "status": 422,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "rejection": {
+            "code": "ERR-InvalidPass",
+            "detail": "malformed signed access pass"
+          }
+        }
+      },
+      "illustrative": [
+        "request.body.sponsorship",
+        "response.body.rejection.detail"
+      ],
+      "binding": {
+        "surface": "rejected",
+        "error": {
+          "code": "ERR-InvalidPass",
+          "detail": "malformed signed access pass"
+        }
+      }
+    },
+    {
+      "name": "submit a signed command that does not decode: the profile's ERR-InvalidAuthorisation",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "rejection at submission",
+        "ERR-InvalidAuthorisation",
+        "REQ-CP-6"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "command",
+            "bytes": "0000e901008333f96fa07b1d2cf5e3fdb00a0955ea00a231c89901000006a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b00"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f203833333366393666613037623164326366356533666462303061303935356561"
+        }
+      },
+      "response": {
+        "status": 422,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "rejection": {
+            "code": "ERR-InvalidAuthorisation",
+            "detail": "malformed signed command"
+          }
+        }
+      },
+      "illustrative": [
+        "request.body.sponsorship",
+        "response.body.rejection.detail"
+      ],
+      "binding": {
+        "surface": "rejected",
+        "error": {
+          "code": "ERR-InvalidAuthorisation",
+          "detail": "malformed signed command"
+        }
+      }
+    },
+    {
+      "name": "submit a pass without presentedAt",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "wire error malformed",
+        "defect"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "pass",
+            "bytes": "0001850100f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8ce408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1b7cf1f815bc6951410ea8053c104e60598fa2cc899010000f8e42dc89901000071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000519027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2276677139456244425f336e6d4f71587757784174597a75773358464f493774446c643076304a53707a4467222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207bfb5beed5192796651669357e85521cac3bf7bcca83ed9571c951c26cbf0b3702200f2e1b504a7aaba61e622658bad5b420bb36595aa81bbb2beb9e9a73e22efe91"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f206237636631663831356263363935313431306561383035336331303465363035"
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "error": {
+            "code": "malformed",
+            "detail": "presentedAt is required for a pass"
+          }
+        }
+      },
+      "illustrative": [
+        "request.body.sponsorship",
+        "response.body.error.detail"
+      ],
+      "binding": {
+        "surface": "defect"
+      }
+    },
+    {
+      "name": "submit a command with presentedAt",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "wire error malformed",
+        "defect"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "command",
+            "bytes": "0000e901008333f96fa07b1d2cf5e3fdb00a0955ea00a231c89901000006a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f203833333366393666613037623164326366356533666462303061303935356561",
+          "presentedAt": 1760000016000
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "error": {
+            "code": "malformed",
+            "detail": "presentedAt is only for a pass"
+          }
+        }
+      },
+      "illustrative": [
+        "request.body.sponsorship",
+        "response.body.error.detail"
+      ],
+      "binding": {
+        "surface": "defect"
+      }
+    },
+    {
+      "name": "submit bytes in upper-case hex",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "wire error malformed",
+        "defect",
+        "C4.md §1.2"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "command",
+            "bytes": "0000E901008333F96FA07B1D2CF5E3FDB00A0955EA00A231C89901000006A849673EFD6C727A86C6067474E08EF65CE5177E631F1F233C7169F29380FF1BF00837ECB1C7892300BA5273D0DED5E0BCE76595F9D911DDB31E511D6D91BE8C1AC6F2ACF9EB8DB9C1E8C54A47392EB26946F4C8E5213718D6F59A6A0ECB06A071050000999C2D2A4EFF77FBCCF42BE6031F387D75F3913C6DF80B1158825348684113DF6B726569766F5F700000000000000000000000000000000000000000000000001FD1F3E085CD16651057013DBA0CF1B9707FE4FB3F430ABCD1A2C1F88686EA1500000000947F29350E3373F0D1AE772F5FC13AE8C5B1CE5147A48B6D414DDAD120EAA6CEC7050000000319027B2274797065223A22776562617574686E2E676574222C226368616C6C656E6765223A2271505445776E72425F57746779706B3479666B7A54746F53734774635A7567446E4642466D4177714B7051222C226F726967696E223A2268747470733A2F2F6B697070752E6578616D706C65222C2263726F73734F726967696E223A66616C73657D1901304402207792BF1885A9004821A7ECABCE4E0D992C2F4A4E1068BB851A1E47258E3BB1550220241D2014AD3D0ABDC9392A99A24E50981BB4ABE10CF03A74784DAEDB8DBE8C9B"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f203833333366393666613037623164326366356533666462303061303935356561"
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "error": {
+            "code": "malformed",
+            "detail": "bytes are not lower-case hex"
+          }
+        }
+      },
+      "illustrative": [
+        "request.body.sponsorship",
+        "response.body.error.detail"
+      ],
+      "binding": {
+        "surface": "defect"
+      }
+    },
+    {
+      "name": "submit while the service is unavailable",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "wire error unavailable",
+        "ERR-LedgerUnavailable",
+        "REQ-CM-1"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "command",
+            "bytes": "0000e901008333f96fa07b1d2cf5e3fdb00a0955ea00a231c89901000006a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f203833333366393666613037623164326366356533666462303061303935356561"
+        }
+      },
+      "response": {
+        "status": 503,
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "retry-after": "2"
+        },
+        "body": {
+          "error": {
+            "code": "unavailable"
+          }
+        }
+      },
+      "illustrative": [
+        "request.body.sponsorship"
+      ],
+      "binding": {
+        "surface": "retry",
+        "exhausted": "ERR-LedgerUnavailable"
+      }
+    },
+    {
+      "name": "submit with no connection to the service",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "transport failure",
+        "ERR-LedgerUnavailable",
+        "REQ-SDK-2"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "command",
+            "bytes": "0000e901008333f96fa07b1d2cf5e3fdb00a0955ea00a231c89901000006a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f203833333366393666613037623164326366356533666462303061303935356561"
+        }
+      },
+      "response": {
+        "transport": "connection-refused"
+      },
+      "illustrative": [
+        "request.body.sponsorship"
+      ],
+      "binding": {
+        "surface": "retry",
+        "exhausted": "ERR-LedgerUnavailable"
+      }
+    },
+    {
+      "name": "submit answered by a proxy's 502 page",
+      "endpoint": "POST /v0/submit",
+      "covers": [
+        "transport failure",
+        "ERR-LedgerUnavailable",
+        "REQ-SDK-2"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/submit",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "input": {
+            "kind": "command",
+            "bytes": "0000e901008333f96fa07b1d2cf5e3fdb00a0955ea00a231c89901000006a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+          },
+          "sponsorship": "706c616365686f6c6465722073706f6e736f727368697020626f756e6420746f203833333366393666613037623164326366356533666462303061303935356561"
+        }
+      },
+      "response": {
+        "status": 502,
+        "headers": {
+          "content-type": "text/html"
+        },
+        "text": "<html><body>Bad Gateway</body></html>"
+      },
+      "illustrative": [
+        "request.body.sponsorship"
+      ],
+      "binding": {
+        "surface": "retry",
+        "exhausted": "ERR-LedgerUnavailable"
+      }
+    },
+    {
+      "name": "long-poll the pass: still pending when wait elapses",
+      "endpoint": "GET /v0/operations/{operationId}",
+      "covers": [
+        "long-poll pending",
+        "NFR-9"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/operations/b7cf1f815bc6951410ea8053c104e605?submission=s90c0ac812c86499c55fe7538e699be18&wait=25000"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "state": "pending"
+        }
+      },
+      "illustrative": [
+        "request.path"
+      ],
+      "binding": {
+        "surface": "pending"
+      }
+    },
+    {
+      "name": "long-poll the pass: settled",
+      "endpoint": "GET /v0/operations/{operationId}",
+      "covers": [
+        "long-poll settled",
+        "US-E3",
+        "NFR-11"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/operations/b7cf1f815bc6951410ea8053c104e605?submission=s90c0ac812c86499c55fe7538e699be18&wait=25000"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "state": "settled",
+          "receipt": {
+            "operationId": "b7cf1f815bc6951410ea8053c104e605",
+            "cursor": "43"
+          }
+        }
+      },
+      "illustrative": [
+        "request.path",
+        "response.body.receipt.cursor"
+      ],
+      "binding": {
+        "surface": "settled",
+        "receipt": {
+          "operationId": "b7cf1f815bc6951410ea8053c104e605",
+          "cursor": "43"
+        }
+      }
+    },
+    {
+      "name": "long-poll transferTicket: settled",
+      "endpoint": "GET /v0/operations/{operationId}",
+      "covers": [
+        "long-poll settled",
+        "US-D1"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/operations/8333f96fa07b1d2cf5e3fdb00a0955ea?submission=s880438ea4da4978ddab36e3d7e6f49c6"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "state": "settled",
+          "receipt": {
+            "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea",
+            "cursor": "44"
+          }
+        }
+      },
+      "illustrative": [
+        "request.path",
+        "response.body.receipt.cursor"
+      ],
+      "binding": {
+        "surface": "settled",
+        "receipt": {
+          "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea",
+          "cursor": "44"
+        }
+      }
+    },
+    {
+      "name": "long-poll the identical resubmission: the original receipt",
+      "endpoint": "GET /v0/operations/{operationId}",
+      "covers": [
+        "idempotent resubmission",
+        "REQ-CM-1"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/operations/8333f96fa07b1d2cf5e3fdb00a0955ea?submission=s880438ea4da4978ddab36e3d7e6f49c6&wait=0"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "state": "settled",
+          "receipt": {
+            "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea",
+            "cursor": "44"
+          }
+        }
+      },
+      "illustrative": [
+        "request.path",
+        "response.body.receipt.cursor"
+      ],
+      "binding": {
+        "surface": "settled",
+        "receipt": {
+          "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea",
+          "cursor": "44"
+        }
+      }
+    },
+    {
+      "name": "long-poll the conflicting submission: rejected",
+      "endpoint": "GET /v0/operations/{operationId}",
+      "covers": [
+        "long-poll rejected",
+        "ERR-OperationConflict",
+        "REQ-CM-1"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/operations/8333f96fa07b1d2cf5e3fdb00a0955ea?submission=s9d09358f60a2b65f626c1cea72949df2&wait=25000"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "state": "rejected",
+          "error": {
+            "code": "ERR-OperationConflict"
+          }
+        }
+      },
+      "illustrative": [
+        "request.path"
+      ],
+      "binding": {
+        "surface": "rejected",
+        "error": {
+          "code": "ERR-OperationConflict"
+        }
+      }
+    },
+    {
+      "name": "long-poll a pass consumed twice: rejected",
+      "endpoint": "GET /v0/operations/{operationId}",
+      "covers": [
+        "long-poll rejected",
+        "ERR-PassReplayed",
+        "INV-6"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/operations/5cf722b99df5b100f65d9974614ba9a3?submission=s1e92a924b82ef93b2d295efbdba43a85&wait=25000"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "state": "rejected",
+          "error": {
+            "code": "ERR-PassReplayed",
+            "detail": "pass already consumed"
+          }
+        }
+      },
+      "illustrative": [
+        "request.path",
+        "response.body.error.detail"
+      ],
+      "binding": {
+        "surface": "rejected",
+        "error": {
+          "code": "ERR-PassReplayed",
+          "detail": "pass already consumed"
+        }
+      }
+    },
+    {
+      "name": "long-poll a submission the service does not hold",
+      "endpoint": "GET /v0/operations/{operationId}",
+      "covers": [
+        "wire error operation-unknown",
+        "REQ-CM-1"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/operations/cb9842ff022a262d6202d043f88eb64b?submission=sfc2a9907083fc88c2eebf6256f866441&wait=25000"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "error": {
+            "code": "operation-unknown"
+          }
+        }
+      },
+      "illustrative": [
+        "request.path"
+      ],
+      "binding": {
+        "surface": "resubmit"
+      }
+    },
+    {
+      "name": "long-poll with wait out of range",
+      "endpoint": "GET /v0/operations/{operationId}",
+      "covers": [
+        "wire error malformed",
+        "defect"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/operations/8333f96fa07b1d2cf5e3fdb00a0955ea?submission=s880438ea4da4978ddab36e3d7e6f49c6&wait=60000"
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "error": {
+            "code": "malformed",
+            "detail": "wait is 0 to 30000"
+          }
+        }
+      },
+      "illustrative": [
+        "request.path",
+        "response.body.error.detail"
+      ],
+      "binding": {
+        "surface": "defect"
+      }
+    },
+    {
+      "name": "query getEvent",
+      "endpoint": "POST /v0/query",
+      "covers": [
+        "query",
+        "REQ-MG-5"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/query",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "kind": "getEvent",
+          "event": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "result": {
+            "ok": true,
+            "value": {
+              "id": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+              "owner": "1c30e14919aed23e90c619e69ddfcdc77e81f703f560c24c025814482c81d405",
+              "status": "Active",
+              "maxCapacity": 500,
+              "issued": 1,
+              "zones": [
+                {
+                  "id": "495ae114deccd30a5376bee2bbd56d7df0e49b9e77c5dc37fe37b2dc491d6bcf",
+                  "kind": "Seated"
+                },
+                {
+                  "id": "add3876998614d7b4c18731f50f97a92edceff1e13663e68425e04c1c0db4fe2",
+                  "kind": "Unseated"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "binding": {
+        "surface": "value",
+        "value": {
+          "ok": true,
+          "value": {
+            "id": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+            "owner": "1c30e14919aed23e90c619e69ddfcdc77e81f703f560c24c025814482c81d405",
+            "status": "Active",
+            "maxCapacity": 500,
+            "issued": 1,
+            "zones": [
+              {
+                "id": "495ae114deccd30a5376bee2bbd56d7df0e49b9e77c5dc37fe37b2dc491d6bcf",
+                "kind": "Seated"
+              },
+              {
+                "id": "add3876998614d7b4c18731f50f97a92edceff1e13663e68425e04c1c0db4fe2",
+                "kind": "Unseated"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "query getTicket",
+      "endpoint": "POST /v0/query",
+      "covers": [
+        "query",
+        "REQ-MG-5"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/query",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "kind": "getTicket",
+          "ticket": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "result": {
+            "ok": true,
+            "value": {
+              "id": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c",
+              "event": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+              "holder": "1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a0",
+              "class": "67656e6572616c",
+              "provenance": "Granted",
+              "zone": "495ae114deccd30a5376bee2bbd56d7df0e49b9e77c5dc37fe37b2dc491d6bcf",
+              "placement": {
+                "kind": "Seated",
+                "position": "412d3132"
+              },
+              "policy": {
+                "kind": "Single"
+              },
+              "restrictions": {
+                "cannotResale": false,
+                "cannotTransfer": false
+              },
+              "attendances": 1
+            }
+          }
+        }
+      },
+      "binding": {
+        "surface": "value",
+        "value": {
+          "ok": true,
+          "value": {
+            "id": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c",
+            "event": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+            "holder": "1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a0",
+            "class": "67656e6572616c",
+            "provenance": "Granted",
+            "zone": "495ae114deccd30a5376bee2bbd56d7df0e49b9e77c5dc37fe37b2dc491d6bcf",
+            "placement": {
+              "kind": "Seated",
+              "position": "412d3132"
+            },
+            "policy": {
+              "kind": "Single"
+            },
+            "restrictions": {
+              "cannotResale": false,
+              "cannotTransfer": false
+            },
+            "attendances": 1
+          }
+        }
+      }
+    },
+    {
+      "name": "query canAttend: refused with a reason",
+      "endpoint": "POST /v0/query",
+      "covers": [
+        "query",
+        "REQ-Q-3",
+        "ERR-CannotAttend"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/query",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "kind": "canAttend",
+          "event": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+          "ticket": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "result": {
+            "ok": true,
+            "value": {
+              "admit": false,
+              "reason": "ERR-CannotAttend"
+            }
+          }
+        }
+      },
+      "binding": {
+        "surface": "value",
+        "value": {
+          "ok": true,
+          "value": {
+            "admit": false,
+            "reason": "ERR-CannotAttend"
+          }
+        }
+      }
+    },
+    {
+      "name": "query getCancellationHolder for an event that is not cancelled",
+      "endpoint": "POST /v0/query",
+      "covers": [
+        "query",
+        "REQ-EV-10"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/query",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "kind": "getCancellationHolder",
+          "ticket": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "result": {
+            "ok": true,
+            "value": null
+          }
+        }
+      },
+      "binding": {
+        "surface": "value",
+        "value": {
+          "ok": true,
+          "value": null
+        }
+      }
+    },
+    {
+      "name": "query getEvent for an event that does not exist",
+      "endpoint": "POST /v0/query",
+      "covers": [
+        "query error",
+        "ERR-EventNotFound"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/query",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "kind": "getEvent",
+          "event": "0f268ff0ef018895d4cc218ef0b8e8e5479fea363890f97994bc266218e2a8ac"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "result": {
+            "ok": false,
+            "error": {
+              "code": "ERR-EventNotFound"
+            }
+          }
+        }
+      },
+      "binding": {
+        "surface": "value",
+        "value": {
+          "ok": false,
+          "error": {
+            "code": "ERR-EventNotFound"
+          }
+        }
+      }
+    },
+    {
+      "name": "query with an identifier of the wrong length",
+      "endpoint": "POST /v0/query",
+      "covers": [
+        "wire error malformed",
+        "defect"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/query",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "kind": "getTicket",
+          "ticket": "f00837ecb1c7892300ba5273d0ded5e0bce76595"
+        }
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "error": {
+            "code": "malformed",
+            "detail": "ticket is not a TicketId"
+          }
+        }
+      },
+      "illustrative": [
+        "response.body.error.detail"
+      ],
+      "binding": {
+        "surface": "defect"
+      }
+    },
+    {
+      "name": "query while the service is unavailable",
+      "endpoint": "POST /v0/query",
+      "covers": [
+        "wire error unavailable",
+        "ERR-LedgerUnavailable"
+      ],
+      "request": {
+        "method": "POST",
+        "path": "/v0/query",
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "kind": "getTicket",
+          "ticket": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c"
+        }
+      },
+      "response": {
+        "status": 503,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "error": {
+            "code": "unavailable",
+            "detail": "starting"
+          }
+        }
+      },
+      "illustrative": [
+        "response.body.error.detail"
+      ],
+      "binding": {
+        "surface": "retry",
+        "exhausted": "ERR-LedgerUnavailable"
+      }
+    },
+    {
+      "name": "read a log page",
+      "endpoint": "GET /v0/log",
+      "covers": [
+        "log page",
+        "REQ-SDK-5",
+        "AD-16"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/log?from=39&limit=5"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "records": [
+            {
+              "cursor": "40",
+              "recordedAt": 1760000001000,
+              "event": null,
+              "entry": {
+                "kind": "command",
+                "bytes": "0000c10800d4432bddd5d36dca15365c757dfa44dae05331c89901000008e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1d10700001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea156b726569766f5f70000000000000000000000000000000000000000000000000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df0000000091027f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec74500000001000000000000000000000000000000000020a1e68542121aee3aadb7b6d168a73ad7467a5e260df3be1979aa790fb464e1fca50102032620012158207534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662362258201def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee8425027b2274797065223a22776562617574686e2e637265617465222c226368616c6c656e6765223a22573164634f7257486838564a5a5758797054454778783833434c4634586b76646b67764278624445316a45222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d6d013059301306072a8648ce3d020106082a8648ce3d030107034200047534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662361def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee8471050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000219027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a227262355a746a67476264706b5a70776f7771566b657631535769496954444d31666852774a346e6574684d222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402204ea3164617cec57fcb3bc6d2f865b5207fae9d4a6150adfda2890af3923fc3f7022015a5f57a215485e5b79619c1e4bad259fb84dc9d4ef96aa1c0f287cfc1dc4416"
+              },
+              "presentedAt": null
+            },
+            {
+              "cursor": "41",
+              "recordedAt": 1760000002000,
+              "event": {
+                "id": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+                "sequence": 0
+              },
+              "entry": {
+                "kind": "command",
+                "bytes": "0000bd0200cb9842ff022a262d6202d043f88eb64be05331c89901000000a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b20c4c4c4c4c4c4c4c408495ae114deccd30a5376bee2bbd56d7df0e49b9e77c5dc37fe37b2dc491d6bcf00add3876998614d7b4c18731f50f97a92edceff1e13663e68425e04c1c0db4fe20101d107019068747470733a2f2f6d6574612e6b697070752e6578616d706c652f6576656e74732f63348d0100010253281311c3a7a3f7a821cb33ad17edc7bc0b4c3e1f9fb929130e318a4f4a15e20021e9595a47c2a7cbda0a72dd0629131fdff534b8f445fc8211d4031265825868134207568cf355d888c259e4b30d49306d05f3c058d7166860487d2d221ced"
+              },
+              "presentedAt": null
+            },
+            {
+              "cursor": "42",
+              "recordedAt": 1760000011000,
+              "event": {
+                "id": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+                "sequence": 1
+              },
+              "entry": {
+                "kind": "command",
+                "bytes": "0000b5020076882f3a76a0e0045638d9e3ee343ea8f07a31c89901000005a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c495ae114deccd30a5376bee2bbd56d7df0e49b9e77c5dc37fe37b2dc491d6bcf0010412d31321c67656e6572616c01000000e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1008d0100010253281311c3a7a3f7a821cb33ad17edc7bc0b4c3e1f9fb929130e318a4f4a15e2976db1d57927c36ba7b7ba7046817a02fe8fdd74f6c71a22a9882485d58007944362efc09507d8491b41034e260605dc387a8c917a8d016a1fa597650c2e0375"
+              },
+              "presentedAt": null
+            },
+            {
+              "cursor": "43",
+              "recordedAt": 1760000016500,
+              "event": {
+                "id": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+                "sequence": 2
+              },
+              "entry": {
+                "kind": "pass",
+                "bytes": "0001850100f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8ce408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1b7cf1f815bc6951410ea8053c104e60598fa2cc899010000f8e42dc89901000071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000519027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2276677139456244425f336e6d4f71587757784174597a75773358464f493774446c643076304a53707a4467222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207bfb5beed5192796651669357e85521cac3bf7bcca83ed9571c951c26cbf0b3702200f2e1b504a7aaba61e622658bad5b420bb36595aa81bbb2beb9e9a73e22efe91"
+              },
+              "presentedAt": 1760000016000
+            },
+            {
+              "cursor": "44",
+              "recordedAt": 1760000021000,
+              "event": {
+                "id": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+                "sequence": 3
+              },
+              "entry": {
+                "kind": "command",
+                "bytes": "0000e901008333f96fa07b1d2cf5e3fdb00a0955ea00a231c89901000006a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+              },
+              "presentedAt": null
+            }
+          ],
+          "next": "44"
+        }
+      },
+      "decoded": {
+        "entries": [
+          {
+            "command": {
+              "kind": "registerCredential",
+              "operationId": "d4432bddd5d36dca15365c757dfa44da",
+              "expiresAt": 1760000300000,
+              "account": "e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1",
+              "registration": "00001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea156b726569766f5f70000000000000000000000000000000000000000000000000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df0000000091027f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec74500000001000000000000000000000000000000000020a1e68542121aee3aadb7b6d168a73ad7467a5e260df3be1979aa790fb464e1fca50102032620012158207534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662362258201def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee8425027b2274797065223a22776562617574686e2e637265617465222c226368616c6c656e6765223a22573164634f7257486838564a5a5758797054454778783833434c4634586b76646b67764278624445316a45222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d6d013059301306072a8648ce3d020106082a8648ce3d030107034200047534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662361def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee84"
+            },
+            "authorisation": "0000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000219027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a227262355a746a67476264706b5a70776f7771566b657631535769496954444d31666852774a346e6574684d222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402204ea3164617cec57fcb3bc6d2f865b5207fae9d4a6150adfda2890af3923fc3f7022015a5f57a215485e5b79619c1e4bad259fb84dc9d4ef96aa1c0f287cfc1dc4416"
+          },
+          {
+            "command": {
+              "kind": "createEvent",
+              "operationId": "cb9842ff022a262d6202d043f88eb64b",
+              "expiresAt": 1760000300000,
+              "event": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+              "salt": "c4c4c4c4c4c4c4c4",
+              "zones": [
+                {
+                  "id": "495ae114deccd30a5376bee2bbd56d7df0e49b9e77c5dc37fe37b2dc491d6bcf",
+                  "kind": "Seated"
+                },
+                {
+                  "id": "add3876998614d7b4c18731f50f97a92edceff1e13663e68425e04c1c0db4fe2",
+                  "kind": "Unseated"
+                }
+              ],
+              "capacity": 500,
+              "metadata": "https://meta.kippu.example/events/c4"
+            },
+            "authorisation": "00010253281311c3a7a3f7a821cb33ad17edc7bc0b4c3e1f9fb929130e318a4f4a15e20021e9595a47c2a7cbda0a72dd0629131fdff534b8f445fc8211d4031265825868134207568cf355d888c259e4b30d49306d05f3c058d7166860487d2d221ced"
+          },
+          {
+            "command": {
+              "kind": "issueTicket",
+              "operationId": "76882f3a76a0e0045638d9e3ee343ea8",
+              "expiresAt": 1760000310000,
+              "event": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+              "ticket": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c",
+              "zone": "495ae114deccd30a5376bee2bbd56d7df0e49b9e77c5dc37fe37b2dc491d6bcf",
+              "placement": {
+                "kind": "Seated",
+                "position": "412d3132"
+              },
+              "class": "67656e6572616c",
+              "provenance": "Granted",
+              "policy": {
+                "kind": "Single"
+              },
+              "restrictions": {
+                "cannotResale": false,
+                "cannotTransfer": false
+              },
+              "holder": "e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1",
+              "metadata": null
+            },
+            "authorisation": "00010253281311c3a7a3f7a821cb33ad17edc7bc0b4c3e1f9fb929130e318a4f4a15e2976db1d57927c36ba7b7ba7046817a02fe8fdd74f6c71a22a9882485d58007944362efc09507d8491b41034e260605dc387a8c917a8d016a1fa597650c2e0375"
+          },
+          {
+            "pass": {
+              "ticket": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c",
+              "holder": "e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1",
+              "id": "b7cf1f815bc6951410ea8053c104e605",
+              "notBefore": 1760000015000,
+              "notAfter": 1760000075000
+            },
+            "authorisation": "0000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000519027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2276677139456244425f336e6d4f71587757784174597a75773358464f493774446c643076304a53707a4467222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207bfb5beed5192796651669357e85521cac3bf7bcca83ed9571c951c26cbf0b3702200f2e1b504a7aaba61e622658bad5b420bb36595aa81bbb2beb9e9a73e22efe91"
+          },
+          {
+            "command": {
+              "kind": "transferTicket",
+              "operationId": "8333f96fa07b1d2cf5e3fdb00a0955ea",
+              "expiresAt": 1760000320000,
+              "event": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+              "ticket": "f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c",
+              "receiver": "1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a0"
+            },
+            "authorisation": "0000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+          }
+        ]
+      },
+      "illustrative": [
+        "request.path",
+        "response.body.records[].cursor",
+        "response.body.records[].recordedAt",
+        "response.body.records[].event.sequence",
+        "response.body.next"
+      ],
+      "binding": {
+        "surface": "value",
+        "value": {
+          "records": [
+            {
+              "cursor": "40",
+              "recordedAt": 1760000001000,
+              "event": null,
+              "entry": {
+                "kind": "command",
+                "bytes": "0000c10800d4432bddd5d36dca15365c757dfa44dae05331c89901000008e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1d10700001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea156b726569766f5f70000000000000000000000000000000000000000000000000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df0000000091027f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec74500000001000000000000000000000000000000000020a1e68542121aee3aadb7b6d168a73ad7467a5e260df3be1979aa790fb464e1fca50102032620012158207534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662362258201def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee8425027b2274797065223a22776562617574686e2e637265617465222c226368616c6c656e6765223a22573164634f7257486838564a5a5758797054454778783833434c4634586b76646b67764278624445316a45222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d6d013059301306072a8648ce3d020106082a8648ce3d030107034200047534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662361def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee8471050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000219027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a227262355a746a67476264706b5a70776f7771566b657631535769496954444d31666852774a346e6574684d222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402204ea3164617cec57fcb3bc6d2f865b5207fae9d4a6150adfda2890af3923fc3f7022015a5f57a215485e5b79619c1e4bad259fb84dc9d4ef96aa1c0f287cfc1dc4416"
+              },
+              "presentedAt": null
+            },
+            {
+              "cursor": "41",
+              "recordedAt": 1760000002000,
+              "event": {
+                "id": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+                "sequence": 0
+              },
+              "entry": {
+                "kind": "command",
+                "bytes": "0000bd0200cb9842ff022a262d6202d043f88eb64be05331c89901000000a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b20c4c4c4c4c4c4c4c408495ae114deccd30a5376bee2bbd56d7df0e49b9e77c5dc37fe37b2dc491d6bcf00add3876998614d7b4c18731f50f97a92edceff1e13663e68425e04c1c0db4fe20101d107019068747470733a2f2f6d6574612e6b697070752e6578616d706c652f6576656e74732f63348d0100010253281311c3a7a3f7a821cb33ad17edc7bc0b4c3e1f9fb929130e318a4f4a15e20021e9595a47c2a7cbda0a72dd0629131fdff534b8f445fc8211d4031265825868134207568cf355d888c259e4b30d49306d05f3c058d7166860487d2d221ced"
+              },
+              "presentedAt": null
+            },
+            {
+              "cursor": "42",
+              "recordedAt": 1760000011000,
+              "event": {
+                "id": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+                "sequence": 1
+              },
+              "entry": {
+                "kind": "command",
+                "bytes": "0000b5020076882f3a76a0e0045638d9e3ee343ea8f07a31c89901000005a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c495ae114deccd30a5376bee2bbd56d7df0e49b9e77c5dc37fe37b2dc491d6bcf0010412d31321c67656e6572616c01000000e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1008d0100010253281311c3a7a3f7a821cb33ad17edc7bc0b4c3e1f9fb929130e318a4f4a15e2976db1d57927c36ba7b7ba7046817a02fe8fdd74f6c71a22a9882485d58007944362efc09507d8491b41034e260605dc387a8c917a8d016a1fa597650c2e0375"
+              },
+              "presentedAt": null
+            },
+            {
+              "cursor": "43",
+              "recordedAt": 1760000016500,
+              "event": {
+                "id": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+                "sequence": 2
+              },
+              "entry": {
+                "kind": "pass",
+                "bytes": "0001850100f00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8ce408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1b7cf1f815bc6951410ea8053c104e60598fa2cc899010000f8e42dc89901000071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000519027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2276677139456244425f336e6d4f71587757784174597a75773358464f493774446c643076304a53707a4467222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207bfb5beed5192796651669357e85521cac3bf7bcca83ed9571c951c26cbf0b3702200f2e1b504a7aaba61e622658bad5b420bb36595aa81bbb2beb9e9a73e22efe91"
+              },
+              "presentedAt": 1760000016000
+            },
+            {
+              "cursor": "44",
+              "recordedAt": 1760000021000,
+              "event": {
+                "id": "a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1b",
+                "sequence": 3
+              },
+              "entry": {
+                "kind": "command",
+                "bytes": "0000e901008333f96fa07b1d2cf5e3fdb00a0955ea00a231c89901000006a849673efd6c727a86c6067474e08ef65ce5177e631f1f233c7169f29380ff1bf00837ecb1c7892300ba5273d0ded5e0bce76595f9d911ddb31e511d6d91be8c1ac6f2acf9eb8db9c1e8c54a47392eb26946f4c8e5213718d6f59a6a0ecb06a071050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000319027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a2271505445776e72425f57746779706b3479666b7a54746f53734774635a7567446e4642466d4177714b7051222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402207792bf1885a9004821a7ecabce4e0d992c2f4a4e1068bb851a1e47258e3bb1550220241d2014ad3d0abdc9392a99a24e50981bb4abe10cf03a74784daedb8dbe8c9b"
+              },
+              "presentedAt": null
+            }
+          ],
+          "next": "44"
+        }
+      }
+    },
+    {
+      "name": "read the log from LOG_START",
+      "endpoint": "GET /v0/log",
+      "covers": [
+        "log page",
+        "LOG_START"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/log?from=&limit=1"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "records": [
+            {
+              "cursor": "40",
+              "recordedAt": 1760000001000,
+              "event": null,
+              "entry": {
+                "kind": "command",
+                "bytes": "0000c10800d4432bddd5d36dca15365c757dfa44dae05331c89901000008e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1d10700001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea156b726569766f5f70000000000000000000000000000000000000000000000000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df0000000091027f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec74500000001000000000000000000000000000000000020a1e68542121aee3aadb7b6d168a73ad7467a5e260df3be1979aa790fb464e1fca50102032620012158207534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662362258201def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee8425027b2274797065223a22776562617574686e2e637265617465222c226368616c6c656e6765223a22573164634f7257486838564a5a5758797054454778783833434c4634586b76646b67764278624445316a45222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d6d013059301306072a8648ce3d020106082a8648ce3d030107034200047534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662361def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee8471050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000219027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a227262355a746a67476264706b5a70776f7771566b657631535769496954444d31666852774a346e6574684d222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402204ea3164617cec57fcb3bc6d2f865b5207fae9d4a6150adfda2890af3923fc3f7022015a5f57a215485e5b79619c1e4bad259fb84dc9d4ef96aa1c0f287cfc1dc4416"
+              },
+              "presentedAt": null
+            }
+          ],
+          "next": "40"
+        }
+      },
+      "decoded": {
+        "entries": [
+          {
+            "command": {
+              "kind": "registerCredential",
+              "operationId": "d4432bddd5d36dca15365c757dfa44da",
+              "expiresAt": 1760000300000,
+              "account": "e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1",
+              "registration": "00001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea156b726569766f5f70000000000000000000000000000000000000000000000000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df0000000091027f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec74500000001000000000000000000000000000000000020a1e68542121aee3aadb7b6d168a73ad7467a5e260df3be1979aa790fb464e1fca50102032620012158207534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662362258201def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee8425027b2274797065223a22776562617574686e2e637265617465222c226368616c6c656e6765223a22573164634f7257486838564a5a5758797054454778783833434c4634586b76646b67764278624445316a45222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d6d013059301306072a8648ce3d020106082a8648ce3d030107034200047534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662361def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee84"
+            },
+            "authorisation": "0000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000219027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a227262355a746a67476264706b5a70776f7771566b657631535769496954444d31666852774a346e6574684d222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402204ea3164617cec57fcb3bc6d2f865b5207fae9d4a6150adfda2890af3923fc3f7022015a5f57a215485e5b79619c1e4bad259fb84dc9d4ef96aa1c0f287cfc1dc4416"
+          }
+        ]
+      },
+      "illustrative": [
+        "response.body.records[].cursor",
+        "response.body.next"
+      ],
+      "binding": {
+        "surface": "value",
+        "value": {
+          "records": [
+            {
+              "cursor": "40",
+              "recordedAt": 1760000001000,
+              "event": null,
+              "entry": {
+                "kind": "command",
+                "bytes": "0000c10800d4432bddd5d36dca15365c757dfa44dae05331c89901000008e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1d10700001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea156b726569766f5f70000000000000000000000000000000000000000000000000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df0000000091027f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec74500000001000000000000000000000000000000000020a1e68542121aee3aadb7b6d168a73ad7467a5e260df3be1979aa790fb464e1fca50102032620012158207534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662362258201def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee8425027b2274797065223a22776562617574686e2e637265617465222c226368616c6c656e6765223a22573164634f7257486838564a5a5758797054454778783833434c4634586b76646b67764278624445316a45222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d6d013059301306072a8648ce3d020106082a8648ce3d030107034200047534f2da8d0b3ad407dd13916314613f78ea4884f46fd6d2b4bcb731b3b662361def92a3399a56561cd38d006bdf776d6a8217d9483851b31810530644a1ee8471050000999c2d2a4eff77fbccf42be6031f387d75f3913c6df80b1158825348684113df6b726569766f5f700000000000000000000000000000000000000000000000001fd1f3e085cd16651057013dba0cf1b9707fe4fb3f430abcd1a2c1f88686ea1500000000947f29350e3373f0d1ae772f5fc13ae8c5b1ce5147a48b6d414ddad120eaa6cec7050000000219027b2274797065223a22776562617574686e2e676574222c226368616c6c656e6765223a227262355a746a67476264706b5a70776f7771566b657631535769496954444d31666852774a346e6574684d222c226f726967696e223a2268747470733a2f2f6b697070752e6578616d706c65222c2263726f73734f726967696e223a66616c73657d1901304402204ea3164617cec57fcb3bc6d2f865b5207fae9d4a6150adfda2890af3923fc3f7022015a5f57a215485e5b79619c1e4bad259fb84dc9d4ef96aa1c0f287cfc1dc4416"
+              },
+              "presentedAt": null
+            }
+          ],
+          "next": "40"
+        }
+      }
+    },
+    {
+      "name": "read past the head: no records, next is from",
+      "endpoint": "GET /v0/log",
+      "covers": [
+        "log page",
+        "AD-17"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/log?from=44&limit=100"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "records": [],
+          "next": "44"
+        }
+      },
+      "illustrative": [
+        "request.path",
+        "response.body.next"
+      ],
+      "binding": {
+        "surface": "value",
+        "value": {
+          "records": [],
+          "next": "44"
+        }
+      }
+    },
+    {
+      "name": "read from a cursor this deployment never issued",
+      "endpoint": "GET /v0/log",
+      "covers": [
+        "wire error cursor-unknown",
+        "defect"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/log?from=not-a-cursor&limit=10"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "error": {
+            "code": "cursor-unknown"
+          }
+        }
+      },
+      "binding": {
+        "surface": "defect"
+      }
+    },
+    {
+      "name": "read with limit 0",
+      "endpoint": "GET /v0/log",
+      "covers": [
+        "wire error malformed",
+        "defect"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/log?from=&limit=0"
+      },
+      "response": {
+        "status": 400,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "error": {
+            "code": "malformed",
+            "detail": "limit is 1 to 1000"
+          }
+        }
+      },
+      "illustrative": [
+        "response.body.error.detail"
+      ],
+      "binding": {
+        "surface": "defect"
+      }
+    },
+    {
+      "name": "hint stream: the head on connecting, a keep-alive, then a new head",
+      "endpoint": "GET /v0/log/hints",
+      "covers": [
+        "hint event",
+        "AD-17"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/log/hints",
+        "headers": {
+          "accept": "text/event-stream"
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/event-stream",
+          "cache-control": "no-cache"
+        },
+        "text": "event: hint\ndata: {\"cursor\":\"44\"}\n\n: keep-alive\n\nevent: hint\ndata: {\"cursor\":\"45\"}\n\n"
+      },
+      "illustrative": [
+        "response.text"
+      ],
+      "binding": {
+        "surface": "hints",
+        "cursors": [
+          "44",
+          "45"
+        ]
+      }
+    },
+    {
+      "name": "read the assurance declaration",
+      "endpoint": "GET /v0/assurance",
+      "covers": [
+        "assurance",
+        "REQ-SDK-6"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/assurance"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "assurance": {
+            "INV-1": "attested",
+            "INV-2": "attested",
+            "INV-3": "attested",
+            "INV-4": "attested",
+            "INV-5": "attested",
+            "INV-6": "enforced",
+            "INV-7": "enforced",
+            "INV-8": "attested",
+            "INV-10": "attested",
+            "INV-11": "attested",
+            "INV-12": "attested",
+            "INV-13": "attested",
+            "INV-14": "attested",
+            "INV-16": "attested",
+            "INV-15": "attested"
+          }
+        }
+      },
+      "illustrative": [
+        "response.body.assurance"
+      ],
+      "binding": {
+        "surface": "value",
+        "value": {
+          "assurance": {
+            "INV-1": "attested",
+            "INV-2": "attested",
+            "INV-3": "attested",
+            "INV-4": "attested",
+            "INV-5": "attested",
+            "INV-6": "enforced",
+            "INV-7": "enforced",
+            "INV-8": "attested",
+            "INV-10": "attested",
+            "INV-11": "attested",
+            "INV-12": "attested",
+            "INV-13": "attested",
+            "INV-14": "attested",
+            "INV-16": "attested",
+            "INV-15": "attested"
+          }
+        }
+      }
+    },
+    {
+      "name": "latest checkpoint before any is published",
+      "endpoint": "GET /v0/checkpoints/latest",
+      "covers": [
+        "checkpoint",
+        "REQ-TM-3"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/checkpoints/latest"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "head": "44",
+          "checkpoint": null
+        }
+      },
+      "illustrative": [
+        "response.body.head"
+      ],
+      "binding": {
+        "surface": "value",
+        "value": {
+          "head": "44",
+          "checkpoint": null
+        }
+      }
+    },
+    {
+      "name": "latest checkpoint",
+      "endpoint": "GET /v0/checkpoints/latest",
+      "covers": [
+        "checkpoint",
+        "REQ-TM-3",
+        "AD-16"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/checkpoints/latest"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "head": "44",
+          "checkpoint": {
+            "cursor": "42",
+            "bytes": "000200000000000000c0b9c48bfab318bf2dea51c6412fba7e9ca7f8e2b061a1672f35b5300041873fe0ee2cc8990100008d010001021c3d3af2d187aff61269074911a92c4bba6374ad977db02c1d35bb19d54e6077aa30550faa4d83a53d3da909442132e4b2c0eb71274aa7f01cc3761291fab8d8291fa91bb9a55a15a000bf272f05a897a4c9dbdf56084ffadea78664ae68f4d3"
+          }
+        }
+      },
+      "decoded": {
+        "checkpoint": {
+          "sequence": 2,
+          "headHash": "c0b9c48bfab318bf2dea51c6412fba7e9ca7f8e2b061a1672f35b5300041873f",
+          "issuedAt": 1760000012000,
+          "authorisation": "0001021c3d3af2d187aff61269074911a92c4bba6374ad977db02c1d35bb19d54e6077aa30550faa4d83a53d3da909442132e4b2c0eb71274aa7f01cc3761291fab8d8291fa91bb9a55a15a000bf272f05a897a4c9dbdf56084ffadea78664ae68f4d3"
+        }
+      },
+      "illustrative": [
+        "response.body.head",
+        "response.body.checkpoint"
+      ],
+      "binding": {
+        "surface": "value",
+        "value": {
+          "head": "44",
+          "checkpoint": {
+            "cursor": "42",
+            "bytes": "000200000000000000c0b9c48bfab318bf2dea51c6412fba7e9ca7f8e2b061a1672f35b5300041873fe0ee2cc8990100008d010001021c3d3af2d187aff61269074911a92c4bba6374ad977db02c1d35bb19d54e6077aa30550faa4d83a53d3da909442132e4b2c0eb71274aa7f01cc3761291fab8d8291fa91bb9a55a15a000bf272f05a897a4c9dbdf56084ffadea78664ae68f4d3"
+          }
+        }
+      }
+    },
+    {
+      "name": "an endpoint this version does not have",
+      "endpoint": "GET /v0/checkpoints/latest",
+      "covers": [
+        "wire error not-found",
+        "defect"
+      ],
+      "request": {
+        "method": "GET",
+        "path": "/v0/checkpoints/first"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "application/json; charset=utf-8"
+        },
+        "body": {
+          "error": {
+            "code": "not-found"
+          }
+        }
+      },
+      "binding": {
+        "surface": "defect"
+      }
+    }
+  ]
+}
