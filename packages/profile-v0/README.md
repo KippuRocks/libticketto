@@ -26,6 +26,18 @@ const ticketto = createTicketto({ backend, profile, sponsor, operationLifetime: 
 configuration is the WebAuthn RP id holder passkeys are bound to; changing it
 invalidates every holder passkey, so it is a profile change and a migration.
 
+## Testing
+
+`@ticketto/profile-v0/testing` exports software credentials for tests and the
+conformance suite only, never for production (plan §5.6):
+
+- `softwareP256Signer()` — a `p256` key in memory, with its self-signed registration;
+- `simulatedWebAuthnSigner({ rpId })` — a holder's `pass-webauthn` credential on a
+  simulated passkey device, whose every signature is a full assertion ceremony
+  with real authenticator data, client data JSON and a DER signature;
+- `SimulatedWebAuthnAuthenticator` — the device itself, with overrides for
+  building invalid ceremonies.
+
 ## Encoding
 
 SCALE, through `scale-ts` (`AD-11`). Every top-level value starts with a one-byte
