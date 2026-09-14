@@ -72,15 +72,29 @@ export function decodeVersioned<T>(codec: Codec<T>, bytes: Uint8Array): T {
   return decodeExact(codec, bytes.subarray(1));
 }
 
+/** A fixed-width byte string. */
+export function fixedBytes(length: number): Codec<Uint8Array> {
+  return enhanceCodec<Uint8Array, Uint8Array>(
+    Bytes(length),
+    (bytes) => {
+      if (!(bytes instanceof Uint8Array) || bytes.length !== length) {
+        throw new TypeError(`expected ${length} bytes`);
+      }
+      return bytes;
+    },
+    (bytes) => {
+      if (bytes.length !== length) throw new DecodeError(`expected ${length} bytes`);
+      return bytes;
+    },
+  );
+}
+
 /** A fixed-width byte string, carried as lower-case hex (a branded identifier). */
 export function fixedHex<T extends string>(length: number): Codec<T> {
   return enhanceCodec<Uint8Array, T>(
-    Bytes(length),
+    fixedBytes(length),
     (hex) => fromHex(hex, length),
-    (bytes) => {
-      if (bytes.length !== length) throw new DecodeError(`expected ${length} bytes`);
-      return toHex(bytes) as T;
-    },
+    (bytes) => toHex(bytes) as T,
   );
 }
 

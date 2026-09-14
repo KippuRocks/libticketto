@@ -41,6 +41,20 @@ value.
 | `EventId` | `BLAKE2b-256("ticketto/v0/event" ‖ creator ‖ salt)` |
 | `TicketId` | `BLAKE2b-256("ticketto/v0/ticket" ‖ SCALE(eventId, zoneId, placement))` |
 
+## Credentials
+
+`Registration` and `Authorisation` are `version u8 ‖ kind u8 ‖ body`. Kind `0` is
+`pass-webauthn` (holders); kind `1` is `p256` (Kippu's server keys).
+
+| `p256` | |
+|---|---|
+| Registration | compressed public key (33) ‖ signature (64) over `BLAKE2b-256("ticketto/v0/registration/p256" ‖ public key)` |
+| Authorisation | compressed public key (33) ‖ signature (64) over `BLAKE2b-256(payload)` |
+| Credential id | the compressed public key, as hex |
+
+Signatures are `r ‖ s` with low S; `normaliseP256Signature` turns a DER signature
+(as a KMS returns) into that form. A high-S signature is refused.
+
 ## Runtime requirements
 
 `scale-ts` constructs a `TextDecoder` when it is imported. Hermes does not

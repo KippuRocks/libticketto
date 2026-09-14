@@ -13,6 +13,13 @@ describe("@ticketto/profile-v0", () => {
     expect(profile.FORMAT_VERSION).toBe(0);
   });
 
+  it("exports p256 credential construction and verification", () => {
+    expect(typeof profile.p256AuthorisationDigest).toBe("function");
+    expect(typeof profile.encodeRegistration).toBe("function");
+    expect(typeof profile.verify).toBe("function");
+    expect(profile.CREDENTIAL_KIND_INDEX.p256).toBe(1);
+  });
+
   it("exports identifier derivation", () => {
     expect(typeof profile.eventId).toBe("function");
     expect(typeof profile.ticketId).toBe("function");

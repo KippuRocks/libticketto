@@ -7,6 +7,25 @@ import * as codecs from "./codec/identity.js";
 export { COMMAND_INDEX, decodeCommand, encodeCommand } from "./codec/command.js";
 export { DecodeError, FORMAT_VERSION } from "./codec/scale.js";
 export {
+  type AuthorisationValue,
+  accountOf,
+  CREDENTIAL_KIND_INDEX,
+  decodeAuthorisation,
+  decodeRegistration,
+  encodeAuthorisation,
+  encodeRegistration,
+  type RegistrationValue,
+  registrationAccount,
+  verify,
+} from "./credential/credential.js";
+export {
+  normaliseP256Signature,
+  P256_SIGNATURE_LENGTH,
+  type P256Signed,
+  p256AuthorisationDigest,
+  p256RegistrationDigest,
+} from "./credential/p256.js";
+export {
   blake2b256,
   deviceId,
   eventId,
