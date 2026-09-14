@@ -9,7 +9,6 @@
 
 import { type Capabilities, type Clock, execute, query } from "@ticketto/ledger-rules";
 import {
-  type AssuranceDeclaration,
   type Backend,
   createSubmission,
   type LogReader,
@@ -22,6 +21,7 @@ import {
   type Submission,
   type SubmitInput,
 } from "@ticketto/sdk";
+import { MEMORY_ASSURANCE } from "./assurance.js";
 import { createMemoryCapabilities } from "./capabilities.js";
 
 /** Options for {@link createMemoryBackend}. */
@@ -88,8 +88,6 @@ export function backendOver(caps: Capabilities, profile: Profile): Backend {
 
     log,
 
-    get assurance(): AssuranceDeclaration {
-      throw new Error("the in-memory assurance declaration is not implemented yet (T-005-04)");
-    },
+    assurance: MEMORY_ASSURANCE,
   };
 }
