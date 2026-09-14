@@ -57,6 +57,14 @@ profile, start?, seed? })` returns the backend with the conformance suite's
 | `clock` | The clock the rules read: `now`, `set`, `advance`. Starts at `TEST_EPOCH` unless told otherwise, and never moves backwards (`REQ-SDK-3`) |
 | `randomBytes(length)` | A seeded, deterministic source for operation and pass ids — the same seed, the same sequence. Not for keys |
 
+## Conformance
+
+Registered in the conformance matrix (`T-005-08`, `REQ-MG-1`, `NFR-8`):
+`pnpm conformance` runs `@ticketto/conformance`'s V0 suite against
+`createTestMemoryBackend` under the V0 profile, through the milestone reached
+(`through` in `conformance/backend-memory.conformance.test.ts`, raised as each
+milestone lands; from `M5`, the whole suite).
+
 Part of [libticketto](../../README.md). Behaviour is specified in `SPEC.md` and
 the package's design in `PLAN.md` and `features/`, in
 [`kippurocks/kippu-docs`](https://github.com/KippuRocks/kippu-docs).

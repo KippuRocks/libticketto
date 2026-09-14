@@ -54,9 +54,11 @@ describe("discovery", () => {
     ]);
   });
 
-  it("finds zero registered backends in this workspace today", () => {
+  it("finds backend-memory registered in this workspace today (T-005-08)", () => {
     const repo = join(import.meta.dirname, "..", "..", "..");
-    expect(discover(repo).registered).toEqual([]);
+    expect(discover(repo).registered.map((backend) => backend.name)).toEqual([
+      "@ticketto/backend-memory",
+    ]);
   });
 });
 

@@ -29,7 +29,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json",
+    "conformance": "vitest run --root . conformance"
   },
   "dependencies": {
     "@ticketto/ledger-rules": "workspace:*",
