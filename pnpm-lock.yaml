@@ -36,7 +36,14 @@ importers:
         specifier: workspace:*
         version: link:../sdk
 
-  packages/log: {}
+  packages/log:
+    dependencies:
+      '@ticketto/profile-v0':
+        specifier: workspace:*
+        version: link:../profile-v0
+      '@ticketto/sdk':
+        specifier: workspace:*
+        version: link:../sdk
 
   packages/profile-v0:
     dependencies:
