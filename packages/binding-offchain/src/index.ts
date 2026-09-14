@@ -48,12 +48,20 @@ export {
   translateQuery,
   translateSubmit,
   type Value,
-  WIRE_CODES,
-  type WireCode,
   type WireLogEntry,
   type WireLogPage,
   type WireLogRecord,
 } from "./translate.js";
+export {
+  codesRaisedByBinding,
+  translateWireCode,
+  UNAVAILABLE_CODE,
+  WIRE_CODES,
+  WIRE_TRANSLATION,
+  type WireCode,
+  type WireRow,
+  type WireTranslation,
+} from "./translation.js";
 export {
   assuranceRequest,
   ENDPOINTS,

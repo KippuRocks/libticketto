@@ -1,7 +1,16 @@
 {
   "repository": "https://github.com/KippuRocks/ticketto-offchain.git",
-  "commit": "07be1558a60cc22055a5cd7e1edf723ae0682719",
-  "path": "protocol/vectors/c4-v0.json",
-  "file": "c4-v0.json",
-  "sha256": "0f497b72829c076d738851cfdca17f4149012cbc539f9ca20cf43ec3a05b39e8"
+  "commit": "3711af65f5d1f1c247f6fc39795b49e6e26b55d0",
+  "files": [
+    {
+      "path": "protocol/C4.md",
+      "file": "C4.md",
+      "sha256": "9a1396055686393b02f7fa5395a27b90ee2a975f83e6576a77cf2f8027943686"
+    },
+    {
+      "path": "protocol/vectors/c4-v0.json",
+      "file": "c4-v0.json",
+      "sha256": "1aaf854ca17aa066dc257017fa95989f16de3b2298cf180cdbc57ae4b236e5f8"
+    }
+  ]
 }

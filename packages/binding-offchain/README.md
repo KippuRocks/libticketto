@@ -56,11 +56,22 @@ the write settles or is rejected — however long that takes (`NFR-9`).
 Because the profile's codecs use `scale-ts`, a React Native app installs a
 `TextDecoder` before importing this package, as it does for `profile-v0`.
 
+## Error translation
+
+`WIRE_TRANSLATION` is `C4.md` §4.2–§4.3 as a table: for every wire code, the
+statuses and endpoints it may come with, and its row — a defect, a retry, a
+resubmission, or a rejection with a §10 code. The response classifier reads
+nothing else, so a wire code without a row is a defect, and the suites fail on
+any code the vendored document or vectors carry that the table does not map. The
+only §10 codes the binding raises itself are binding-origin:
+`ERR-SponsorshipRefused` and `ERR-LedgerUnavailable`. Ledger-origin codes pass
+through unchanged; any other §10 code from the service is a defect (`REQ-SDK-2`).
+
 ## Tests and the `C4` vectors
 
-The `C4` test vectors are vendored in [`test/c4/`](test/c4/) from a pinned
-`ticketto-offchain` commit, recorded with the file's SHA-256 in
-[`test/c4/source.json`](test/c4/source.json). The tests check that digest; they
+`C4.md` and its test vectors are vendored in [`test/c4/`](test/c4/) from a pinned
+`ticketto-offchain` commit, recorded with each file's SHA-256 in
+[`test/c4/source.json`](test/c4/source.json). The tests check those digests; they
 never read another repository.
 
 ```sh

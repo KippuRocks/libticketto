@@ -25,6 +25,7 @@ import {
 } from "@ticketto/sdk";
 import type { AbortSignalLike, C4Client } from "./client.js";
 import type { OperationOutcome, SubmitOutcome } from "./translate.js";
+import { UNAVAILABLE_CODE } from "./translation.js";
 import { type SignedInputBytes, WAIT_DEFAULT, WAIT_MAX } from "./wire.js";
 
 /** How transient failures are retried. */
@@ -183,7 +184,7 @@ export function createOffchainSubmit(
       failures += 1;
       if (failures > retry.attempts) {
         // Amendment 0003 G8: the ledger could not be reached.
-        controller.rejected({ code: "ERR-LedgerUnavailable" });
+        controller.rejected({ code: UNAVAILABLE_CODE });
         return false;
       }
       if (delay) await sleep(backoff(failures, retryAfter));

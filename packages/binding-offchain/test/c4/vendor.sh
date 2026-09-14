@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Vendors the C4 test vectors from a pinned ticketto-offchain commit.
+# Vendors C4 — its document and its test vectors — from a pinned ticketto-offchain
+# commit.
 #
-#   test/c4/vendor.sh <commit>   copy protocol/vectors/c4-v0.json at <commit> into
-#                                test/c4/, and record the commit and the file's digest
-#   test/c4/vendor.sh --check    fetch the recorded commit and fail if the vendored
-#                                file differs from it
+#   test/c4/vendor.sh <commit>   copy protocol/C4.md and protocol/vectors/c4-v0.json at
+#                                <commit> into test/c4/, and record the commit and digests
+#   test/c4/vendor.sh --check    fetch the recorded commit and fail if a vendored file
+#                                differs from it
 #
-# The vectors are C4's (protocol/C4.md §6, owned by F-010). They are copied rather
+# C4 and its vectors are F-010's (protocol/C4.md §6). They are copied rather
 # than read across repositories at test time, so this repository's tests never
 # need a ticketto-offchain checkout. Fetching needs read access to the private
 # repository; the tests themselves only check the recorded digest.
@@ -14,7 +15,7 @@ set -euo pipefail
 
 here=$(cd "$(dirname "$0")" && pwd)
 repository="https://github.com/KippuRocks/ticketto-offchain.git"
-path="protocol/vectors/c4-v0.json"
+paths=("protocol/C4.md" "protocol/vectors/c4-v0.json")
 
 mode=vendor
 if [[ "${1:-}" == "--check" ]]; then
@@ -36,25 +37,36 @@ trap 'rm -rf "$work"' EXIT
 
 git init --quiet "$work/src"
 git -C "$work/src" fetch --quiet --depth 1 "$repository" "$commit"
-git -C "$work/src" show "FETCH_HEAD:$path" > "$work/c4-v0.json"
+for path in "${paths[@]}"; do
+  git -C "$work/src" show "FETCH_HEAD:$path" > "$work/$(basename "$path")"
+done
 
 if [[ "$mode" == check ]]; then
-  if ! cmp -s "$work/c4-v0.json" "$here/c4-v0.json"; then
-    echo "test/c4/c4-v0.json differs from $path at $commit" >&2
-    exit 1
-  fi
-  echo "test/c4/c4-v0.json matches $path at $commit"
-  exit 0
+  status=0
+  for path in "${paths[@]}"; do
+    file=$(basename "$path")
+    if ! cmp -s "$work/$file" "$here/$file"; then
+      echo "test/c4/$file differs from $path at $commit" >&2
+      status=1
+    fi
+  done
+  [[ $status -eq 0 ]] && echo "test/c4 matches ticketto-offchain at $commit"
+  exit $status
 fi
 
-cp "$work/c4-v0.json" "$here/c4-v0.json"
-node - "$here" "$commit" "$repository" "$path" <<'NODE'
+for path in "${paths[@]}"; do
+  cp "$work/$(basename "$path")" "$here/$(basename "$path")"
+done
+node - "$here" "$commit" "$repository" "${paths[@]}" <<'NODE'
 const { createHash } = require("node:crypto");
 const { readFileSync, writeFileSync } = require("node:fs");
-const { join } = require("node:path");
-const [dir, commit, repository, path] = process.argv.slice(2);
-const sha256 = createHash("sha256").update(readFileSync(join(dir, "c4-v0.json"))).digest("hex");
-const source = { repository, commit, path, file: "c4-v0.json", sha256 };
-writeFileSync(join(dir, "source.json"), `${JSON.stringify(source, null, 2)}\n`);
+const { basename, join } = require("node:path");
+const [dir, commit, repository, ...paths] = process.argv.slice(2);
+const files = paths.map((path) => ({
+  path,
+  file: basename(path),
+  sha256: createHash("sha256").update(readFileSync(join(dir, basename(path)))).digest("hex"),
+}));
+writeFileSync(join(dir, "source.json"), `${JSON.stringify({ repository, commit, files }, null, 2)}\n`);
 NODE
-echo "vendored $path at $commit"
+echo "vendored ${paths[*]} at $commit"

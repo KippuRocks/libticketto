@@ -26,6 +26,7 @@ import {
   type Timestamp,
 } from "@ticketto/sdk";
 import { fromHex, isHex } from "./hex.js";
+import { translateWireCode } from "./translation.js";
 import { type Endpoint, isCount, isCursor, isOperationId, isSubmissionToken } from "./wire.js";
 
 /** A wire response the binding cannot act on (C4.md §4.3): never retried, never mapped. */
@@ -126,27 +127,10 @@ export interface ReceivedResponse {
   readonly text: string;
 }
 
-/** C4.md §4.2: every wire code, with the statuses it may be sent with. */
-export const WIRE_CODES = {
-  malformed: [400, 413],
-  "not-found": [404],
-  "operation-unknown": [404],
-  "cursor-unknown": [404],
-  "sponsorship-missing": [403],
-  "sponsorship-invalid": [403],
-  unavailable: [503],
-} as const satisfies Record<string, readonly number[]>;
-
-export type WireCode = keyof typeof WIRE_CODES;
-
 type Body = Record<string, unknown>;
 
-// `Object.hasOwn` and `Array.prototype.at` are avoided: not every Hermes release
-// React Native apps ship has them.
-function hasOwn(object: object, key: string): boolean {
-  return Object.hasOwn(object, key);
-}
-
+// `Array.prototype.at` is avoided: not every Hermes release React Native apps ship
+// has it.
 function isObject(value: unknown): value is Body {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -213,31 +197,21 @@ function failure(
     // a proxy's 502 or 504 — is a transport failure; anything else is a defect.
     return status >= 500 && status < 600 ? RETRY : defect(`${status} without a C4 error body`);
   }
-  if (!hasOwn(WIRE_CODES, wire.code)) return defect(`unknown wire code ${wire.code}`);
-  const code = wire.code as WireCode;
-  if (!(WIRE_CODES[code] as readonly number[]).includes(status)) {
-    return defect(`wire code ${code} with status ${status}`);
-  }
-  switch (code) {
-    case "sponsorship-missing":
-    case "sponsorship-invalid":
-      // SPEC.md §10: a backend refusing a submission whose sponsorship is
-      // missing or invalid raises ERR-SponsorshipRefused. Not retried.
-      return endpoint === "POST /v0/submit"
-        ? { outcome: "rejected", error: { code: "ERR-SponsorshipRefused" } }
-        : defect(`${code} from ${endpoint}`);
-    case "operation-unknown":
-      return endpoint === "GET /v0/operations/{operationId}"
-        ? { outcome: "resubmit" }
-        : defect(`${code} from ${endpoint}`);
-    case "unavailable":
+  // The table decides the row (T-007-04); a code it does not have is a defect.
+  const row = translateWireCode(wire.code, status, endpoint);
+  if (row === undefined) return defect(`unmapped wire code ${wire.code}`);
+  const { translation } = row;
+  switch (translation.row) {
+    case "rejected":
+      return { outcome: "rejected", error: { code: translation.code } };
+    case "resubmit":
+      return { outcome: "resubmit" };
+    case "retry":
       return { outcome: "retry", retryAfter: retryAfter(response) };
-    case "malformed":
-    case "not-found":
-    case "cursor-unknown":
-      return defect(`${status} ${code}`);
+    case "defect":
+      return defect(row.reason ?? `${status} ${wire.code}`);
     default:
-      return defect(`unmapped wire code ${String(code)}`);
+      return defect(`unmapped wire code ${wire.code}`);
   }
 }
 
@@ -325,7 +299,8 @@ export function translateQuery<Q extends Query>(
       ? defect("a query error without a ledger-origin code")
       : { outcome: "value", value: { ok: false, error } };
   }
-  if (result.ok !== true || !hasOwn(result, "value")) return defect("a result that is not C4");
+  if (result.ok !== true || !Object.hasOwn(result, "value"))
+    return defect("a result that is not C4");
   const value = result.value;
   // The value is the SDK's shape for the query's kind (§3.3). What decides the
   // row is checked here; the shapes themselves are the SDK's.
