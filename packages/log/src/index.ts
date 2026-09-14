@@ -29,6 +29,33 @@ export {
   verifyCheckpoint,
 } from "./checkpoint.js";
 export {
+  EXPORT_ITEM_TAG,
+  EXPORT_MAGIC,
+  EXPORT_VERSION,
+  type ExportedCancellationHolder,
+  type ExportedConsumedPass,
+  type ExportedCredential,
+  type ExportedOperation,
+  encodeExport,
+  encodeSnapshotEvent,
+  encodeSnapshotTicket,
+  exportStream,
+  type LedgerExport,
+  type LedgerSnapshot,
+  type ReadExport,
+  type ReadExportOptions,
+  readExport,
+} from "./export.js";
+export {
+  type ImportMismatch,
+  type ImportVerification,
+  type ImportVerifiedOptions,
+  importVerified,
+  type VerifiedImport,
+  type VerifyImportOptions,
+  verifyImport,
+} from "./import.js";
+export {
   type ChainedRecord,
   decodeRecord,
   type EventReference,

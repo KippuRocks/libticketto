@@ -6,8 +6,8 @@ Contract `C7`. Owned by `F-006`.
 
 **Status:** `C7` — the record and checkpoint formats, the chain and their
 verification — is in place for `M0`, specified in [`FORMAT.md`](FORMAT.md) with
-test vectors. Export and import (`M1`) and the `ticketto-log` verifier tool
-(`M5`) follow.
+test vectors. Export and import (`M1`) follow the same document; the
+`ticketto-log` verifier tool (`M5`) is to come.
 
 | | |
 |---|---|
@@ -75,6 +75,31 @@ party already holds (`REQ-TM-3`). A log rewritten and re-linked consistently
 passes every other check; against a held checkpoint it fails at the
 checkpoint's sequence (`checkpoint`), or where the log ends if it was cut short
 before it (`truncated`). Publishing checkpoints is `ticketto-offchain`'s.
+
+## Export and import
+
+`REQ-MG-3`, plan §5.5; the format is [`FORMAT.md`](FORMAT.md) §5.
+
+- `encodeExport(ledger)` / `exportStream(ledger)` — a `LedgerExport` (records up
+  to a checkpoint, the checkpoint, and the snapshot: events, tickets, credential
+  registrations, cancellation holders, consumed passes within retention,
+  operations within expiry) as a stream, each section sorted. A backend's
+  `migration.export()` returns it.
+- `readExport(stream, { publication? })` — the export, or a
+  `MigrationFailure` with reason `malformed` when the stream is incomplete, not
+  canonical, or its parts disagree. A backend's `migration.import(stream)` reads
+  with it, appends the records verbatim and loads the snapshot.
+- `verifyImport(backend, ledger)` — checks, through the port alone, that the
+  backend's log re-links into the exported records and ends at the checkpoint's
+  head hash, and that `getEvent`, `getTicket`, `getCredential` and
+  `getCancellationHolder` answer every snapshot entry with it. A disagreement is
+  a typed `mismatch`.
+- `importVerified(target, stream, options)` — the import driver: reads the
+  export, imports it through `target.migration`, then verifies.
+
+The tests run a round trip through a reference `migration` store
+(`test/reference-store.ts`), with no backend involved. Consumed passes and
+operations are probed by each backend's own tests.
 
 ## Format document and test vectors (`C7`)
 

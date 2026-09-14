@@ -6,7 +6,16 @@
 // 0 and 1, no trailing bytes, no length that runs past the input — so no two
 // byte strings stand for one record or checkpoint.
 
-import { concatBytes } from "./bytes.js";
+import { concatBytes, equalBytes } from "./bytes.js";
+
+/**
+ * A self-delimiting codec of another format — the profile's (`C2`) encodings of
+ * zones, placements, policies and the like — read and written in place.
+ */
+export interface ForeignCodec<T> {
+  readonly enc: (value: T) => Uint8Array;
+  readonly dec: (bytes: Uint8Array) => T;
+}
 
 /** Raised when bytes are not the canonical encoding of a log value. */
 export class LogDecodeError extends Error {
@@ -78,6 +87,12 @@ export class Writer {
     if (value === null) return this.u8(0);
     this.u8(1);
     write(this, value);
+    return this;
+  }
+
+  /** `value` in another format's encoding, appended as it is. */
+  codec<T>(codec: ForeignCodec<T>, value: T): this {
+    this.#parts.push(codec.enc(value));
     return this;
   }
 
@@ -181,6 +196,34 @@ export class Reader {
     if (tag === 0) return null;
     if (tag === 1) return read(this);
     throw new LogDecodeError(`invalid option tag ${tag}`);
+  }
+
+  /**
+   * A value in another format's self-delimiting encoding. Only its canonical
+   * encoding is accepted: the value must re-encode to exactly the bytes read.
+   */
+  codec<T>(codec: ForeignCodec<T>, what = "value"): T {
+    const rest = this.#bytes.slice(this.#offset);
+    let value: T;
+    let encoded: Uint8Array;
+    try {
+      value = codec.dec(rest);
+      encoded = codec.enc(value);
+    } catch (error) {
+      throw new LogDecodeError(
+        `${what}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+    if (encoded.length > rest.length || !equalBytes(encoded, rest.subarray(0, encoded.length))) {
+      throw new LogDecodeError(`${what}: not the canonical encoding`);
+    }
+    this.#offset += encoded.length;
+    return value;
+  }
+
+  /** How many bytes are left to read. */
+  get remaining(): number {
+    return this.#bytes.length - this.#offset;
   }
 
   /** Throws unless every byte has been read. */
