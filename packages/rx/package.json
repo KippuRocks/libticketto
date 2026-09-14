@@ -1,7 +1,7 @@
 {
   "name": "@ticketto/rx",
   "version": "0.0.0",
-  "description": "Optional RxJS adapter exposing SDK write completion as an Observable, so the SDK itself never depends on RxJS.",
+  "description": "Optional RxJS adapter: SDK write completion and log hints as Observables, so the SDK itself never depends on RxJS.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -26,5 +26,15 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@ticketto/sdk": "workspace:*"
+  },
+  "peerDependencies": {
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.4",
+    "rxjs": "7.8.2"
   }
 }
