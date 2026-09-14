@@ -25,6 +25,22 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.json"
+    "typecheck": "tsc -p tsconfig.json && tsc -p test/hermes/tsconfig.json",
+    "test:hermes": "node test/hermes/run.ts",
+    "vectors:vendor": "test/c4/vendor.sh",
+    "vectors:check": "test/c4/vendor.sh --check"
+  },
+  "dependencies": {
+    "@ticketto/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@babel/core": "7.29.7",
+    "@babel/runtime": "7.29.7",
+    "@react-native/babel-preset": "0.87.1",
+    "@react-native/metro-config": "0.87.1",
+    "@ticketto/profile-v0": "workspace:*",
+    "@types/node": "24.13.4",
+    "hermes-compiler": "250829098.0.17",
+    "metro": "0.87.1"
   }
 }

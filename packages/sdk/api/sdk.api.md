@@ -633,7 +633,7 @@ export const TICKETTO_ERROR_CODES: readonly [
 "ERR-ZoneInUse",
 /** Placement does not match the zone's kind (`REQ-ID-7`) */
 "ERR-ZoneKindMismatch",
-/** Adding a zone whose id already exists in the event (`REQ-ID-7`) */
+/** Adding a zone whose id already exists in the event, or creating an event that names the same zone id twice (`REQ-ID-7`) */
 "ERR-ZoneExists",
 /** Creating an event whose derived `EventId` already exists (`REQ-EV-9`) */
 "ERR-EventIdExists",
@@ -649,6 +649,8 @@ export const TICKETTO_ERROR_CODES: readonly [
 "ERR-LedgerUnavailable",
 /** A command reusing an operation id already recorded for a different command (`REQ-CM-1`) */
 "ERR-OperationConflict",
+/** A command whose stated `EventId` or `TicketId` is not the profile's canonical representation of its stated components (`REQ-ID-1`, `REQ-ID-3`, `REQ-EV-9`) */
+"ERR-IdentifierMismatch",
 /** The operation is outside every sponsorship entitlement (`REQ-SP-3`), or its sponsorship is missing or invalid. Not retryable */
 "ERR-SponsorshipRefused"];
 

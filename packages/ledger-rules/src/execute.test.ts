@@ -15,15 +15,8 @@ import { describe, expect, it, vi } from "vitest";
 import { commandOf, EVENT_COMMAND_KINDS, ticketIn } from "../test/commands.js";
 import { createFakeCapabilities, type FakeCapabilities } from "../test/fake-capabilities.js";
 import { credential, eventId, profile, registered, sign } from "../test/fixtures.js";
-import {
-  accept,
-  type CommandHandler,
-  type CommandHandlers,
-  createExecute,
-  execute,
-  reject,
-  handlers as v0Handlers,
-} from "./execute.js";
+import { createExecute, execute, handlers as v0Handlers } from "./execute.js";
+import { accept, type CommandHandler, type CommandHandlers, reject } from "./handler.js";
 
 /** Handlers that accept every command by recording its event as Active. */
 function acceptingHandlers(spy: () => void = () => {}): CommandHandlers {
