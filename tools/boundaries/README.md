@@ -28,8 +28,10 @@ dynamic imports, re-exports, `require` calls and `import("…")` types.
   refused by the base TypeScript configuration, which loads no DOM or Node
   types.
 - A relative import may not leave its package.
-- A package with no row in §5.2 — today `@ticketto/log` and `@ticketto/rx` — is
-  listed and not checked. Its rule belongs in the plan, not here.
+- A third-party package (`@noble/*`, `scale-ts`, `rxjs`, …) is not internal and
+  is not governed by the table; `rx`'s RxJS peer dependency needs no entry.
+- A package with no row in §5.2 is listed and not checked. Its rule belongs in
+  the plan, not here. Today every package has a row.
 
 The rules live in [`src/rules.ts`](src/rules.ts); the tests in
 [`src/check.test.ts`](src/check.test.ts) include the deliberate
