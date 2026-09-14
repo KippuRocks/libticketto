@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Build, lint, test, boundaries
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm boundaries
+
+  hermes:
+    # features/001-workspace/plan.md §5.3: sdk, profile-v0 and binding-offchain
+    # run inside React Native apps, so a Node-only API on that path must fail
+    # here, at the commit that introduces it.
+    name: Hermes bundle (sdk, profile-v0, binding-offchain)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Bundle with Metro and compile with hermesc
+        run: pnpm hermes
+      - name: Self-test — a Node-only API in sdk must fail the bundle
+        run: pnpm vitest run --project @libticketto/hermes-bundle
