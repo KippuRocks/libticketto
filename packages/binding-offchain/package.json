@@ -25,7 +25,6 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc -p tsconfig.json",
-    "conformance": "node -e \"process.exit(0)\""
+    "typecheck": "tsc -p tsconfig.json"
   }
 }
