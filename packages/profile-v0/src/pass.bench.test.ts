@@ -31,5 +31,5 @@ describe.skipIf(process.env.BENCH === undefined)("T-003-09 pass benchmark on Nod
       console.log(`BENCH ${JSON.stringify({ runtime: `node ${process.version}`, ...result })}`);
       expect(result.qrVersionM).not.toBeNull();
     }
-  });
+  }, 120_000);
 });
