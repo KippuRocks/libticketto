@@ -1,6 +1,6 @@
 // T-006-01 — the record codec, its hash and domain separation (REQ-SDK-5).
 
-import { blake2b256, encodeSignedPass } from "@ticketto/profile-v0";
+import { blake2b256, encodeSignedAccessPass, encodeSignedCommand } from "@ticketto/profile-v0";
 import type { CommandKind } from "@ticketto/sdk";
 import { beforeAll, describe, expect, it } from "vitest";
 import { COMMANDS, eventOf, samplePass, signCommand } from "../test/fixtures.js";
@@ -68,13 +68,16 @@ describe("T-006-01 record codec round-trips", () => {
     expect(decodeRecord(encodeRecord(record))).toEqual(record);
   });
 
-  it("carries a pass as the profile's presented bytes", () => {
-    const [, input] = inputs.at(-1) as [string, LogInput];
-    const bytes = encodeRecord(recordOf(input));
-    const presented = encodeSignedPass(input as never);
-    // version 1 + sequence 8 + Some 1 + event 32 + eventSequence 8 + recordedAt 8 + kind 1
-    expect(toHex(bytes.subarray(59, 59 + presented.length))).toBe(toHex(presented));
-    expect(bytes[58]).toBe(1);
+  it("carries the input as the profile's signed-input framing", () => {
+    // version 1 + sequence 8 + Some 1 + event 32 + eventSequence 8 + recordedAt 8 = 58
+    const [, pass] = inputs.at(-1) as [string, LogInput];
+    const framedPass = encodeSignedAccessPass(pass as never);
+    const passBytes = encodeRecord(recordOf(pass));
+    expect(toHex(passBytes.subarray(58, 58 + framedPass.length))).toBe(toHex(framedPass));
+    const [, command] = inputs[0] as [string, LogInput];
+    const framedCommand = encodeSignedCommand(command as never);
+    const commandBytes = encodeRecord(recordOf(command));
+    expect(toHex(commandBytes.subarray(58, 58 + framedCommand.length))).toBe(toHex(framedCommand));
   });
 });
 
@@ -101,9 +104,12 @@ describe("T-006-01 record codec refuses non-canonical bytes", () => {
     expect(() => decodeRecord(bytes)).toThrow(LogDecodeError);
   });
 
-  it("an unknown input kind", () => {
+  it("an unknown signed-input kind or version", () => {
+    const versioned = sample();
+    versioned[58] = 1;
+    expect(() => decodeRecord(versioned)).toThrow(LogDecodeError);
     const bytes = sample();
-    bytes[58] = 2;
+    bytes[59] = 2;
     expect(() => decodeRecord(bytes)).toThrow(LogDecodeError);
   });
 
@@ -115,12 +121,12 @@ describe("T-006-01 record codec refuses non-canonical bytes", () => {
 
   it("a non-minimal compact length on the command bytes", () => {
     const bytes = sample();
-    // The command's length prefix sits after the kind byte; re-encode it in two-byte mode.
-    const length = (bytes[59] as number) >> 2;
+    // The payload's length prefix follows the input's version and kind; widen it to two bytes.
+    const length = (bytes[60] as number) >> 2;
     const widened = concatBytes(
-      bytes.subarray(0, 59),
+      bytes.subarray(0, 60),
       Uint8Array.of(((length << 2) | 1) & 0xff, (length << 2) >> 8),
-      bytes.subarray(60),
+      bytes.subarray(61),
     );
     expect(() => decodeRecord(widened)).toThrow(LogDecodeError);
   });
@@ -138,6 +144,11 @@ describe("T-006-01 record codec refuses non-canonical bytes", () => {
     expect(() => encodeRecord(recordOf(register, { event }))).toThrow(TypeError);
     const [, pass] = inputs.at(-1) as [string, LogInput];
     expect(() => encodeRecord(recordOf(pass, { event: null }))).toThrow(TypeError);
+  });
+
+  it("a command record claiming a presentedAt", () => {
+    const [, input] = inputs[1] as [string, LogInput];
+    expect(() => encodeRecord(recordOf(input, { presentedAt: 1 }))).toThrow(TypeError);
   });
 
   it("values that cannot be encoded", () => {
@@ -164,7 +175,7 @@ describe("T-006-01 record hash", () => {
   });
 
   it("changes with every field", () => {
-    const [, input] = inputs[5] as [string, LogInput];
+    const [, input] = inputs.at(-1) as [string, LogInput];
     const base = recordOf(input);
     const variants: Partial<ChainedRecord>[] = [
       { sequence: 8 },

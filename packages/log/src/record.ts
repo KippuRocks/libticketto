@@ -20,20 +20,13 @@
 
 import {
   blake2b256,
-  DecodeError,
-  decodeCommand,
-  decodePass,
-  encodeCommand,
-  encodeSignedPass,
-  PASS_LENGTH,
+  decodeSignedAccessPass,
+  decodeSignedCommand,
+  encodeSignedAccessPass,
+  encodeSignedCommand,
+  SIGNED_INPUT_KIND_INDEX,
 } from "@ticketto/profile-v0";
-import type {
-  Authorisation,
-  EventId,
-  SignedAccessPass,
-  SignedCommand,
-  Timestamp,
-} from "@ticketto/sdk";
+import type { EventId, SignedAccessPass, SignedCommand, Timestamp } from "@ticketto/sdk";
 import { checkRecordContent } from "./allow-list.js";
 import { ascii, concatBytes, fromHex, toHex } from "./bytes.js";
 import { LogDecodeError, Reader, Writer } from "./scale.js";
@@ -49,9 +42,6 @@ export const HASH_LENGTH = 32;
 
 /** The `prevHash` of the first record in a log: 32 zero bytes, as hex. */
 export const GENESIS_HASH = "00".repeat(HASH_LENGTH);
-
-const INPUT_COMMAND = 0;
-const INPUT_PASS = 1;
 
 /** What a record carries: the write as submitted, with its authorisation. */
 export type LogInput = SignedCommand | SignedAccessPass;
@@ -72,7 +62,7 @@ export interface ChainedRecord {
   /** When the ledger recorded the input, by its clock. */
   readonly recordedAt: Timestamp;
   readonly input: LogInput;
-  /** When a pass was presented, as claimed by its submitter; `null` when none was claimed. */
+  /** When a pass was presented, as its submitter claimed it; always `null` for a command. */
   readonly presentedAt: Timestamp | null;
   /** The previous record's hash, as lower-case hex; `GENESIS_HASH` for the first record. */
   readonly prevHash: string;
@@ -83,17 +73,21 @@ function isPass(input: LogInput): input is SignedAccessPass {
 }
 
 /**
- * Throws a `TypeError` unless the record names the event its input concerns: a
+ * Throws a `TypeError` unless the record names the event its input concerns — a
  * command's own `event`, none for a command without one, and some event for a
- * pass (whose ticket belongs to one).
+ * pass, whose ticket belongs to one — and unless a command's record claims no
+ * `presentedAt`, which only a pass carries.
  */
-function checkEventReference(record: ChainedRecord): void {
+function checkConsistency(record: ChainedRecord): void {
   const { input, event } = record;
   if (isPass(input)) {
     if (event === null) throw new TypeError("a pass record names the event of its ticket");
     return;
   }
   const command = input.command;
+  if (record.presentedAt !== null) {
+    throw new TypeError(`a ${command.kind} record carries no presentedAt`);
+  }
   const own = Object.hasOwn(command, "event") ? (command as { event: EventId }).event : null;
   if (own === null && event !== null) {
     throw new TypeError(`a ${command.kind} record names no event`);
@@ -109,7 +103,7 @@ function checkEventReference(record: ChainedRecord): void {
  */
 export function encodeRecord(record: ChainedRecord): Uint8Array {
   checkRecordContent(record);
-  checkEventReference(record);
+  checkConsistency(record);
   const writer = new Writer()
     .u8(RECORD_VERSION)
     .u64(record.sequence, "sequence")
@@ -118,16 +112,7 @@ export function encodeRecord(record: ChainedRecord): Uint8Array {
     })
     .u64(record.recordedAt, "recordedAt");
   const { input } = record;
-  if (isPass(input)) {
-    // The profile's presented pass: pass [u8;97] ‖ authorisation Vec<u8>.
-    writer.u8(INPUT_PASS);
-    writer.raw(encodeSignedPass(input));
-  } else {
-    writer
-      .u8(INPUT_COMMAND)
-      .bytes(encodeCommand(input.command), "input.command")
-      .bytes(input.authorisation, "input.authorisation");
-  }
+  writer.raw(isPass(input) ? encodeSignedAccessPass(input) : encodeSignedCommand(input));
   return writer
     .option(record.presentedAt, (w, at) => {
       w.u64(at, "presentedAt");
@@ -136,27 +121,23 @@ export function encodeRecord(record: ChainedRecord): Uint8Array {
     .finish();
 }
 
+/** The profile's signed-input framing, read off the front of a record's remaining bytes. */
 function decodeInput(reader: Reader): LogInput {
+  const version = reader.u8();
   const kind = reader.u8();
-  if (kind === INPUT_COMMAND) {
-    const bytes = reader.bytes();
-    let command: SignedCommand["command"];
-    try {
-      command = decodeCommand(bytes);
-    } catch (error) {
-      if (error instanceof DecodeError) throw new LogDecodeError(`input.command: ${error.message}`);
-      throw error;
-    }
-    return { command, authorisation: reader.bytes() as Authorisation };
-  }
-  if (kind === INPUT_PASS) {
-    const pass = reader.fixed(PASS_LENGTH);
-    const authorisation = reader.bytes();
-    const decoded = decodePass(concatBytes(pass, new Writer().bytes(authorisation).finish()));
-    if (!decoded.ok) throw new LogDecodeError(`input.pass: ${decoded.error.detail ?? "invalid"}`);
-    return decoded.value;
-  }
-  throw new LogDecodeError(`unknown input kind ${kind}`);
+  const payload = reader.bytes();
+  const authorisation = reader.bytes();
+  // Re-framed exactly as read, so the profile's strict decoder judges the bytes.
+  const framed = new Writer().u8(version).u8(kind).bytes(payload).bytes(authorisation).finish();
+  const decoded =
+    kind === SIGNED_INPUT_KIND_INDEX.command
+      ? decodeSignedCommand(framed)
+      : kind === SIGNED_INPUT_KIND_INDEX.accessPass
+        ? decodeSignedAccessPass(framed)
+        : null;
+  if (decoded === null) throw new LogDecodeError(`unknown signed input kind ${kind}`);
+  if (!decoded.ok) throw new LogDecodeError(`input: ${decoded.error.detail ?? "malformed"}`);
+  return decoded.value;
 }
 
 /** The record `bytes` canonically encode. Throws `LogDecodeError` for anything else. */
@@ -176,7 +157,7 @@ export function decodeRecord(bytes: Uint8Array): ChainedRecord {
   reader.end();
   const record: ChainedRecord = { sequence, event, recordedAt, input, presentedAt, prevHash };
   try {
-    checkEventReference(record);
+    checkConsistency(record);
   } catch (error) {
     throw new LogDecodeError(error instanceof Error ? error.message : String(error));
   }

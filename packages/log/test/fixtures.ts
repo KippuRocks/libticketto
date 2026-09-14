@@ -2,7 +2,7 @@
 // V0 kind, and a signed access pass. Keys are fixed, and p256 signing is
 // deterministic, so the same inputs come out on every run.
 
-import { encodeCommand, eventId, producePass, ticketId } from "@ticketto/profile-v0";
+import { commandSigningPayload, eventId, producePass, ticketId } from "@ticketto/profile-v0";
 import { softwareP256Signer } from "@ticketto/profile-v0/testing";
 import type {
   AccountId,
@@ -109,7 +109,7 @@ export const COMMANDS: Readonly<Record<CommandKind, Command>> = {
 
 export async function signCommand(command: Command): Promise<SignedCommand> {
   const signer = command.kind === "registerCredential" ? holder.signer : organiser.signer;
-  return { command, authorisation: await signer.sign(encodeCommand(command)) };
+  return { command, authorisation: await signer.sign(commandSigningPayload(command)) };
 }
 
 export async function samplePass(): Promise<SignedAccessPass> {

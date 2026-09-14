@@ -18,15 +18,14 @@ document follow.
 ```
 LogRecord = version u8, sequence u64,
             event Option<(id [u8;32], eventSequence u64)>,
-            recordedAt u64, input Input, presentedAt Option<u64>,
+            recordedAt u64, input SignedInput, presentedAt Option<u64>,
             prevHash [u8;32]
-Input     = 0u8, command Vec<u8>, authorisation Vec<u8>     a signed command
-          | 1u8, pass [u8;97], authorisation Vec<u8>        a signed access pass
 hash      = BLAKE2b-256("ticketto/v0/log" ‖ LogRecord)
 ```
 
-SCALE (`AD-11`), integers little-endian. `command` and `pass` are the profile's
-canonical bytes — exactly what was signed — so a third party re-verifies each
+SCALE (`AD-11`), integers little-endian. `input` is the profile's signed-input
+framing (`encodeSignedCommand`, `encodeSignedAccessPass`: version, kind, payload,
+authorisation), carried as it is, so a third party re-verifies each
 authorisation against the record itself. Decoding is strict: only the canonical
 encoding of a record is accepted.
 
@@ -35,7 +34,8 @@ encoding of a record is accepted.
   ever be needed, they come as a new record version.
 - **The event reference is optional**, as in the SDK's `LogRecord`: registering
   a credential belongs to no event. A command's record names the command's own
-  event; a pass's record names the event of its ticket.
+  event; a pass's record names the event of its ticket. Only a pass's record
+  carries a `presentedAt`.
 - **`NFR-6` allow-list.** `encodeRecord` refuses, with `LogContentError`, any
   field of a record or its input that the allow-list does not name — per
   command kind, and for every nested value — rather than letting the encoding
