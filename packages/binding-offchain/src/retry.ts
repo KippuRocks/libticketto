@@ -83,6 +83,10 @@ export interface RetryBudget {
 export interface Retrier {
   readonly policy: RetryPolicy;
   budget(): RetryBudget;
+  /** The backoff before retry `attempt` (1-based), never less than `Retry-After` seconds. */
+  delay(attempt: number, retryAfter: number | null): number;
+  /** Waits `milliseconds` on the retrier's timers. */
+  sleep(milliseconds: number): Promise<void>;
   /** Runs one exchange, abandoning it after `milliseconds`: an abandoned exchange is a transport failure. */
   timed<T>(
     exchange: (signal: AbortSignalLike | undefined) => Promise<T>,
@@ -172,5 +176,5 @@ export function createRetrier(options: RetryOptions = {}): Retrier {
     }
   };
 
-  return { policy, budget, timed, read };
+  return { policy, budget, delay: backoff, sleep, timed, read };
 }

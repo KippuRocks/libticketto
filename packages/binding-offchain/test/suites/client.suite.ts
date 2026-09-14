@@ -306,11 +306,14 @@ export const clientSuite: Suite = (t) => {
         assertThrows(() => queryRequest({ kind: "listTickets" } as unknown as Query));
       });
 
-      t.it("a query C4 version 0 does not define, though the SDK does", () => {
+      t.it("a getCredential with a credential id C4 does not accept", () => {
         const account = "e408f9fc4beb52821ac1b3841f8e0775bf589d150b21a6286603fd767dc8ebf1";
-        assertThrows(() =>
-          queryRequest({ kind: "getCredential", account, credential: account } as unknown as Query),
-        );
+        for (const credential of ["", "0", "AB", "ab".repeat(65)]) {
+          assertThrows(() =>
+            queryRequest({ kind: "getCredential", account, credential } as unknown as Query),
+          );
+        }
+        queryRequest({ kind: "getCredential", account, credential: "ab".repeat(64) } as Query);
       });
 
       t.it("a query carries exactly its kind's fields", () => {

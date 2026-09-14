@@ -95,6 +95,14 @@ export interface HintStream extends AsyncIterable<Cursor> {
 
 export type HintsOutcome = HintStream | Retry | Defect;
 
+/** The platform's `fetch` returned no streamed body, so the hint stream cannot be read here: poll instead. */
+export class HintStreamUnsupported extends Error {
+  constructor() {
+    super("this platform's fetch does not stream response bodies; poll instead");
+    this.name = "HintStreamUnsupported";
+  }
+}
+
 /** A transport failure while reading an open hint stream. The reader reconnects. */
 export class HintStreamClosed extends Error {
   constructor(cause: unknown) {
@@ -222,7 +230,7 @@ export function createC4Client(options: C4ClientOptions): C4Client {
       if (opened.outcome !== "hints") return opened;
       const body = response.body;
       if (body === undefined || body === null) {
-        throw new Error("this platform's fetch does not stream response bodies; poll instead");
+        throw new HintStreamUnsupported();
       }
       return hintStream(body.getReader());
     },

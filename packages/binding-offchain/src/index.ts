@@ -4,6 +4,11 @@
 // KippuRocks/ticketto-offchain.
 
 export {
+  connectOffchainBackend,
+  type OffchainBackend,
+  type OffchainBackendOptions,
+} from "./backend.js";
+export {
   type AbortSignalLike,
   type BodyReaderLike,
   type C4Client,
@@ -14,10 +19,17 @@ export {
   type FetchResponseLike,
   type HintStream,
   HintStreamClosed,
+  HintStreamUnsupported,
   type HintsOutcome,
   type RequestOptions,
 } from "./client.js";
 export { HintParser, HintStreamDefect } from "./hints.js";
+export {
+  createOffchainLog,
+  decodeRecord,
+  type HintTransport,
+  type OffchainLogOptions,
+} from "./log.js";
 export {
   createRetrier,
   DEFAULT_RETRY,
