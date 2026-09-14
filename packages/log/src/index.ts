@@ -4,6 +4,18 @@
 
 export { COMMAND_FIELDS, checkRecordContent, LogContentError } from "./allow-list.js";
 export {
+  type ChainFault,
+  type ChainHead,
+  type ChainState,
+  type ChainVerification,
+  EMPTY_CHAIN,
+  type LinkedRecord,
+  LogChain,
+  type LogEntry,
+  linkRecord,
+  verifyChain,
+} from "./chain.js";
+export {
   type ChainedRecord,
   decodeRecord,
   type EventReference,
