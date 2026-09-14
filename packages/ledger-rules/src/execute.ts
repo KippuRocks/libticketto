@@ -6,6 +6,8 @@
 // serialisable transaction, and commits together or not at all.
 //
 // The checks every signed command passes, in order (plan §5.2):
+//   0. the event and ticket it names exist         → ERR-EventNotFound /
+//      (createEvent names an event yet to exist)      ERR-TicketNotFound
 //   1. its envelope has not expired                → ERR-OperationExpired
 //   2. its operation id is not recorded            → an identical replay returns
 //      the original receipt; a different command    → ERR-OperationConflict
@@ -31,10 +33,11 @@ import type {
   Result,
   SignedAccessPass,
   SignedCommand,
+  TicketId,
   TickettoError,
   Timestamp,
 } from "@ticketto/sdk";
-import type { Capabilities, Registry } from "./capabilities.js";
+import type { Capabilities, Registry, TicketRecord } from "./capabilities.js";
 import { err, ok } from "./result.js";
 
 /** What accompanies an input besides its own bytes. */
@@ -54,8 +57,13 @@ export interface CommandContext<C extends Command> {
   readonly command: C;
   /** The account whose registered credential authorised the command (step 3). */
   readonly signer: AccountId;
-  /** The event the command names, as recorded; `null` when it names none, or none exists. */
+  /**
+   * The event the command names, as recorded; `null` only for a command that
+   * names an event yet to exist (`createEvent`), or none (`registerCredential`).
+   */
   readonly event: Event | null;
+  /** The existing ticket the command names; `null` when it names none. */
+  readonly ticket: TicketRecord | null;
   /** The capabilities' clock, read once for the whole input. */
   readonly now: Timestamp;
 }
@@ -108,6 +116,13 @@ function namedEvent(command: Command): EventId | null {
   return "event" in command ? command.event : null;
 }
 
+/** The existing ticket a command names, if any. `issueTicket` names one yet to exist. */
+function namedTicket(command: Command): TicketId | null {
+  return command.kind === "transferTicket" || command.kind === "removeRestriction"
+    ? command.ticket
+    : null;
+}
+
 /**
  * Step 3: the account an authorisation speaks for, provided it verifies against
  * a credential registered to that account (`REQ-CP-6`). The payload verified is
@@ -149,6 +164,19 @@ export function createExecute(handlers: CommandHandlers): Execute {
     return caps.transaction(async (tx): Promise<Result<Receipt>> => {
       const now = caps.clock.now();
 
+      // 0. What the command names exists (§10, amendment 0003). A command against
+      // a named event or ticket checks it first (plan §5.2).
+      const eventId = namedEvent(command);
+      const event = eventId === null ? null : await tx.getEvent(eventId);
+      if (event === null && eventId !== null && command.kind !== "createEvent") {
+        return err("ERR-EventNotFound", `no event ${eventId}`);
+      }
+      const ticketId = namedTicket(command);
+      const ticket = ticketId === null ? null : await tx.getTicket(ticketId);
+      if (ticket === null && ticketId !== null) {
+        return err("ERR-TicketNotFound", `no ticket ${ticketId}`);
+      }
+
       // 1. The envelope.
       if (now > command.expiresAt) {
         return err("ERR-OperationExpired", `expired at ${command.expiresAt}`);
@@ -168,15 +196,21 @@ export function createExecute(handlers: CommandHandlers): Execute {
       if (!authorised.ok) return authorised;
 
       // 4. INV-16: nothing of a Finished event changes.
-      const eventId = namedEvent(command);
-      const event = eventId === null ? null : await tx.getEvent(eventId);
       if (event?.status === "Finished") {
         return err("ERR-EventFinished", "the event is Finished");
       }
 
       // 5. The command's own checks, then its writes.
       const handler = handlers[command.kind] as CommandHandler<Command>;
-      const outcome = await handler({ tx, profile, command, signer: authorised.value, event, now });
+      const outcome = await handler({
+        tx,
+        profile,
+        command,
+        signer: authorised.value,
+        event,
+        ticket,
+        now,
+      });
       if (!outcome.accepted) return { ok: false, error: outcome.error };
       await outcome.apply();
 

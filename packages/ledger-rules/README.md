@@ -25,6 +25,8 @@ const event = await query(caps, profile, { kind: "getEvent", event: id });
 `execute` runs the whole input in one `caps.transaction`. Every signed command
 passes, in this order (plan §5.2):
 
+0. The event and ticket it names exist → `ERR-EventNotFound` /
+   `ERR-TicketNotFound`. `createEvent` and `issueTicket` name ones yet to exist.
 1. Its envelope has not expired → `ERR-OperationExpired`.
 2. Its operation id is not recorded. An identical replay — same id, same digest
    of the profile's signed-input framing — returns the original receipt and

@@ -2,9 +2,17 @@
 // log emission (features/008-ledger-rules/plan.md §5.2, §5.4).
 
 import { decodeSignedCommand, encodeSignedCommand } from "@ticketto/profile-v0";
-import type { AccountId, Authorisation, Event, EventId, Receipt, Result } from "@ticketto/sdk";
+import type {
+  AccountId,
+  Authorisation,
+  Event,
+  EventId,
+  Receipt,
+  Result,
+  TicketId,
+} from "@ticketto/sdk";
 import { describe, expect, it, vi } from "vitest";
-import { commandOf, EVENT_COMMAND_KINDS } from "../test/commands.js";
+import { commandOf, EVENT_COMMAND_KINDS, ticketIn } from "../test/commands.js";
 import { createFakeCapabilities, type FakeCapabilities } from "../test/fake-capabilities.js";
 import { credential, eventId, profile, registered, sign } from "../test/fixtures.js";
 import {
@@ -56,7 +64,7 @@ describe("execute — replay (REQ-CM-1, plan §5.4)", () => {
     const spy = vi.fn();
     const run = createExecute(acceptingHandlers(spy));
     const organiser = await registered(caps);
-    const signed = await sign(organiser, commandOf("setEventStatus", eventId()));
+    const signed = await sign(organiser, commandOf("createEvent", eventId()));
 
     const first = await run(caps, profile, signed);
     const replay = await run(caps, profile, signed);
@@ -71,7 +79,7 @@ describe("execute — replay (REQ-CM-1, plan §5.4)", () => {
     const { caps } = await setup();
     const run = createExecute(acceptingHandlers());
     const organiser = await registered(caps);
-    const signed = await sign(organiser, commandOf("setEventStatus", eventId()));
+    const signed = await sign(organiser, commandOf("createEvent", eventId()));
 
     const first = await run(caps, profile, signed);
     const decoded = decodeSignedCommand(encodeSignedCommand(signed));
@@ -84,11 +92,11 @@ describe("execute — replay (REQ-CM-1, plan §5.4)", () => {
     const { caps } = await setup();
     const run = createExecute(acceptingHandlers());
     const organiser = await registered(caps);
-    const original = await sign(organiser, commandOf("setEventStatus", eventId()));
+    const original = await sign(organiser, commandOf("createEvent", eventId()));
     await run(caps, profile, original);
 
     const different = await sign(organiser, {
-      ...commandOf("setEventStatus", eventId()),
+      ...commandOf("createEvent", eventId()),
       operationId: original.command.operationId,
     });
     expectError(await run(caps, profile, different), "ERR-OperationConflict");
@@ -99,7 +107,7 @@ describe("execute — replay (REQ-CM-1, plan §5.4)", () => {
     const { caps } = await setup();
     const run = createExecute(acceptingHandlers());
     const organiser = await registered(caps);
-    const original = await sign(organiser, commandOf("setEventStatus", eventId()));
+    const original = await sign(organiser, commandOf("createEvent", eventId()));
     await run(caps, profile, original);
 
     const tampered = new Uint8Array(original.authorisation);
@@ -117,7 +125,7 @@ describe("execute — replay (REQ-CM-1, plan §5.4)", () => {
       Object.fromEntries(Object.keys(v0Handlers).map((k) => [k, handler])) as never,
     );
     const organiser = await registered(caps);
-    const signed = await sign(organiser, commandOf("setEventStatus", eventId()));
+    const signed = await sign(organiser, commandOf("createEvent", eventId()));
 
     expectError(await run(caps, profile, signed), "ERR-NotOwner");
     expect(caps.log()).toHaveLength(0);
@@ -131,10 +139,7 @@ describe("execute — the envelope", () => {
     const { caps } = await setup();
     const run = createExecute(acceptingHandlers());
     const organiser = await registered(caps);
-    const signed = await sign(
-      organiser,
-      commandOf("setEventStatus", eventId(), { expiresAt: 100 }),
-    );
+    const signed = await sign(organiser, commandOf("createEvent", eventId(), { expiresAt: 100 }));
 
     caps.clock.set(101);
     expectError(await run(caps, profile, signed), "ERR-OperationExpired");
@@ -145,10 +150,7 @@ describe("execute — the envelope", () => {
     const { caps } = await setup();
     const run = createExecute(acceptingHandlers());
     const organiser = await registered(caps);
-    const signed = await sign(
-      organiser,
-      commandOf("setEventStatus", eventId(), { expiresAt: 100 }),
-    );
+    const signed = await sign(organiser, commandOf("createEvent", eventId(), { expiresAt: 100 }));
 
     caps.clock.set(100);
     expect((await run(caps, profile, signed)).ok).toBe(true);
@@ -158,10 +160,7 @@ describe("execute — the envelope", () => {
     const { caps } = await setup();
     const run = createExecute(acceptingHandlers());
     const organiser = await registered(caps);
-    const signed = await sign(
-      organiser,
-      commandOf("setEventStatus", eventId(), { expiresAt: 100 }),
-    );
+    const signed = await sign(organiser, commandOf("createEvent", eventId(), { expiresAt: 100 }));
     expect((await run(caps, profile, signed)).ok).toBe(true);
 
     caps.clock.set(101);
@@ -172,15 +171,12 @@ describe("execute — the envelope", () => {
     const { caps } = await setup();
     const run = createExecute(acceptingHandlers());
     const organiser = await registered(caps);
-    const original = await sign(
-      organiser,
-      commandOf("setEventStatus", eventId(), { expiresAt: 100 }),
-    );
+    const original = await sign(organiser, commandOf("createEvent", eventId(), { expiresAt: 100 }));
     await run(caps, profile, original);
 
     caps.clock.set(101);
     const later = await sign(organiser, {
-      ...commandOf("setEventStatus", eventId(), { expiresAt: 1_000 }),
+      ...commandOf("createEvent", eventId(), { expiresAt: 1_000 }),
       operationId: original.command.operationId,
     });
     expect((await run(caps, profile, later)).ok).toBe(true);
@@ -192,7 +188,7 @@ describe("execute — authorisation (REQ-CP-6)", () => {
     const { caps } = await setup();
     const run = createExecute(acceptingHandlers());
     const stranger = credential();
-    const signed = await sign(stranger, commandOf("setEventStatus", eventId()));
+    const signed = await sign(stranger, commandOf("createEvent", eventId()));
     expectError(await run(caps, profile, signed), "ERR-InvalidAuthorisation");
     expect(caps.log()).toHaveLength(0);
   });
@@ -201,8 +197,8 @@ describe("execute — authorisation (REQ-CP-6)", () => {
     const { caps } = await setup();
     const run = createExecute(acceptingHandlers());
     const organiser = await registered(caps);
-    const signed = await sign(organiser, commandOf("setEventStatus", eventId()));
-    const other = await sign(organiser, commandOf("setEventStatus", eventId()));
+    const signed = await sign(organiser, commandOf("createEvent", eventId()));
+    const other = await sign(organiser, commandOf("createEvent", eventId()));
     const swapped = { command: signed.command, authorisation: other.authorisation };
     expectError(await run(caps, profile, swapped), "ERR-InvalidAuthorisation");
   });
@@ -211,7 +207,7 @@ describe("execute — authorisation (REQ-CP-6)", () => {
     const { caps } = await setup();
     const run = createExecute(acceptingHandlers());
     const signed = {
-      command: commandOf("setEventStatus", eventId()),
+      command: commandOf("createEvent", eventId()),
       authorisation: new Uint8Array([9, 9, 9]) as Authorisation,
     };
     expectError(await run(caps, profile, signed), "ERR-InvalidAuthorisation");
@@ -227,7 +223,7 @@ describe("execute — authorisation (REQ-CP-6)", () => {
       credential: signer.credential,
       registration: other.registration,
     });
-    const signed = await sign(signer, commandOf("setEventStatus", eventId()));
+    const signed = await sign(signer, commandOf("createEvent", eventId()));
     expectError(await run(caps, profile, signed), "ERR-InvalidAuthorisation");
   });
 
@@ -242,7 +238,7 @@ describe("execute — authorisation (REQ-CP-6)", () => {
       Object.fromEntries(Object.keys(v0Handlers).map((k) => [k, handler])) as never,
     );
     const organiser = await registered(caps);
-    await run(caps, profile, await sign(organiser, commandOf("setEventStatus", eventId())));
+    await run(caps, profile, await sign(organiser, commandOf("createEvent", eventId())));
     expect(seen).toEqual([organiser.account]);
   });
 });
@@ -256,6 +252,10 @@ describe("execute — INV-16", () => {
       const id = eventId();
       await caps.registry.putEvent(event(id, organiser.account, "Finished"));
       const signed = await sign(organiser, commandOf(kind, id, { account: organiser.account }));
+      const named = signed.command as { kind: string; ticket?: TicketId };
+      if (named.kind === "transferTicket" || named.kind === "removeRestriction") {
+        await caps.registry.insertTicket(ticketIn(id, named.ticket as TicketId, organiser.account));
+      }
 
       expectError(await execute(caps, profile, signed), "ERR-EventFinished");
       expect(caps.log()).toHaveLength(0);
@@ -278,12 +278,12 @@ describe("execute — check order (plan §5.2)", () => {
     const { caps } = await setup();
     const run = createExecute(acceptingHandlers());
     const organiser = await registered(caps);
-    const original = await sign(organiser, commandOf("setEventStatus", eventId()));
+    const original = await sign(organiser, commandOf("createEvent", eventId()));
     await run(caps, profile, original);
 
     caps.clock.set(original.command.expiresAt - 1);
     const expired = await sign(organiser, {
-      ...commandOf("setEventStatus", eventId(), { expiresAt: 10 }),
+      ...commandOf("createEvent", eventId(), { expiresAt: 10 }),
       operationId: original.command.operationId,
     });
     expectError(await run(caps, profile, expired), "ERR-OperationExpired");
@@ -293,11 +293,11 @@ describe("execute — check order (plan §5.2)", () => {
     const { caps } = await setup();
     const run = createExecute(acceptingHandlers());
     const organiser = await registered(caps);
-    const original = await sign(organiser, commandOf("setEventStatus", eventId()));
+    const original = await sign(organiser, commandOf("createEvent", eventId()));
     await run(caps, profile, original);
 
     const stranger = await sign(credential(), {
-      ...commandOf("setEventStatus", eventId()),
+      ...commandOf("createEvent", eventId()),
       operationId: original.command.operationId,
     });
     expectError(await run(caps, profile, stranger), "ERR-OperationConflict");
@@ -326,7 +326,7 @@ describe("execute — log emission (REQ-SDK-5)", () => {
     const organiser = await registered(caps);
     const id = eventId();
     caps.clock.set(42);
-    const signed = await sign(organiser, commandOf("setEventStatus", id));
+    const signed = await sign(organiser, commandOf("createEvent", id));
 
     const result = (await run(caps, profile, signed)) as { ok: true; value: Receipt };
     const [record] = caps.log();
@@ -366,7 +366,7 @@ describe("execute — log emission (REQ-SDK-5)", () => {
     );
     const organiser = await registered(caps);
     const id = eventId();
-    const signed = await sign(organiser, commandOf("setEventStatus", id));
+    const signed = await sign(organiser, commandOf("createEvent", id));
 
     await expect(run(caps, profile, signed)).rejects.toThrow("store failure");
     expect(caps.log()).toHaveLength(0);
@@ -379,7 +379,7 @@ describe("execute — defects", () => {
   it("throws for a command carrying presentedAt", async () => {
     const { caps } = await setup();
     const organiser = await registered(caps);
-    const signed = await sign(organiser, commandOf("setEventStatus", eventId()));
+    const signed = await sign(organiser, commandOf("createEvent", eventId()));
     await expect(execute(caps, profile, signed, { presentedAt: 1 })).rejects.toThrow(TypeError);
   });
 });
