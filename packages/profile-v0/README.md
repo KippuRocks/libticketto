@@ -52,7 +52,27 @@ value.
 | Authorisation | compressed public key (33) ‖ signature (64) over `BLAKE2b-256(payload)` |
 | Credential id | the compressed public key, as hex |
 
-Signatures are `r ‖ s` with low S; `normaliseP256Signature` turns a DER signature
+| `pass-webauthn` | |
+|---|---|
+| Registration | hashed user id (32) ‖ `Attestation` |
+| Authorisation | device id (32) ‖ `Assertion` |
+| Credential id | the device id, as hex |
+
+`Attestation` and `Assertion` are byte for byte the SCALE structures of
+[`virto-network/papi-signers`](https://github.com/virto-network/papi-signers),
+with `authority_id` `"kreivo_p"` and `context` `0`. An assertion over a payload
+verifies when its user id is the registration's, its device is the registered
+one, its client data is a `webauthn.get` whose challenge is
+`base64url(BLAKE2b-256(payload))`, its authenticator data carries the configured
+RP id hash and the user-verified flag, and its ECDSA P-256 signature over
+`authenticatorData ‖ SHA-256(clientDataJSON)` verifies after DER is normalised
+to low S. The RP id is deployment configuration: changing it invalidates every
+holder passkey.
+
+The profile does not interpret an attestation's challenge: a registration is
+accepted for an account only through a command authorised under `REQ-CP-6`.
+
+`p256` signatures are `r ‖ s` with low S; `normaliseP256Signature` turns a DER signature
 (as a KMS returns) into that form. A high-S signature is refused.
 
 ## Runtime requirements
