@@ -27,6 +27,7 @@ export type {
   CommandKind,
   CreateEvent,
   GetCancellationHolder,
+  GetCredential,
   GetEvent,
   GetTicket,
   IssueTicket,

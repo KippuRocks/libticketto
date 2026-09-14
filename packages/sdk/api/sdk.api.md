@@ -176,6 +176,16 @@ export interface GetCancellationHolder {
 }
 
 // @public
+export interface GetCredential {
+    // (undocumented)
+    readonly account: AccountId;
+    // (undocumented)
+    readonly credential: CredentialId;
+    // (undocumented)
+    readonly kind: "getCredential";
+}
+
+// @public
 export interface GetEvent {
     // (undocumented)
     readonly event: EventId;
@@ -336,7 +346,7 @@ export type ProofId = Brand<string, "ProofId">;
 export type Provenance = "Purchased" | "Granted";
 
 // @public
-export type Query = GetEvent | GetTicket | CanAttend | GetCancellationHolder;
+export type Query = GetEvent | GetTicket | CanAttend | GetCancellationHolder | GetCredential;
 
 // @public
 export type QueryResult<Q extends Query> = QueryResults[Q["kind"]];
@@ -346,6 +356,7 @@ export interface QueryResults {
     // (undocumented)
     readonly canAttend: AttendanceVerdict;
     readonly getCancellationHolder: AccountId | null;
+    readonly getCredential: Registration | null;
     // (undocumented)
     readonly getEvent: Event;
     // (undocumented)
@@ -541,6 +552,7 @@ export interface Ticketto {
     createEvent(signer: Signer, input: CommandInput<"createEvent">): Derived<EventId>;
     // (undocumented)
     getCancellationHolder(ticket: TicketId): Promise<Result<AccountId | null>>;
+    getCredential(account: AccountId, credential: CredentialId): Promise<Result<Registration | null>>;
     // (undocumented)
     getEvent(event: EventId): Promise<Result<Event>>;
     // (undocumented)
