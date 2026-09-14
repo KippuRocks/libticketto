@@ -108,6 +108,11 @@ test/hermes/build-vm.sh ~/.cache/hermes-vm     # once: builds the VM matching he
 HERMES_VM=~/.cache/hermes-vm/bin/hermes pnpm --filter @ticketto/profile-v0 test:hermes
 ```
 
+`src/credential/papi-signers.compat.test.ts` runs on Node only: it drives
+`@virtonetwork/authenticators-webauthn`'s own `WebAuthn` authenticator (with
+`@virtonetwork/signer`) against a simulated `navigator.credentials`, and requires
+identical account ids, device ids, attestation bytes and assertion bytes.
+
 The runner bundles the suites with Metro and React Native's Babel preset,
 compiles them with the `hermesc` React Native ships, and executes the bytecode
 on a VM built from the same `facebook/hermes` release. CI does the same in the
