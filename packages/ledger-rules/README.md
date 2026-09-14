@@ -18,7 +18,7 @@ A store supplies the rules with `Capabilities` (`REQ-SDK-3`):
 
 | | |
 |---|---|
-| `registry` | Ledger state in domain terms: events, credential registrations by account, tickets and their facts, consumed pass ids with retention, operation ids with expiry, and appending logical log records |
+| `registry` | Ledger state in domain terms: events, credential registrations by account, tickets and their facts, consumed pass ids with retention, operation ids with expiry and a digest of the signed input, and appending logical log records (with a pass's claimed `presentedAt`) |
 | `clock` | A monotonic current timestamp |
 | `value` | Declared for settlement beyond V0; nothing implements it in V0 |
 | `transaction(fn)` | Runs `fn` in one serialisable transaction: its writes commit together when `fn` resolves, and none does when it rejects |

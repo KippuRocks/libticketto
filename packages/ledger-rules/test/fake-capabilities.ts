@@ -160,7 +160,8 @@ function registryOver(state: State, assertOpen: () => void): Registry {
     },
     async recordOperation(id, operation) {
       assertOpen();
-      state.operations.set(id, operation);
+      // A copy, as a real store keeps its own bytes.
+      state.operations.set(id, { ...operation, digest: operation.digest.slice() });
     },
 
     async appendLog(append: LogAppend) {
@@ -176,8 +177,7 @@ function registryOver(state: State, assertOpen: () => void): Registry {
         recordedAt: append.recordedAt,
         event,
         entry: append.entry,
-        // LogAppend does not carry presentedAt yet; T-008-01's follow-up adds it.
-        presentedAt: null,
+        presentedAt: append.presentedAt,
       };
       state.log.push(record);
       return record;

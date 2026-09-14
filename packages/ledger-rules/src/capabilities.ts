@@ -75,6 +75,13 @@ export interface TicketFacts {
 /** A recorded operation id, with what an identical replay returns (`REQ-CM-1`, plan §5.4). */
 export interface OperationRecord {
   readonly expiresAt: Timestamp;
+  /**
+   * A digest of the signed input recorded under this id — BLAKE2b-256 of the
+   * profile's signed-input framing. The rules compute it; the store only keeps
+   * and returns it. The same id with the same digest is an identical replay,
+   * answered with `receipt`; with a different digest, `ERR-OperationConflict`.
+   */
+  readonly digest: Uint8Array;
   readonly receipt: Receipt;
 }
 
@@ -89,6 +96,11 @@ export interface LogAppend {
   /** The event the write concerns; `null` for a write no event owns. */
   readonly event: EventId | null;
   readonly entry: LogRecord["entry"];
+  /**
+   * When an access pass was presented, as its submitter claimed it; `null` for
+   * a command. The store puts it in the record (`F-006` plan §5.1).
+   */
+  readonly presentedAt: Timestamp | null;
 }
 
 /**
