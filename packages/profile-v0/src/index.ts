@@ -69,6 +69,16 @@ export {
 } from "./pass.js";
 export { createProfileV0, type ProfileV0Config } from "./profile.js";
 export {
+  PROOF_OF_CONTROL_NONCE_LENGTH,
+  PROOF_OF_CONTROL_TAG,
+  type ProofOfControlChallenge,
+  type ProofOfControlFailure,
+  type ProofOfControlVerdict,
+  proofOfControlSigningPayload,
+  signProofOfControl,
+  verifyProofOfControl,
+} from "./proof-of-control.js";
+export {
   decodeSignedAccessPass,
   decodeSignedCommand,
   encodeSignedAccessPass,

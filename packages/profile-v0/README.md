@@ -98,6 +98,7 @@ round:
 |---|---|---|
 | Command | `"ticketto/v0/command" ‖ command bytes` | `Profile.encodeCommand`, `commandSigningPayload` |
 | Access pass | `"ticketto/v0/pass" ‖ pass bytes` | `Profile.encodePass`, `passSigningPayload` |
+| Proof of control | `"ticketto/v0/proof-of-control" ‖ challenge bytes` | `proofOfControlSigningPayload` (see Proof of control) |
 
 **Always sign and verify the signing payload, never the raw SCALE bytes.**
 `Signer.sign` and `Profile.verify` carry no domain, so the tag travels inside the
@@ -168,6 +169,34 @@ signature verifies, and that the supplied clock is inside `[notBefore, notAfter]
 `ERR-InvalidPass` or `ERR-PassExpired` otherwise. Whether the holder still holds
 the ticket, and whether the pass was already consumed, are the ledger rules'.
 
+## Proof of control
+
+A holder proves to a verifier other than the ledger — `kippu-api` linking a
+holder to an account — that they control an account (plan §5.4a, `REQ-SP-4`):
+
+```
+ProofOfControl = "ticketto/v0/proof-of-control" ‖ SCALE(audience Vec<u8>,
+                 nonce [u8;32], expiresAt u64, account [u8;32])
+```
+
+The verifier issues a `ProofOfControlChallenge` with its own audience, a fresh
+nonce and a short expiry; the holder's client signs it with `signProofOfControl`
+and the holder's `Signer`. `verifyProofOfControl(challenge, authorisation,
+registration, now, config)` checks, in order, that the registration derives the
+challenge's account (`account`), that the authorisation comes from the
+registration's credential (`credential`), that it verifies over the signing
+payload — for a passkey, under the configured RP id with user presence and
+verification (`signature`) — and that `now` is before `expiresAt` (`expired`). A
+proof is not a ledger operation, so a failure names the check it failed rather
+than an error of §10.
+
+**The registration must come from the ledger**, through the SDK's `getCredential`.
+A registration from any other source — the client, above all — proves nothing:
+one can be built for any account whose derivation inputs are public, and only
+the ledger knows which it accepted (`REQ-CP-6`). Consuming each nonce once is the
+verifier's job. The signing payload's tag keeps a proof from ever verifying as a
+command or a pass signature, and the other way round.
+
 ## Runtime requirements
 
 `scale-ts` constructs a `TextDecoder` when it is imported. Hermes does not
@@ -205,7 +234,8 @@ their registration challenges, device ids, `EventId`, `TicketId`), credential
 registrations and registrations refused for their challenge, two commands of
 every kind with their bytes and signing payloads, valid and invalid
 authorisations (cross-domain signatures among them), signed passes with their
-expected verdict, framed signed inputs, and malformed inputs. It ships in the package
+expected verdict, framed signed inputs, malformed inputs, and proofs of control
+with their signing payloads and expected verdicts. It ships in the package
 (`@ticketto/profile-v0/vectors/v0.json`); `binding-offchain`, `ticketto-offchain`
 and any other implementation must reproduce every vector. Byte strings are
 lower-case hex.

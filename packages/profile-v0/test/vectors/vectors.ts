@@ -46,6 +46,12 @@ import {
 } from "../../src/pass.js";
 import { createProfileV0 } from "../../src/profile.js";
 import {
+  type ProofOfControlChallenge,
+  proofOfControlSigningPayload,
+  signProofOfControl,
+  verifyProofOfControl,
+} from "../../src/proof-of-control.js";
+import {
   decodeSignedAccessPass,
   decodeSignedCommand,
   encodeSignedAccessPass,
@@ -437,6 +443,113 @@ export async function buildVectors(): Promise<Json> {
     bytes: toHex(bytes as Uint8Array),
   }));
 
+  // Proofs of control (plan §5.4a), signed after every vector above, so that
+  // their assertions do not move the sign counters those vectors were made with.
+  const proofRandom = new Random(0x0c2_0011);
+  const holderDevice2 = simulatedWebAuthnSigner({
+    rpId: RP_ID,
+    userId: holder.userId,
+    secretKey: p256Key(proofRandom).secretKey,
+    credentialId: proofRandom.bytes(32),
+  });
+  const proofChallenge = (account: AccountId): ProofOfControlChallenge => ({
+    audience: new TextEncoder().encode("kippu-api/holder-linking"),
+    nonce: proofRandom.bytes(32),
+    expiresAt: T0 + 120_000,
+    account,
+  });
+  const holderChallenge = proofChallenge(holder.signer.account);
+  const holderProof = await signProofOfControl(holderChallenge, holder.signer);
+  const organiserChallenge = proofChallenge(organiser.signer.account);
+  const strangerChallenge = proofChallenge(stranger.signer.account);
+  const proofs = [
+    ["pass-webauthn valid", holderChallenge, holderProof, holder.registration, T0, "ok"],
+    [
+      "pass-webauthn valid one millisecond before expiry",
+      holderChallenge,
+      holderProof,
+      holder.registration,
+      holderChallenge.expiresAt - 1,
+      "ok",
+    ],
+    [
+      "p256 valid",
+      organiserChallenge,
+      await signProofOfControl(organiserChallenge, organiser.signer),
+      organiser.registration,
+      T0,
+      "ok",
+    ],
+    [
+      "for another account",
+      strangerChallenge,
+      await holder.signer.sign(proofOfControlSigningPayload(strangerChallenge)),
+      holder.registration,
+      T0,
+      "account",
+    ],
+    [
+      "by another credential of the same account",
+      holderChallenge,
+      await signProofOfControl(holderChallenge, holderDevice2.signer),
+      holder.registration,
+      T0,
+      "credential",
+    ],
+    [
+      "for another audience",
+      { ...holderChallenge, audience: new TextEncoder().encode("another-verifier") },
+      holderProof,
+      holder.registration,
+      T0,
+      "signature",
+    ],
+    [
+      "pass-webauthn without user verification",
+      holderChallenge,
+      simulatedAssertion(holder, proofOfControlSigningPayload(holderChallenge), {
+        userVerified: false,
+      }),
+      holder.registration,
+      T0,
+      "signature",
+    ],
+    [
+      "at its expiry",
+      holderChallenge,
+      holderProof,
+      holder.registration,
+      holderChallenge.expiresAt,
+      "expired",
+    ],
+  ].map(([name, challenge, authorisation, registration, now, result]) => {
+    const c = challenge as ProofOfControlChallenge;
+    const verdict = verifyProofOfControl(
+      c,
+      authorisation as Authorisation,
+      registration as Registration,
+      now as number,
+      { rpId: RP_ID },
+    );
+    if ((verdict.ok ? "ok" : verdict.failure) !== result) {
+      throw new Error(`proof-of-control vector "${name}" mislabelled`);
+    }
+    return {
+      name: name as string,
+      challenge: {
+        audience: toHex(c.audience),
+        nonce: toHex(c.nonce),
+        expiresAt: c.expiresAt,
+        account: c.account,
+      },
+      signingPayload: toHex(proofOfControlSigningPayload(c)),
+      authorisation: toHex(authorisation as Uint8Array),
+      registration: toHex(registration as Uint8Array),
+      now: now as number,
+      result: result as string,
+    };
+  });
+
   return {
     profile: "ticketto/v0",
     formatVersion: FORMAT_VERSION,
@@ -455,6 +568,7 @@ export async function buildVectors(): Promise<Json> {
     signedPasses,
     signedInputs: signedInputVectors,
     malformed,
+    proofsOfControl: proofs,
   } as unknown as Json;
 }
 
@@ -520,6 +634,15 @@ interface Vectors {
     bytes: string;
   }[];
   malformed: { name: string; kind: string; bytes: string }[];
+  proofsOfControl: {
+    name: string;
+    challenge: { audience: string; nonce: string; expiresAt: number; account: string };
+    signingPayload: string;
+    authorisation: string;
+    registration: string;
+    now: number;
+    result: string;
+  }[];
 }
 
 /**
@@ -660,6 +783,26 @@ export function vectorsSuite(file: unknown): Suite {
             }
             assert(refused, v.name);
           }
+        }
+      });
+
+      it("T-003-11 proofs of control encode to their signing payloads, and verify or fail as labelled", () => {
+        for (const v of vectors.proofsOfControl) {
+          const challenge: ProofOfControlChallenge = {
+            audience: fromHex(v.challenge.audience),
+            nonce: fromHex(v.challenge.nonce),
+            expiresAt: v.challenge.expiresAt,
+            account: v.challenge.account as AccountId,
+          };
+          assertEqual(toHex(proofOfControlSigningPayload(challenge)), v.signingPayload, v.name);
+          const verdict = verifyProofOfControl(
+            challenge,
+            fromHex(v.authorisation) as Authorisation,
+            fromHex(v.registration) as Registration,
+            v.now,
+            { rpId: vectors.rpId },
+          );
+          assertEqual(verdict.ok ? "ok" : verdict.failure, v.result, v.name);
         }
       });
     });
