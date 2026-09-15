@@ -1,10 +1,20 @@
 // ERR-OperationConflict: a command reusing an operation id already recorded for a
 // different command (REQ-CM-1, amendment 0003).
 
-import type { AddZone, Signer } from "@ticketto/sdk";
+import type { AddZone, OperationId, Signer } from "@ticketto/sdk";
 import { expect } from "vitest";
 import { expectError, expectOk } from "../expect.js";
-import { createEventWith, envelope, eventOf, sign, submitSigned } from "../steps.js";
+import {
+  attendancesOf,
+  createEventWith,
+  envelope,
+  eventOf,
+  issued,
+  passFor,
+  present,
+  sign,
+  submitSigned,
+} from "../steps.js";
 import { suite } from "../suite.js";
 
 export default suite("ERR-OperationConflict", (test) => {
@@ -76,6 +86,28 @@ export default suite("ERR-OperationConflict", (test) => {
         world.ticketto.getEvent(world.profile.eventId(holder.account, salt)),
         "ERR-EventNotFound",
       );
+    },
+  );
+
+  test(
+    "ERR-OperationConflict: a pass whose id is already recorded for a command fails, and is not consumed",
+    "M3",
+    async (world) => {
+      const event = await createEventWith(world);
+      const ticket = await issued(world, event, { policy: { kind: "Unlimited", until: null } });
+      const command: AddZone = {
+        kind: "addZone",
+        ...envelope(world),
+        operationId: world.identifiers.pass(0) as string as OperationId,
+        event,
+        zone: { id: world.identifiers.zone(5), kind: "Seated" },
+      };
+      await expectOk(submitSigned(world, await sign(world, world.organiser, command)));
+      await expectError(
+        present(world, await passFor(world, ticket, { id: 0 })),
+        "ERR-OperationConflict",
+      );
+      expect(await attendancesOf(world, ticket)).toBe(0);
     },
   );
 });

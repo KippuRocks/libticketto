@@ -75,11 +75,13 @@ export default suite("REQ-CP-6", (test) => {
     async (world) => {
       const intruder = world.holders[1] as Signer;
       const device = world.signers.secondDevice;
-      const result = await world.ticketto.registerCredential(intruder, {
-        account: device.signer.account,
-        registration: device.registration,
-      });
-      expect(result.ok).toBe(false);
+      await expectError(
+        world.ticketto.registerCredential(intruder, {
+          account: device.signer.account,
+          registration: device.registration,
+        }),
+        "ERR-InvalidAuthorisation",
+      );
       await expectError(
         world.ticketto.createEvent(device.signer, {
           salt: world.identifiers.salt(1),

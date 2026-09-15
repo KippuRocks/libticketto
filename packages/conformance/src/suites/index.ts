@@ -3,6 +3,7 @@
 // (features/004-conformance/plan.md §5.2).
 
 import type { Suite } from "../suite.js";
+import errCannotAttend from "./ERR-CannotAttend.js";
 import errCapacityBelowIssuance from "./ERR-CapacityBelowIssuance.js";
 import errCapacityExceeded from "./ERR-CapacityExceeded.js";
 import errCapacityProofRequired from "./ERR-CapacityProofRequired.js";
@@ -13,11 +14,15 @@ import errEventNotFound from "./ERR-EventNotFound.js";
 import errEventSealed from "./ERR-EventSealed.js";
 import errIdentifierMismatch from "./ERR-IdentifierMismatch.js";
 import errInvalidAuthorisation from "./ERR-InvalidAuthorisation.js";
+import errInvalidPass from "./ERR-InvalidPass.js";
 import errInvalidTransition from "./ERR-InvalidTransition.js";
 import errNotOwner from "./ERR-NotOwner.js";
 import errOperationConflict from "./ERR-OperationConflict.js";
 import errOperationExpired from "./ERR-OperationExpired.js";
+import errPassExpired from "./ERR-PassExpired.js";
+import errPassReplayed from "./ERR-PassReplayed.js";
 import errRestrictionNotPermitted from "./ERR-RestrictionNotPermitted.js";
+import errTicketExpired from "./ERR-TicketExpired.js";
 import errTicketIdExists from "./ERR-TicketIdExists.js";
 import errTicketNotFound from "./ERR-TicketNotFound.js";
 import errUnknownZone from "./ERR-UnknownZone.js";
@@ -26,7 +31,11 @@ import errZoneInUse from "./ERR-ZoneInUse.js";
 import errZoneKindMismatch from "./ERR-ZoneKindMismatch.js";
 import inv1 from "./INV-1.js";
 import inv2 from "./INV-2.js";
+import inv3 from "./INV-3.js";
 import inv4 from "./INV-4.js";
+import inv5 from "./INV-5.js";
+import inv6 from "./INV-6.js";
+import inv8 from "./INV-8.js";
 import inv10 from "./INV-10.js";
 import inv11 from "./INV-11.js";
 import inv12 from "./INV-12.js";
@@ -75,4 +84,14 @@ export const V0_SUITES: readonly Suite[] = [
   reqCm1,
   errOperationExpired,
   errOperationConflict,
+  // The gate (T-004-06): US-E1–US-E3.
+  inv3,
+  inv5,
+  inv6,
+  inv8,
+  errInvalidPass,
+  errPassExpired,
+  errPassReplayed,
+  errCannotAttend,
+  errTicketExpired,
 ];

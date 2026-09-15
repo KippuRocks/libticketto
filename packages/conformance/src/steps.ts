@@ -4,6 +4,7 @@
 // with a profile-defined encoding come from the target's identifiers.
 
 import type {
+  AccessPass,
   AccountId,
   AttendancePolicy,
   Command,
@@ -16,18 +17,20 @@ import type {
   Provenance,
   Receipt,
   Result,
+  SignedAccessPass,
   SignedCommand,
   Signer,
   Submission,
   Ticket,
   TicketId,
   TicketRestrictions,
+  Timestamp,
   Zone,
   ZoneId,
 } from "@ticketto/sdk";
 import { expect } from "vitest";
 import { expectOk } from "./expect.js";
-import { OPERATION_LIFETIME, type World } from "./world.js";
+import { HarnessError, OPERATION_LIFETIME, type World } from "./world.js";
 
 /** The zones `createEventWith` makes unless told otherwise: zone 0 seated, zone 1 unseated. */
 export function standardZones(world: World): Zone[] {
@@ -150,4 +153,62 @@ export async function moveTo(
   for (const status of statuses) {
     await expectOk(world.ticketto.setEventStatus(world.organiser, { event, status }));
   }
+}
+
+/** NFR-5's default pass validity window, in milliseconds. */
+export const PASS_WINDOW = 60_000;
+
+export interface PassOptions {
+  /** Signs the pass. Defaults to the ticket's holder given as `holder`. */
+  readonly signer?: Signer;
+  /** The holder the pass names. Defaults to holder 0. */
+  readonly holder?: AccountId;
+  /** Which pass id (`identifiers.pass`). Defaults to 0. */
+  readonly id?: number;
+  /** Defaults to the backend's current time. */
+  readonly notBefore?: Timestamp;
+  /** Defaults to `notBefore` plus `PASS_WINDOW`. */
+  readonly notAfter?: Timestamp;
+}
+
+/** An access pass for `ticket`, signed over the profile's signing payload, as Saifu produces one. */
+export async function passFor(
+  world: World,
+  ticket: TicketId,
+  options: PassOptions = {},
+): Promise<SignedAccessPass> {
+  const holder = world.holders[0] as Signer;
+  const signer = options.signer ?? holder;
+  const notBefore = options.notBefore ?? world.backend.clock.now();
+  const pass: AccessPass = {
+    ticket,
+    holder: options.holder ?? signer.account,
+    id: world.identifiers.pass(options.id ?? 0),
+    notBefore,
+    notAfter: options.notAfter ?? notBefore + PASS_WINDOW,
+  };
+  return { pass, authorisation: await signer.sign(world.profile.encodePass(pass)) };
+}
+
+/** Submits a signed pass, presented at `presentedAt` — by default, the backend's current time. */
+export function present(
+  world: World,
+  signed: SignedAccessPass,
+  presentedAt: Timestamp = world.backend.clock.now(),
+): Submission<Receipt> {
+  return world.ticketto.submitAccessPass(signed, { presentedAt });
+}
+
+/** A ticket's attendance count. */
+export async function attendancesOf(world: World, ticket: TicketId): Promise<Count> {
+  return (await ticketOf(world, ticket)).attendances;
+}
+
+/** A gate parameter of the backend's test controls (§5.2b); fails the test, naming it, when missing. */
+export function gateParameter(world: World, name: "maxRecordingLag" | "maxClockSkew"): number {
+  const value = world.backend[name];
+  if (value === undefined) {
+    throw new HarnessError(`the backend's test controls do not provide ${name} (TestControls)`);
+  }
+  return value;
 }

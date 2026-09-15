@@ -1,5 +1,5 @@
 // The V0 scope of the conformance suite — features/004-conformance/plan.md §5.3
-// (kippu-docs 96f4c06), SPEC.md §15, NFR-8.
+// (kippu-docs 00a9d8c), SPEC.md §15, NFR-8.
 //
 // Curated, and checked against the spec: every live invariant of §9 and every
 // live error of §10 is either in the V0 list, which the suite must cover, or out
@@ -57,7 +57,6 @@ export const SCOPE_V0: Scope = {
     "ERR-InvalidTransition",
     "ERR-CannotAttend",
     "ERR-TicketExpired",
-    "ERR-PolicyUndeterminable",
     "ERR-CannotTransfer",
     "ERR-InvalidPass",
     "ERR-PassExpired",
@@ -93,6 +92,8 @@ export const SCOPE_V0: Scope = {
     "ERR-ClassQuotaExceeded": PLATFORM,
     "ERR-LedgerUnavailable":
       "raised by bindings, not by the ledger's rules (§10 note); verified in F-007",
+    "ERR-PolicyUndeterminable":
+      "not producible through the port under a validating profile: a policy reaches the ledger only through an issueTicket the profile encoded; verified in F-008's unit tests",
     "ERR-SponsorshipRefused":
       "binding error (§10 note), not required by REQ-SDK-7; verified in F-007 and F-010",
   },

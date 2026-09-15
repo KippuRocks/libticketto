@@ -1,6 +1,7 @@
 // T-005-05: test controls under /testing (REQ-SDK-7; features/005-backend-memory/plan.md §5.4).
 
 import type { TestBackend } from "@ticketto/conformance";
+import { DEFAULT_MAX_CLOCK_SKEW, DEFAULT_MAX_RECORDING_LAG } from "@ticketto/ledger-rules";
 import { createProfileV0 } from "@ticketto/profile-v0";
 import { softwareP256Signer } from "@ticketto/profile-v0/testing";
 import { createTicketto, type Sponsorship } from "@ticketto/sdk";
@@ -20,6 +21,12 @@ describe("in-memory backend: test controls", () => {
     expectTypeOf(createTestMemoryBackend).returns.toExtend<TestBackend>();
     const backend: TestBackend = createTestMemoryBackend({ profile });
     expect(backend.clock.now()).toBe(TEST_EPOCH);
+  });
+
+  it("reports the gate parameters the rules run with (features/004-conformance/plan.md §5.2b)", () => {
+    const backend = createTestMemoryBackend({ profile });
+    expect(backend.maxRecordingLag).toBe(DEFAULT_MAX_RECORDING_LAG);
+    expect(backend.maxClockSkew).toBe(DEFAULT_MAX_CLOCK_SKEW);
   });
 
   it("starts the clock at a fixed time, and moves it only forward", () => {
