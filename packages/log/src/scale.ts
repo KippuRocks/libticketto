@@ -47,7 +47,7 @@ export class Writer {
   u64(value: number, what = "u64"): this {
     assertU64Number(value, what);
     const out = new Uint8Array(8);
-    new DataView(out.buffer).setBigUint64(0, BigInt(value), true);
+    new DataView(out.buffer, out.byteOffset, out.byteLength).setBigUint64(0, BigInt(value), true);
     this.#parts.push(out);
     return this;
   }
@@ -126,7 +126,10 @@ export class Reader {
   #offset = 0;
 
   constructor(bytes: Uint8Array) {
-    this.#bytes = bytes;
+    // A plain `Uint8Array` over the same memory, whatever view it was given: a
+    // Node `Buffer`'s `slice` returns another view into its pool instead of a
+    // copy, so everything read below is taken from this view, never `bytes`.
+    this.#bytes = new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   }
 
   #take(length: number): Uint8Array {
@@ -143,7 +146,10 @@ export class Reader {
 
   u64(): number {
     const bytes = this.#take(8);
-    const value = new DataView(bytes.buffer).getBigUint64(0, true);
+    const value = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getBigUint64(
+      0,
+      true,
+    );
     if (value > BigInt(Number.MAX_SAFE_INTEGER)) {
       throw new LogDecodeError("integer exceeds the safe range");
     }
