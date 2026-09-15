@@ -14,7 +14,8 @@ runs the checks every signed command passes (`T-008-02`, `T-008-13`).
 | `issueTicket` | Implemented (`T-008-07`) |
 | `registerCredential` | Implemented (`T-008-14`) |
 | Queries: `getEvent`, `getTicket`, `getCredential`, `canAttend`, `getCancellationHolder` | Implemented (`T-008-02`, `T-008-15`, `T-008-09`) |
-| Every other command, and access passes | Not yet — each throws until its task lands |
+| `submitAccessPass` | Implemented (`T-008-10`) |
+| Every other command | Not yet — each throws until its task lands |
 
 | | |
 |---|---|
@@ -53,6 +54,35 @@ passes, in this order (plan §5.2):
 An accepted command's writes, its log record (carrying the signed input) and its
 operation record commit together. A rejected command writes nothing. A defect —
 something no rule can judge — throws, and the transaction rolls back.
+
+## Submitting an access pass
+
+```ts
+const result = await execute(caps, profile, signedPass, { presentedAt });
+```
+
+A pass carries its holder's authorisation; its pass id is its operation id, and
+`presentedAt` is the submitter's claim, which the rules bound (plan §5.2):
+
+0. The ticket exists → `ERR-TicketNotFound`. An identical resubmission — the same
+   signed pass and the same `presentedAt` — of a consumed pass returns the
+   original receipt, up to `notAfter` plus the maximum recording lag; an operation
+   record under the pass id that is not this pass's is `ERR-OperationConflict`.
+1. The authorisation verifies, and its signer is the ticket's current holder →
+   `ERR-InvalidPass`.
+2. `presentedAt` lies within `[notBefore, notAfter]` and no more than the maximum
+   clock skew ahead of the clock, and the clock is no later than `notAfter` plus
+   the maximum recording lag → `ERR-PassExpired`.
+3. The pass id is not consumed for the ticket → `ERR-PassReplayed`.
+4. `canAttend`'s order, with policy expiry judged at `presentedAt`.
+5. `attendances` goes up by one; the pass id is kept until `notAfter` plus the
+   maximum recording lag.
+
+| Configuration (`configureExecute`) | Default |
+|---|---|
+| `maxOperationLifetime` | 24 hours (`DEFAULT_MAX_OPERATION_LIFETIME`) |
+| `maxRecordingLag` | 5 minutes (`DEFAULT_MAX_RECORDING_LAG`) |
+| `maxClockSkew` | 10 seconds (`DEFAULT_MAX_CLOCK_SKEW`) |
 
 ## Capabilities (`C3`)
 

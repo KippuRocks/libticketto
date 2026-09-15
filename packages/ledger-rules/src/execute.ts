@@ -41,8 +41,10 @@ import { createEvent } from "./commands/create-event.js";
 import { issueTicket } from "./commands/issue-ticket.js";
 import { registerCredential } from "./commands/register-credential.js";
 import { addZone, removeZone } from "./commands/zones.js";
+import { type RulesConfig, resolveLimits } from "./config.js";
 import type { CommandHandler, CommandHandlers } from "./handler.js";
-import { err, ok } from "./result.js";
+import { submitAccessPass } from "./pass.js";
+import { bytesEqual, err, ok } from "./result.js";
 
 /** What accompanies an input besides its own bytes. */
 export interface ExecuteContext {
@@ -64,12 +66,6 @@ export type Execute = (
 
 function isSignedCommand(input: SignedCommand | SignedAccessPass): input is SignedCommand {
   return "command" in input;
-}
-
-function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
-  return true;
 }
 
 /** The event a command names, if any; the event whose log sequence records it. */
@@ -135,28 +131,16 @@ async function authorise(
   return ok(account);
 }
 
-/** The default maximum operation lifetime: 24 hours, in milliseconds (plan §5.4). */
-export const DEFAULT_MAX_OPERATION_LIFETIME = 24 * 60 * 60 * 1000;
-
-/** Configuration of the rules, set by whatever runs them. */
-export interface RulesConfig {
-  /**
-   * How far ahead of the authority's clock, in milliseconds, a command's
-   * expiry may lie. Bounds how long operation records are kept (plan §5.4,
-   * `AD-15`). Defaults to {@link DEFAULT_MAX_OPERATION_LIFETIME}.
-   */
-  readonly maxOperationLifetime?: number;
-}
-
 /** `execute` over a given set of command handlers and configuration. */
 export function createExecute(handlers: CommandHandlers, config: RulesConfig = {}): Execute {
-  const maxLifetime = config.maxOperationLifetime ?? DEFAULT_MAX_OPERATION_LIFETIME;
-  if (!Number.isSafeInteger(maxLifetime) || maxLifetime < 0) {
-    throw new RangeError("maxOperationLifetime is a non-negative whole number of milliseconds");
-  }
+  const limits = resolveLimits(config);
+  const maxLifetime = limits.maxOperationLifetime;
   return async (caps, profile, input, context = {}) => {
     if (!isSignedCommand(input)) {
-      throw new Error("submitAccessPass is not implemented yet (T-008-10)");
+      if (context.presentedAt === undefined) {
+        throw new TypeError("an access pass is submitted with the time it was presented");
+      }
+      return submitAccessPass(caps, profile, input, context.presentedAt, limits);
     }
     if (context.presentedAt !== undefined) {
       throw new TypeError("a command carries no presentedAt; only an access pass does");
