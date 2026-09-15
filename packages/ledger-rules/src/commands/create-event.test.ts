@@ -56,7 +56,7 @@ describe("createEvent", () => {
       {
         cursor: result.value.cursor,
         recordedAt: 0,
-        event: { id: command.event, sequence: 1 },
+        event: { id: command.event, sequence: 0 },
         entry: signed,
         presentedAt: null,
       },

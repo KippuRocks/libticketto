@@ -136,7 +136,7 @@ describe("fake capabilities: serialisability smoke test", () => {
       {
         cursor: receipt.cursor,
         recordedAt: 5,
-        event: { id: eventId, sequence: 1 },
+        event: { id: eventId, sequence: 0 },
         entry: signedPass,
         presentedAt: 4,
       },
@@ -212,9 +212,9 @@ describe("fake capabilities: serialisability smoke test", () => {
     await caps.registry.appendLog({ recordedAt: 2, event: null, entry, presentedAt: 2 });
     await caps.registry.appendLog({ recordedAt: 3, event: eventId, entry, presentedAt: 3 });
     expect(caps.log().map((r) => r.event)).toEqual([
-      { id: eventId, sequence: 1 },
+      { id: eventId, sequence: 0 },
       null,
-      { id: eventId, sequence: 2 },
+      { id: eventId, sequence: 1 },
     ]);
     expect(new Set(caps.log().map((r) => r.cursor)).size).toBe(3);
   });
