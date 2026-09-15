@@ -4,7 +4,7 @@ The shared conformance suite, written once against the SDK surface and run again
 
 Owned by `F-004`. Serves `REQ-SDK-7`, `REQ-CP-5` and `NFR-8`.
 
-**Status:** harness, `TestControls` contract, V0 signer fixtures, the V0 scope, the `REQ-SDK-6` assurance-declaration check, and the event lifecycle (`T-004-03`) identity and issuance (`T-004-04`), replay (`T-004-07`) and gate (`T-004-06`) suites, and the concurrency variant (`T-004-08`).
+**Status:** harness, `TestControls` contract, V0 signer fixtures, the V0 scope, the `REQ-SDK-6` assurance-declaration check, and the event lifecycle (`T-004-03`), identity and issuance (`T-004-04`), replay (`T-004-07`), gate (`T-004-06`) and transfer (`T-004-05`) suites, and the concurrency variant (`T-004-08`).
 
 | | |
 |---|---|

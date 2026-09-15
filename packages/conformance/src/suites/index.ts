@@ -3,10 +3,13 @@
 // (features/004-conformance/plan.md §5.2).
 
 import type { Suite } from "../suite.js";
+import acA54 from "./AC-A5.4.js";
+import acA55 from "./AC-A5.5.js";
 import concurrentAcE32 from "./concurrency/AC-E3.2.js";
 import concurrentInv4 from "./concurrency/INV-4.js";
 import concurrentInv6 from "./concurrency/INV-6.js";
 import errCannotAttend from "./ERR-CannotAttend.js";
+import errCannotTransfer from "./ERR-CannotTransfer.js";
 import errCapacityBelowIssuance from "./ERR-CapacityBelowIssuance.js";
 import errCapacityExceeded from "./ERR-CapacityExceeded.js";
 import errCapacityProofRequired from "./ERR-CapacityProofRequired.js";
@@ -47,6 +50,7 @@ import inv14 from "./INV-14.js";
 import inv16 from "./INV-16.js";
 import reqCm1 from "./REQ-CM-1.js";
 import reqCp6 from "./REQ-CP-6.js";
+import reqEv10 from "./REQ-EV-10.js";
 import reqSdk6 from "./REQ-SDK-6.js";
 
 /** Every suite `defineConformance` runs, in order. */
@@ -97,6 +101,11 @@ export const V0_SUITES: readonly Suite[] = [
   errPassReplayed,
   errCannotAttend,
   errTicketExpired,
+  // Transfer (T-004-05): US-D1, REQ-EV-10.
+  errCannotTransfer,
+  reqEv10,
+  acA54,
+  acA55,
   // The concurrency variant (T-004-08, §5.4): parallel submissions through the port.
   concurrentInv4,
   concurrentAcE32,
