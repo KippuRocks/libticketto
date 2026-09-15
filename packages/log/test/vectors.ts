@@ -25,6 +25,7 @@ import {
   LogChain,
   type LogEntry,
   linkRecord,
+  operationDigest,
   signCheckpoint,
   statementFor,
 } from "../src/index.js";
@@ -242,6 +243,15 @@ export async function buildVectors(): Promise<Json> {
         expected: { ok: false, sequence: 3, fault: "truncated" },
       },
     ],
+    // FORMAT.md §5.2: an exported operation's C3 digest, for a command record and
+    // for an access-pass record (over its framing and presentedAt).
+    operationDigests: linked
+      .filter(({ record }) => record.sequence === 1 || "pass" in record.input)
+      .map(({ record }) => ({
+        name: "pass" in record.input ? "a signed access pass" : "a signed command",
+        record: record.sequence,
+        digest: toHex(operationDigest(record.input, record.presentedAt)),
+      })),
     malformedRecords: [
       { name: "trailing byte", bytes: toHex(Uint8Array.of(...sample, 0)) },
       { name: "truncated", bytes: toHex(sample.subarray(0, sample.length - 1)) },
