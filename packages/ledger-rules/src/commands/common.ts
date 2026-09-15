@@ -1,7 +1,7 @@
 // Checks several command handlers share (features/008-ledger-rules/plan.md §5.2).
 
 import type { AccountId, TickettoError } from "@ticketto/sdk";
-import type { EventRecord } from "../capabilities.js";
+import type { EventRecord, TicketRecord } from "../capabilities.js";
 import { error } from "../result.js";
 
 /**
@@ -33,4 +33,14 @@ export function activeCheck(event: EventRecord): TickettoError | null {
     default:
       return error("ERR-EventFinished", "the event is Finished");
   }
+}
+
+/**
+ * The ticket a handler's command names. `execute` has already refused a missing
+ * one, or one of another event, with `ERR-TicketNotFound`, so its absence here
+ * is a defect.
+ */
+export function existingTicket(ticket: TicketRecord | null): TicketRecord {
+  if (ticket === null) throw new Error("the named ticket was not checked for existence");
+  return ticket;
 }
