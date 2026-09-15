@@ -14,5 +14,5 @@ defineConformance(
     makeBackend: async () => createTestMemoryBackend({ profile: fixtures.profile }),
     ...fixtures,
   },
-  { through: "M1" },
+  { through: "M3" },
 );
