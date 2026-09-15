@@ -15,6 +15,7 @@ runs the checks every signed command passes (`T-008-02`, `T-008-13`).
 | `registerCredential` | Implemented (`T-008-14`) |
 | Queries: `getEvent`, `getTicket`, `getCredential`, `canAttend`, `getCancellationHolder` | Implemented (`T-008-02`, `T-008-15`, `T-008-09`) |
 | `submitAccessPass` | Implemented (`T-008-10`) |
+| `transferTicket` | Implemented, with the lazy cancellation snapshot (`T-008-08`) |
 | Every other command | Not yet — each throws until its task lands |
 
 | | |

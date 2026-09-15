@@ -105,8 +105,7 @@ describe("commands against what does not exist", () => {
       ticketIn(id, ticketOf("transferTicket", command), organiser.account),
     );
     const signed = await sign(organiser, command);
-    // Past the not-found check, the unimplemented handler is reached.
-    await expect(execute(caps, profile, signed)).rejects.toThrow("not implemented");
+    expect(codeOf(await execute(caps, profile, signed))).toBe("accepted");
   });
 
   it("createEvent names an event yet to exist, and is not refused as not found", async () => {
