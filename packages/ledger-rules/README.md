@@ -70,7 +70,7 @@ A pass carries its holder's authorisation; its pass id is its operation id, and
    record under the pass id that is not this pass's is `ERR-OperationConflict`.
 1. The authorisation verifies, and its signer is the ticket's current holder →
    `ERR-InvalidPass`.
-2. `presentedAt` lies within `[notBefore, notAfter]` and no more than the maximum
+2. The window is no longer than the maximum pass window, `presentedAt` lies within `[notBefore, notAfter]` and no more than the maximum
    clock skew ahead of the clock, and the clock is no later than `notAfter` plus
    the maximum recording lag → `ERR-PassExpired`.
 3. The pass id is not consumed for the ticket → `ERR-PassReplayed`.
@@ -83,6 +83,7 @@ A pass carries its holder's authorisation; its pass id is its operation id, and
 | `maxOperationLifetime` | 24 hours (`DEFAULT_MAX_OPERATION_LIFETIME`) |
 | `maxRecordingLag` | 5 minutes (`DEFAULT_MAX_RECORDING_LAG`) |
 | `maxClockSkew` | 10 seconds (`DEFAULT_MAX_CLOCK_SKEW`) |
+| `maxPassWindow` | 5 minutes (`DEFAULT_MAX_PASS_WINDOW`) |
 
 ## Capabilities (`C3`)
 
