@@ -205,7 +205,10 @@ export async function attendancesOf(world: World, ticket: TicketId): Promise<Cou
 }
 
 /** A gate parameter of the backend's test controls (§5.2b); fails the test, naming it, when missing. */
-export function gateParameter(world: World, name: "maxRecordingLag" | "maxClockSkew"): number {
+export function gateParameter(
+  world: World,
+  name: "maxRecordingLag" | "maxClockSkew" | "maxPassWindow",
+): number {
   const value = world.backend[name];
   if (value === undefined) {
     throw new HarnessError(`the backend's test controls do not provide ${name} (TestControls)`);

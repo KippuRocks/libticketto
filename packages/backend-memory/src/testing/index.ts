@@ -7,6 +7,7 @@
 import {
   type Clock,
   DEFAULT_MAX_CLOCK_SKEW,
+  DEFAULT_MAX_PASS_WINDOW,
   DEFAULT_MAX_RECORDING_LAG,
 } from "@ticketto/ledger-rules";
 import type { Backend, Migration, Profile, Signer, Timestamp } from "@ticketto/sdk";
@@ -34,6 +35,8 @@ export interface TestMemoryBackend extends Backend {
   readonly maxRecordingLag: number;
   /** How far ahead of the ledger's clock a pass's `presentedAt` may be, in milliseconds. */
   readonly maxClockSkew: number;
+  /** The longest window, `notAfter − notBefore`, a pass may carry, in milliseconds (`REQ-AP-3`). */
+  readonly maxPassWindow: number;
 }
 
 export interface TestMemoryBackendOptions {
@@ -125,5 +128,6 @@ export function createTestMemoryBackend(options: TestMemoryBackendOptions): Test
     // The rules run with their defaults here (`backendOver`), so these are those defaults.
     maxRecordingLag: DEFAULT_MAX_RECORDING_LAG,
     maxClockSkew: DEFAULT_MAX_CLOCK_SKEW,
+    maxPassWindow: DEFAULT_MAX_PASS_WINDOW,
   };
 }

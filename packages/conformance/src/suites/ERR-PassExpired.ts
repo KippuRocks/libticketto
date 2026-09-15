@@ -1,7 +1,8 @@
 // ERR-PassExpired: the pass validity window has closed (AC-E1.3, REQ-AP-3). Its
 // presentedAt must fall within [notBefore, notAfter], no more than the maximum
-// clock skew ahead of the ledger's clock, and the ledger must record it no later
-// than notAfter plus the maximum recording lag (features/008-ledger-rules/plan.md
+// clock skew ahead of the ledger's clock, its window no longer than the maximum
+// pass window, and the ledger must record it no later than notAfter plus the
+// maximum recording lag (features/008-ledger-rules/plan.md
 // §5.2).
 
 import { expect } from "vitest";
@@ -97,6 +98,34 @@ export default suite("ERR-PassExpired", (test) => {
       await expectOk(present(world, signed, presentedAt));
       world.backend.clock.set(signed.pass.notAfter + gateParameter(world, "maxRecordingLag") + 1);
       await expectError(present(world, signed, presentedAt), "ERR-PassExpired");
+      expect(await attendancesOf(world, ticket)).toBe(1);
+    },
+  );
+
+  test(
+    "ERR-PassExpired: a pass whose window is longer than the maximum pass window fails; at the maximum, it admits",
+    "M3",
+    async (world) => {
+      const ticket = await unlimitedTicket(world);
+      const now = world.backend.clock.now();
+      const longest = gateParameter(world, "maxPassWindow");
+
+      await expectError(
+        present(
+          world,
+          await passFor(world, ticket, { id: 0, notBefore: now - longest - 1, notAfter: now }),
+          now,
+        ),
+        "ERR-PassExpired",
+      );
+      expect(await attendancesOf(world, ticket)).toBe(0);
+      await expectOk(
+        present(
+          world,
+          await passFor(world, ticket, { id: 1, notBefore: now - longest, notAfter: now }),
+          now,
+        ),
+      );
       expect(await attendancesOf(world, ticket)).toBe(1);
     },
   );
