@@ -4,6 +4,7 @@
 // nothing (`REQ-Q-1`) and nothing enumerates (`REQ-MG-5`).
 
 import type { Event, Profile, Query, QueryResult, Result, Ticket } from "@ticketto/sdk";
+import { attendanceVerdict } from "./attendance.js";
 import type { Capabilities, EventRecord, TicketRecord } from "./capabilities.js";
 import { err, ok } from "./result.js";
 
@@ -36,15 +37,24 @@ export async function query<Q extends Query>(
         return ticket === null ? err("ERR-TicketNotFound") : ok(publicTicket(ticket));
       }
       case "canAttend": {
-        if ((await caps.registry.getEvent(q.event)) === null) return err("ERR-EventNotFound");
+        const event = await caps.registry.getEvent(q.event);
+        if (event === null) return err("ERR-EventNotFound");
         // A ticket of another event does not exist in the event named (INV-1, plan §5.7a).
         const ticket = await caps.registry.getTicket(q.ticket);
         if (ticket === null || ticket.event !== q.event) return err("ERR-TicketNotFound");
-        throw new Error("canAttend is not implemented yet (T-008-09)");
+        // Judged at the authority's clock (REQ-Q-2: "current time").
+        return ok(attendanceVerdict(event, ticket, caps.clock.now()));
       }
       case "getCancellationHolder": {
-        if ((await caps.registry.getTicket(q.ticket)) === null) return err("ERR-TicketNotFound");
-        throw new Error("getCancellationHolder is not implemented yet (T-008-09)");
+        const ticket = await caps.registry.getTicket(q.ticket);
+        if (ticket === null) return err("ERR-TicketNotFound");
+        const event = await caps.registry.getEvent(ticket.event);
+        if (event === null) throw new Error(`ticket ${ticket.id} of a missing event`);
+        // Plan §5.5: the holder at cancellation is the lazy snapshot, else the holder,
+        // who has not changed since. No holder is fixed until the event is Cancelled.
+        return ok(
+          event.status === "Cancelled" ? (ticket.cancellationHolder ?? ticket.holder) : null,
+        );
       }
       case "getCredential": {
         // One registration by (account, credential); the account's others stay unexposed (REQ-MG-5).

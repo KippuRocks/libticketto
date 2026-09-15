@@ -68,6 +68,7 @@ interface State {
   /** Keyed by ticket and pass id; the value is the retention time. */
   readonly consumedPasses: Map<string, Timestamp>;
   readonly operations: Map<OperationId, OperationRecord>;
+  /** The number of records each event has in the log: its next record's sequence. */
   readonly eventSequences: Map<EventId, Count>;
   readonly log: LogRecord[];
 }
@@ -168,8 +169,9 @@ function registryOver(state: State, assertOpen: () => void): Registry {
       assertOpen();
       let event: LogRecord["event"] = null;
       if (append.event !== null) {
-        const sequence = (state.eventSequences.get(append.event) ?? 0) + 1;
-        state.eventSequences.set(append.event, sequence);
+        // An event's first record is sequence 0, as in the published log (C7) and backend-memory.
+        const sequence = state.eventSequences.get(append.event) ?? 0;
+        state.eventSequences.set(append.event, sequence + 1);
         event = { id: append.event, sequence };
       }
       const record: LogRecord = {

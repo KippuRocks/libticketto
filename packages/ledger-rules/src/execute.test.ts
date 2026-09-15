@@ -408,7 +408,7 @@ describe("execute — log emission (REQ-SDK-5)", () => {
     expect(record).toEqual({
       cursor: result.value.cursor,
       recordedAt: 42,
-      event: { id, sequence: 1 },
+      event: { id, sequence: 0 },
       entry: signed,
       presentedAt: null,
     });
