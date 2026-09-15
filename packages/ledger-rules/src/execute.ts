@@ -40,6 +40,7 @@ import type { Capabilities, Registry } from "./capabilities.js";
 import { createEvent } from "./commands/create-event.js";
 import { issueTicket } from "./commands/issue-ticket.js";
 import { registerCredential } from "./commands/register-credential.js";
+import { transferTicket } from "./commands/transfer-ticket.js";
 import { addZone, removeZone } from "./commands/zones.js";
 import { type RulesConfig, resolveLimits } from "./config.js";
 import type { CommandHandler, CommandHandlers } from "./handler.js";
@@ -242,7 +243,7 @@ export const handlers: CommandHandlers = {
   addZone,
   removeZone,
   issueTicket,
-  transferTicket: notImplemented("transferTicket", "T-008-08"),
+  transferTicket,
   removeRestriction: notImplemented("removeRestriction", "T-008-12"),
   registerCredential,
 };
