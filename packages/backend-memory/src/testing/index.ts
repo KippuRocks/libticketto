@@ -4,7 +4,11 @@
 // seeded random source, so time-dependent cases (`AC-B1.4`, `ERR-PassExpired`)
 // can be reached, and a failing run replayed.
 
-import type { Clock } from "@ticketto/ledger-rules";
+import {
+  type Clock,
+  DEFAULT_MAX_CLOCK_SKEW,
+  DEFAULT_MAX_RECORDING_LAG,
+} from "@ticketto/ledger-rules";
 import type { Backend, Migration, Profile, Signer, Timestamp } from "@ticketto/sdk";
 import { backendOver } from "../backend.js";
 import { createMemoryStore } from "../capabilities.js";
@@ -26,6 +30,10 @@ export interface TestMemoryBackend extends Backend {
    * with the same seed yield the same sequence. Not cryptographically secure.
    */
   randomBytes(length: number): Uint8Array;
+  /** How long after a pass's `notAfter` the rules still record it, in milliseconds (`AD-13`). */
+  readonly maxRecordingLag: number;
+  /** How far ahead of the ledger's clock a pass's `presentedAt` may be, in milliseconds. */
+  readonly maxClockSkew: number;
 }
 
 export interface TestMemoryBackendOptions {
@@ -114,5 +122,8 @@ export function createTestMemoryBackend(options: TestMemoryBackendOptions): Test
     migration: backend.migration,
     clock,
     randomBytes: seededRandomBytes(options.seed),
+    // The rules run with their defaults here (`backendOver`), so these are those defaults.
+    maxRecordingLag: DEFAULT_MAX_RECORDING_LAG,
+    maxClockSkew: DEFAULT_MAX_CLOCK_SKEW,
   };
 }

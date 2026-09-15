@@ -9,6 +9,7 @@ import type {
   Backend,
   ClassId,
   Discriminator,
+  PassId,
   Position,
   Profile,
   ProofId,
@@ -34,8 +35,9 @@ export interface TestClock {
 
 /**
  * What every backend must offer in test mode, and nowhere else (§5.1): a
- * settable clock and seeded randomness. For a service, test mode is a flag that
- * production refuses to start with.
+ * settable clock, seeded randomness, and the gate parameters its rules use
+ * (§5.2b). For a service, test mode is a flag that production refuses to start
+ * with.
  */
 export interface TestControls {
   readonly clock: TestClock;
@@ -45,6 +47,20 @@ export interface TestControls {
    * be replayed.
    */
   randomBytes(length: number): Uint8Array;
+  /**
+   * How long after a pass's `notAfter` the backend still records it, in
+   * milliseconds (`AD-13`; `features/008-ledger-rules/plan.md` §5.6).
+   *
+   * Optional until every registered backend provides it; a test that needs it
+   * fails naming it when it is missing.
+   */
+  readonly maxRecordingLag?: number;
+  /**
+   * How far ahead of the backend's clock a pass's `presentedAt` may be, in
+   * milliseconds; beyond it the pass fails with `ERR-PassExpired`. Optional,
+   * as `maxRecordingLag` is.
+   */
+  readonly maxClockSkew?: number;
 }
 
 /** A backend in test mode. */
@@ -85,6 +101,8 @@ export interface ConformanceIdentifiers {
   position(index: number): Position;
   discriminator(index: number): Discriminator;
   proof(index: number): ProofId;
+  /** An access pass id (`REQ-AP-4`). */
+  pass(index: number): PassId;
   /** A salt for `createEvent` (`REQ-EV-9`). */
   salt(index: number): Uint8Array;
 }

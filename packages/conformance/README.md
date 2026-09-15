@@ -4,7 +4,7 @@ The shared conformance suite, written once against the SDK surface and run again
 
 Owned by `F-004`. Serves `REQ-SDK-7`, `REQ-CP-5` and `NFR-8`.
 
-**Status:** harness, `TestControls` contract, V0 signer fixtures, the V0 scope, the `REQ-SDK-6` assurance-declaration check, and the event lifecycle (`T-004-03`) identity and issuance (`T-004-04`), and replay (`T-004-07`) suites.
+**Status:** harness, `TestControls` contract, V0 signer fixtures, the V0 scope, the `REQ-SDK-6` assurance-declaration check, and the event lifecycle (`T-004-03`) identity and issuance (`T-004-04`), replay (`T-004-07`) and gate (`T-004-06`) suites.
 
 | | |
 |---|---|
@@ -40,7 +40,9 @@ the CI matrix by defining a `conformance` script that runs that file, for exampl
 - **`makeBackend`** returns a fresh, empty backend in test mode, once per test.
 - **`TestControls`** is what every backend must offer in test mode, and nowhere else: a settable
   `clock` (`now`, `set`, `advance`) that the backend's rules read, and `randomBytes`, a seeded
-  source the SDK uses for operation ids. A service offers them behind a test-mode flag that
+  source the SDK uses for operation ids; and the gate parameters its rules use, `maxRecordingLag`
+  and `maxClockSkew` (ms), so pass-window boundaries are tested exactly. They are optional until every
+  registered backend provides them; a test that needs one fails naming it. A service offers them behind a test-mode flag that
   production refuses to start with.
 - **`signers`**, from the profile under test: an organiser, at least three holders, a second
   device for the first holder's account, a stranger no world registers, and a sponsor. Every

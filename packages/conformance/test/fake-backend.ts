@@ -50,6 +50,8 @@ export async function fakeBackend(): Promise<FakeBackend> {
         time += ms;
       },
     },
+    maxRecordingLag: 300_000,
+    maxClockSkew: 10_000,
     randomBytes: seeded(0x7c4e770),
     submit(input, sponsorship) {
       submitted.push({ input, sponsorship });

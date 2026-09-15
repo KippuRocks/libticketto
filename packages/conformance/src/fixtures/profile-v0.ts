@@ -15,6 +15,7 @@ import {
 import type {
   ClassId,
   Discriminator,
+  PassId,
   Position,
   ProofId,
   Sponsor,
@@ -74,6 +75,7 @@ export const profileV0Identifiers: ConformanceIdentifiers = {
   position: (index) => hex(ascii(`seat-${index}`)) as Position,
   discriminator: (index) => hex(derived(`discriminator/${index}`).slice(0, 16)) as Discriminator,
   proof: (index) => hex(ascii(`proof-${index}`)) as ProofId,
+  pass: (index) => hex(derived(`pass/${index}`).slice(0, 16)) as PassId,
   salt: (index) => derived(`salt/${index}`),
 };
 
