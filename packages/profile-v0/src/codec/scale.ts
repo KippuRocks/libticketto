@@ -41,8 +41,10 @@ export class DecodeError extends Error {
 export function decodeExact<T>(codec: Codec<T>, bytes: Uint8Array): T {
   let value: T;
   try {
-    // A copy: scale-ts reads from the underlying buffer, ignoring a view's offset.
-    value = codec.dec(bytes.slice());
+    // A copy into memory of its own: scale-ts reads from the underlying buffer,
+    // ignoring a view's offset. `bytes.slice()` is not enough — on a Node
+    // `Buffer`, `slice` returns another view into the same pool.
+    value = codec.dec(new Uint8Array(bytes));
   } catch (error) {
     throw new DecodeError(error instanceof Error ? error.message : String(error));
   }
