@@ -8,6 +8,7 @@
 import {
   blake2b256,
   commandSigningPayload,
+  encodeSignedAccessPass,
   encodeSignedCommand,
   registrationAccount,
 } from "@ticketto/profile-v0";
@@ -19,6 +20,7 @@ import type {
   CredentialId,
   Event,
   EventId,
+  OperationId,
   PassId,
   Registration,
   SignedCommand,
@@ -40,6 +42,7 @@ import {
 import { referenceStore } from "../test/reference-store.js";
 import { concatBytes } from "./bytes.js";
 import {
+  decodeRecord,
   EXPORT_ITEM_TAG,
   EXPORT_MAGIC,
   encodeExport,
@@ -49,6 +52,7 @@ import {
   type LedgerSnapshot,
   LogChain,
   type LogEntry,
+  operationDigest,
   readExport,
   verifyImport,
 } from "./index.js";
@@ -106,15 +110,23 @@ beforeAll(async () => {
     });
     records.push(linked.bytes);
   }
+  // An access pass is an operation too, under its pass id, with its C3 pass digest.
   const pass = await samplePass();
-  records.push(
-    chain.append({
-      recordedAt: 1_800_000_000_100,
-      event,
-      entry: pass,
-      presentedAt: 1_800_000_000_000,
-    }).bytes,
-  );
+  const presentedAt = 1_800_000_000_000;
+  const passRecord = chain.append({
+    recordedAt: 1_800_000_000_100,
+    event,
+    entry: pass,
+    presentedAt,
+  });
+  records.push(passRecord.bytes);
+  const retainUntil = pass.pass.notAfter + 300_000;
+  operations.push({
+    operationId: pass.pass.id as string as OperationId,
+    expiresAt: retainUntil,
+    digest: operationDigest(pass, presentedAt),
+    sequence: passRecord.record.sequence,
+  });
 
   const events: Event[] = [
     {
@@ -155,7 +167,7 @@ beforeAll(async () => {
       tickets,
       credentials: [credentialOf(holder.registration), credentialOf(organiser.registration)],
       cancellationHolders: [{ ticket, holder: holder.signer.account }],
-      consumedPasses: [{ ticket, pass: pass.pass.id, retainUntil: pass.pass.notAfter + 300_000 }],
+      consumedPasses: [{ ticket, pass: pass.pass.id, retainUntil }],
       operations,
     },
   };
@@ -379,9 +391,9 @@ describe("T-006-04 export format", () => {
     expect(new TextDecoder().decode(chunks[0])).toBe(`${EXPORT_MAGIC}\u0000`);
     expect(chunks[1]?.[0]).toBe(EXPORT_ITEM_TAG.record);
     const end = chunks.at(-1) as Uint8Array;
-    // Counts: 8 records, 1 checkpoint, 2 events, 1 ticket, 2 credentials, 1 holder, 1 pass, 7 operations.
-    expect([...end]).toEqual([0, 8 << 2, ...[8, 1, 2, 1, 2, 1, 1, 7].map((n) => n << 2)]);
-    expect(chunks).toHaveLength(1 + 8 + 1 + 2 + 1 + 2 + 1 + 1 + 7 + 1);
+    // Counts: 8 records, 1 checkpoint, 2 events, 1 ticket, 2 credentials, 1 holder, 1 pass, 8 operations.
+    expect([...end]).toEqual([0, 8 << 2, ...[8, 1, 2, 1, 2, 1, 1, 8].map((n) => n << 2)]);
+    expect(chunks).toHaveLength(1 + 8 + 1 + 2 + 1 + 2 + 1 + 1 + 8 + 1);
   });
 
   it("refuses an encoding whose checkpoint and records disagree, or whose credential is not its registration's", async () => {
@@ -439,9 +451,29 @@ describe("T-006-04 export format", () => {
     });
   }
 
+  it("carries a pass operation under its pass id, with the pass digest over presentedAt", async () => {
+    const ledger = await exported();
+    const passOperation = ledger.snapshot.operations.find((o) => o.sequence === 7);
+    expect(passOperation).toBeDefined();
+    const record = decodeRecord(ledger.records[7] as Uint8Array);
+    if (!("pass" in record.input) || passOperation === undefined) throw new Error("fixture");
+    expect(passOperation.operationId).toBe(record.input.pass.id);
+    // BLAKE2b-256(signed-pass framing ‖ presentedAt as u64 little-endian).
+    const presentedAt = new Uint8Array(8);
+    new DataView(presentedAt.buffer).setBigUint64(0, BigInt(record.presentedAt ?? 0), true);
+    expect(passOperation.digest).toEqual(
+      blake2b256(concatBytes(encodeSignedAccessPass(record.input), presentedAt)),
+    );
+  });
+
   it("refuses a snapshot whose parts disagree", async () => {
     const ledger = await exported();
     const { snapshot } = ledger;
+    const pass = decodeRecord(ledger.records[7] as Uint8Array);
+    const withPassOperation = (change: Partial<(typeof snapshot.operations)[number]>) => ({
+      ...snapshot,
+      operations: snapshot.operations.map((o) => (o.sequence === 7 ? { ...o, ...change } : o)),
+    });
     const variants: LedgerSnapshot[] = [
       { ...snapshot, cancellationHolders: [] },
       {
@@ -469,6 +501,14 @@ describe("T-006-04 export format", () => {
         ),
       },
       { ...snapshot, credentials: [...snapshot.credentials, ...snapshot.credentials.slice(0, 1)] },
+      // A pass operation whose digest omits presentedAt, or covers another one.
+      withPassOperation({ digest: blake2b256(encodeSignedAccessPass(pass.input as never)) }),
+      withPassOperation({
+        digest: operationDigest(pass.input, (pass.presentedAt ?? 0) + 1),
+      }),
+      // A pass operation naming a command record, or under an id other than its pass id.
+      withPassOperation({ sequence: 0 }),
+      withPassOperation({ operationId: "cd".repeat(16) as OperationId }),
     ];
     for (const variant of variants) {
       expect(await readExport(exportStream({ ...ledger, snapshot: variant }))).toMatchObject({

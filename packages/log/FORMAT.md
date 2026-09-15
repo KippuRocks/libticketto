@@ -262,9 +262,20 @@ Ticket = id [u8;32], event [u8;32], holder [u8;32], class ClassId,
 - A **cancellation holder** is carried for every ticket of a `Cancelled` event,
   and for no other ticket: the holder that event's cancellation fixed.
 - A **consumed pass** is carried while it is within its retention; an
-  **operation** while it is within its expiry. An operation's `digest` is
-  BLAKE2b-256 of its command's signed-input framing (§2.2), and `sequence` is
-  that of the record the operation produced.
+  **operation** while it is within its expiry. `sequence` is that of the record
+  the operation produced, which is a signed command or a signed access pass. A
+  pass's operation id is its pass id, and its `expiresAt` is the end of its
+  retention. `digest` is the operation digest of that record's input, over the
+  signed-input framing exactly as the record carries it (§2.2):
+
+  ```
+  command  digest = BLAKE2b-256(framing)
+  pass     digest = BLAKE2b-256(framing ‖ presentedAt u64)
+  ```
+
+  where `presentedAt` is the pass record's own. The same pass presented at
+  another time therefore has another digest. An importer carries pass operations
+  as it carries command operations, and never rebuilds either.
 
 ### 5.3 Consistency
 
@@ -282,9 +293,12 @@ A decoder MUST also refuse an export whose parts disagree:
 3. Every ticket's event, and every consumed pass's ticket, is in the snapshot.
    Cancellation holders are carried for exactly the tickets of `Cancelled`
    events.
-4. Every operation's `sequence` names a record carrying a signed command whose
-   operation id and expiry are the operation's, and whose signed-input framing
-   hashes to its `digest`.
+4. Every operation's `sequence` names a record whose input's operation digest
+   (§5.2) is its `digest`. That input is a signed command whose operation id and
+   expiry are the operation's, or a signed access pass whose pass id is the
+   operation id and whose record carries a `presentedAt`. A pass operation's
+   expiry is not checked against its record, which does not carry the retention
+   it ends with.
 
 An encoder sorts each section, so equal state always exports to equal bytes.
 
@@ -320,10 +334,12 @@ vectors:generate`:
 | `checkpoint` | A valid checkpoint at sequence 5 of the sample log: its fields, `signingPayload` and `bytes` |
 | `invalidCheckpoints[]` | Checkpoint bytes that MUST NOT verify against `publicationRegistration` |
 | `chains[]` | Logs — `records`, as record bytes — with the `checkpoints` held (`sequence`, `headHash`) and the `expected` result: `{ ok: true }`, or the first failure's `sequence` and `fault` |
+| `operationDigests[]` | For a command record and an access-pass record of the sample log, by index in `records[]`: the operation `digest` (§5.2) |
 | `malformedRecords[]` | Bytes a decoder MUST refuse |
 
 An implementation conforms when it decodes every record to the stated fields
 and hash, reproduces every `chains[]` result, accepts `checkpoint`, refuses every
-`invalidCheckpoints[]` entry, and refuses every `malformedRecords[]` entry.
+`invalidCheckpoints[]` entry, reproduces every `operationDigests[]` digest, and
+refuses every `malformedRecords[]` entry.
 After `M0`, changing a vector is a format revision and needs the feature plan
 updated.
