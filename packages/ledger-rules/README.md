@@ -17,6 +17,7 @@ runs the checks every signed command passes (`T-008-02`, `T-008-13`).
 | `submitAccessPass` | Implemented (`T-008-10`) |
 | `transferTicket` | Implemented, with the lazy cancellation snapshot (`T-008-08`) |
 | `setEventStatus` | Implemented (`T-008-04`) |
+| `setEventCapacity` | Implemented (`T-008-05`) |
 | Every other command | Not yet — each throws until its task lands |
 
 | | |
