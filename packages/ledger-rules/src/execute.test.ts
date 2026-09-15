@@ -23,13 +23,8 @@ import {
   sign,
 } from "../test/fixtures.js";
 import type { EventRecord } from "./capabilities.js";
-import {
-  configureExecute,
-  createExecute,
-  DEFAULT_MAX_OPERATION_LIFETIME,
-  execute,
-  handlers as v0Handlers,
-} from "./execute.js";
+import { DEFAULT_MAX_OPERATION_LIFETIME } from "./config.js";
+import { configureExecute, createExecute, execute, handlers as v0Handlers } from "./execute.js";
 import { accept, type CommandHandler, type CommandHandlers, reject } from "./handler.js";
 
 /** Handlers that accept every command by recording its event as Active. */

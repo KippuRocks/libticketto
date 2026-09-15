@@ -87,10 +87,14 @@ export interface TicketFacts {
 export interface OperationRecord {
   readonly expiresAt: Timestamp;
   /**
-   * A digest of the signed input recorded under this id — BLAKE2b-256 of the
-   * profile's signed-input framing. The rules compute it; the store only keeps
-   * and returns it. The same id with the same digest is an identical replay,
-   * answered with `receipt`; with a different digest, `ERR-OperationConflict`.
+   * A digest of the signed input recorded under this id. For a command,
+   * BLAKE2b-256 of the profile's signed-input framing; for an access pass,
+   * BLAKE2b-256 of the profile's signed-pass framing followed by `presentedAt`
+   * as u64 little-endian, so the same pass presented at another time differs
+   * (plan §5.2). The rules compute it; the store only keeps and returns it. The
+   * same id with the same digest is an identical replay, answered with
+   * `receipt`; with a different digest, `ERR-OperationConflict` — or, for a
+   * consumed pass, `ERR-PassReplayed`.
    */
   readonly digest: Uint8Array;
   readonly receipt: Receipt;

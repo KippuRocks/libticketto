@@ -14,13 +14,12 @@ export type {
   Value,
 } from "./capabilities.js";
 export {
-  configureExecute,
+  DEFAULT_MAX_CLOCK_SKEW,
   DEFAULT_MAX_OPERATION_LIFETIME,
-  type Execute,
-  type ExecuteContext,
-  execute,
+  DEFAULT_MAX_RECORDING_LAG,
   type RulesConfig,
-} from "./execute.js";
+} from "./config.js";
+export { configureExecute, type Execute, type ExecuteContext, execute } from "./execute.js";
 export { query } from "./query.js";
 
 export const packageName = "@ticketto/ledger-rules";
