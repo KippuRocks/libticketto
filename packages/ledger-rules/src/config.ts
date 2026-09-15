@@ -12,6 +12,12 @@ export const DEFAULT_MAX_RECORDING_LAG = 5 * 60 * 1000;
 /** The default maximum clock skew: 10 seconds, the gate tolerance of F-025 (plan §5.2). */
 export const DEFAULT_MAX_CLOCK_SKEW = 10 * 1000;
 
+/**
+ * The default maximum pass window: 5 minutes (plan §5.2, `REQ-AP-3`). An
+ * organiser's per-event window is chosen within it.
+ */
+export const DEFAULT_MAX_PASS_WINDOW = 5 * 60 * 1000;
+
 /** Configuration of the rules, set by whatever runs them. */
 export interface RulesConfig {
   /**
@@ -31,6 +37,12 @@ export interface RulesConfig {
    * lie (plan §5.2). Defaults to {@link DEFAULT_MAX_CLOCK_SKEW}.
    */
   readonly maxClockSkew?: number;
+  /**
+   * The longest window, `notAfter − notBefore`, an access pass may carry, so
+   * that every window is bounded (plan §5.2, `REQ-AP-3`, `NFR-5`). Defaults to
+   * {@link DEFAULT_MAX_PASS_WINDOW}.
+   */
+  readonly maxPassWindow?: number;
 }
 
 /** Every limit, resolved. */
@@ -42,6 +54,7 @@ export function resolveLimits(config: RulesConfig): Limits {
     maxOperationLifetime: config.maxOperationLifetime ?? DEFAULT_MAX_OPERATION_LIFETIME,
     maxRecordingLag: config.maxRecordingLag ?? DEFAULT_MAX_RECORDING_LAG,
     maxClockSkew: config.maxClockSkew ?? DEFAULT_MAX_CLOCK_SKEW,
+    maxPassWindow: config.maxPassWindow ?? DEFAULT_MAX_PASS_WINDOW,
   };
   for (const [name, value] of Object.entries(limits)) {
     if (!Number.isSafeInteger(value) || value < 0) {

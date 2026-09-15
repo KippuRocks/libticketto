@@ -29,7 +29,11 @@ import {
   sign,
   type TestCredential,
 } from "../test/fixtures.js";
-import { DEFAULT_MAX_CLOCK_SKEW, DEFAULT_MAX_RECORDING_LAG } from "./config.js";
+import {
+  DEFAULT_MAX_CLOCK_SKEW,
+  DEFAULT_MAX_PASS_WINDOW,
+  DEFAULT_MAX_RECORDING_LAG,
+} from "./config.js";
 import { configureExecute, type Execute, execute } from "./execute.js";
 import { passDigest } from "./pass.js";
 
@@ -44,6 +48,7 @@ interface Gate {
   /** A fresh pass for the ticket, signed by `signer` (the holder by default), valid from `notBefore`. */
   pass(options?: {
     readonly notBefore?: number;
+    readonly window?: number;
     readonly signer?: TestCredential;
     readonly id?: PassId;
   }): Promise<SignedAccessPass>;
@@ -93,7 +98,7 @@ async function gate(
           ticket,
           holder: signer.account,
           notBefore: o.notBefore ?? T0,
-          window: WINDOW,
+          window: o.window ?? WINDOW,
           ...(o.id === undefined ? {} : { id: o.id }),
         },
         signer.signer,
@@ -283,6 +288,39 @@ describe("submitAccessPass — the window (REQ-AP-3)", () => {
     expect((await g.submit(ahead, late.pass.notAfter + 1_001, run)).ok).toBe(true);
     expect(() => configureExecute({ maxRecordingLag: -1 })).toThrow(RangeError);
     expect(() => configureExecute({ maxClockSkew: 0.5 })).toThrow(RangeError);
+  });
+});
+
+describe("submitAccessPass — maximum pass window (REQ-AP-3)", () => {
+  it("ERR-PassExpired: a pass whose window is longer than the default maximum", async () => {
+    const g = await gate();
+    const signed = await g.pass({ window: DEFAULT_MAX_PASS_WINDOW + 1 });
+    expect(codeOf(await g.submit(signed))).toBe("ERR-PassExpired");
+    expect(await g.attendances()).toBe(0);
+    expect(await g.caps.registry.isPassConsumed(g.ticket, signed.pass.id)).toBe(false);
+  });
+
+  it("accepts a pass whose window is exactly the default maximum", async () => {
+    const g = await gate();
+    expect(DEFAULT_MAX_PASS_WINDOW).toBe(5 * 60 * 1000);
+    expect((await g.submit(await g.pass({ window: DEFAULT_MAX_PASS_WINDOW }))).ok).toBe(true);
+  });
+
+  it("the maximum pass window is rules configuration", async () => {
+    const run = configureExecute({ maxPassWindow: 1_000 });
+    const g = await gate({ policy: { kind: "Unlimited", until: null } });
+    expect(codeOf(await g.submit(await g.pass({ window: 1_001 }), T0, run))).toBe(
+      "ERR-PassExpired",
+    );
+    expect((await g.submit(await g.pass({ window: 1_000 }), T0, run)).ok).toBe(true);
+    expect(() => configureExecute({ maxPassWindow: -1 })).toThrow(RangeError);
+  });
+
+  it("the window's length is checked after the holder", async () => {
+    const g = await gate();
+    const stranger = await registered(g.caps);
+    const signed = await g.pass({ signer: stranger, window: DEFAULT_MAX_PASS_WINDOW + 1 });
+    expect(codeOf(await g.submit(signed))).toBe("ERR-InvalidPass");
   });
 });
 

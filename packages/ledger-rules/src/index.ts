@@ -16,6 +16,7 @@ export type {
 export {
   DEFAULT_MAX_CLOCK_SKEW,
   DEFAULT_MAX_OPERATION_LIFETIME,
+  DEFAULT_MAX_PASS_WINDOW,
   DEFAULT_MAX_RECORDING_LAG,
   type RulesConfig,
 } from "./config.js";
