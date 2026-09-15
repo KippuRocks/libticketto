@@ -40,8 +40,8 @@ the CI matrix by defining a `conformance` script that runs that file, for exampl
 - **`makeBackend`** returns a fresh, empty backend in test mode, once per test.
 - **`TestControls`** is what every backend must offer in test mode, and nowhere else: a settable
   `clock` (`now`, `set`, `advance`) that the backend's rules read, and `randomBytes`, a seeded
-  source the SDK uses for operation ids; and the gate parameters its rules use, `maxRecordingLag`
-  and `maxClockSkew` (ms), so pass-window boundaries are tested exactly. They are optional until every
+  source the SDK uses for operation ids; and the gate parameters its rules use, `maxRecordingLag`,
+  `maxClockSkew` and `maxPassWindow` (ms), so pass-window boundaries are tested exactly. They are optional until every
   registered backend provides them; a test that needs one fails naming it. A service offers them behind a test-mode flag that
   production refuses to start with.
 - **`signers`**, from the profile under test: an organiser, at least three holders, a second

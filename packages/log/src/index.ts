@@ -42,6 +42,7 @@ export {
   exportStream,
   type LedgerExport,
   type LedgerSnapshot,
+  operationDigest,
   type ReadExport,
   type ReadExportOptions,
   readExport,

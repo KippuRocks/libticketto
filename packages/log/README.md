@@ -83,7 +83,8 @@ before it (`truncated`). Publishing checkpoints is `ticketto-offchain`'s.
 - `encodeExport(ledger)` / `exportStream(ledger)` — a `LedgerExport` (records up
   to a checkpoint, the checkpoint, and the snapshot: events, tickets, credential
   registrations, cancellation holders, consumed passes within retention,
-  operations within expiry) as a stream, each section sorted. A backend's
+  operations within expiry — commands and access passes alike, each with its
+  `operationDigest`) as a stream, each section sorted. A backend's
   `migration.export()` returns it.
 - `readExport(stream, { publication? })` — the export, or a
   `MigrationFailure` with reason `malformed` when the stream is incomplete, not

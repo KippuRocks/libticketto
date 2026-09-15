@@ -8,11 +8,12 @@ import type { Registration } from "@ticketto/sdk";
 import { beforeAll, describe, expect, it } from "vitest";
 import * as independent from "../test/independent/decoder.js";
 import { buildVectors, type Json } from "../test/vectors.js";
-import { fromHex } from "./bytes.js";
+import { fromHex, toHex } from "./bytes.js";
 import {
   decodeCheckpoint,
   decodeRecord,
   hashRecordBytes,
+  operationDigest,
   verifyChain,
   verifyCheckpoint,
 } from "./index.js";
@@ -32,6 +33,7 @@ interface Vectors {
     expected: { ok: boolean; sequence?: number; fault?: string };
   }[];
   malformedRecords: { name: string; bytes: string }[];
+  operationDigests: { name: string; record: number; digest: string }[];
 }
 
 // `pnpm vectors:generate` rewrites the file; every other run checks it.
@@ -93,6 +95,14 @@ if (process.env.TICKETTO_WRITE_VECTORS !== undefined) {
       }
     });
 
+    it("reproduce every operation digest through the package", () => {
+      expect(vectors.operationDigests.map((v) => v.name)).toContain("a signed access pass");
+      for (const { name, record, digest } of vectors.operationDigests) {
+        const decoded = decodeRecord(fromHex(vectors.records[record]?.bytes ?? ""));
+        expect(toHex(operationDigest(decoded.input, decoded.presentedAt)), name).toBe(digest);
+      }
+    });
+
     it("refuse every malformed record through the package", () => {
       for (const { name, bytes } of vectors.malformedRecords) {
         expect(() => decodeRecord(fromHex(bytes)), name).toThrow();
@@ -147,6 +157,13 @@ if (process.env.TICKETTO_WRITE_VECTORS !== undefined) {
       });
       for (const { name, bytes: invalid } of vectors.invalidCheckpoints) {
         expect(independent.checkpointValid(independent.unhex(invalid), reg), name).toBe(false);
+      }
+    });
+
+    it("reproduces every operation digest", () => {
+      for (const { name, record, digest } of vectors.operationDigests) {
+        const bytes = independent.unhex(vectors.records[record]?.bytes ?? "");
+        expect(independent.operationDigest(independent.decodeRecord(bytes)), name).toBe(digest);
       }
     });
 

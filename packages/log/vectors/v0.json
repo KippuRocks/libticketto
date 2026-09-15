@@ -454,6 +454,18 @@
       }
     }
   ],
+  "operationDigests": [
+    {
+      "name": "a signed command",
+      "record": 1,
+      "digest": "2c277a6eebdc1544413f4accca89782a4afd45e075fa7289aa513ade596d0f5a"
+    },
+    {
+      "name": "a signed access pass",
+      "record": 9,
+      "digest": "cfe3436601d788b1db5587c77a9fbb2a45a7be0752311260b8bc9943b0ad3039"
+    }
+  ],
   "malformedRecords": [
     {
       "name": "trailing byte",

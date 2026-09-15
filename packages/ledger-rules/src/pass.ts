@@ -14,7 +14,8 @@
 //      pass's consumption                                → ERR-OperationConflict
 //   1. the authorisation verifies, and its signer is the ticket's current
 //      holder                                            → ERR-InvalidPass
-//   2. presentedAt is within [notBefore, notAfter] and no more than the maximum
+//   2. the window is no longer than the maximum pass window; presentedAt is
+//      within [notBefore, notAfter] and no more than the maximum
 //      clock skew ahead of the clock; the clock is no later than notAfter plus
 //      the maximum recording lag                         → ERR-PassExpired
 //   3. the pass id is not consumed for the ticket        → ERR-PassReplayed
@@ -111,7 +112,10 @@ export async function submitAccessPass(
     const authorised = await authorisedByHolder(tx, profile, signed, ticket);
     if (!authorised.ok) return authorised;
 
-    // 2. The window (REQ-AP-3), bounding the submitter's claim.
+    // 2. The window (REQ-AP-3): bounded itself, and bounding the submitter's claim.
+    if (pass.notAfter - pass.notBefore > limits.maxPassWindow) {
+      return err("ERR-PassExpired", "the pass's window is longer than the ledger allows");
+    }
     if (presentedAt < pass.notBefore || presentedAt > pass.notAfter) {
       return err("ERR-PassExpired", "presented outside the pass's window");
     }

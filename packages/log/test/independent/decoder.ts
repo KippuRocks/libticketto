@@ -147,6 +147,20 @@ export function decodeRecord(bytes: Uint8Array): DecodedRecord {
 export const recordHash = (bytes: Uint8Array): string =>
   hex(blake2b256(cat(tag("ticketto/v0/log"), bytes)));
 
+/** §5.2: an exported operation's digest, from the record it names. */
+export function operationDigest(record: DecodedRecord): string {
+  const framed = unhex(record.input.framed);
+  if (record.input.kind === 0) return hex(blake2b256(framed));
+  if (record.presentedAt === null) throw new Error("a pass operation's digest covers presentedAt");
+  const at = new Uint8Array(8);
+  let v = BigInt(record.presentedAt);
+  for (let i = 0; i < 8; i++) {
+    at[i] = Number(v & 0xffn);
+    v >>= 8n;
+  }
+  return hex(blake2b256(cat(framed, at)));
+}
+
 // §3 and §4.3: the chain, against held checkpoints.
 
 export type Outcome = { ok: true } | { ok: false; sequence: number; fault: string };

@@ -21,7 +21,13 @@
 // A chunk of the stream is not a unit of the format: a reader accepts the bytes
 // however they are split.
 
-import { blake2b256, codecs, encodeSignedCommand, registrationAccount } from "@ticketto/profile-v0";
+import {
+  blake2b256,
+  codecs,
+  encodeSignedAccessPass,
+  encodeSignedCommand,
+  registrationAccount,
+} from "@ticketto/profile-v0";
 import type {
   AccountId,
   CredentialId,
@@ -42,7 +48,7 @@ import {
   encodeCheckpoint,
   verifyCheckpoint,
 } from "./checkpoint.js";
-import { type ChainedRecord, decodeRecord, HASH_LENGTH } from "./record.js";
+import { type ChainedRecord, decodeRecord, HASH_LENGTH, type LogInput } from "./record.js";
 import { LogDecodeError, Reader, Writer } from "./scale.js";
 
 /** The ASCII magic an export starts with. */
@@ -86,11 +92,15 @@ export interface ExportedConsumedPass {
   readonly retainUntil: Timestamp;
 }
 
-/** An operation id still within its expiry (`REQ-CM-1`, `AD-15`). */
+/**
+ * An operation id still within its expiry (`REQ-CM-1`, `AD-15`). Its record is a
+ * signed command, or a signed access pass, whose operation id is its pass id.
+ */
 export interface ExportedOperation {
   readonly operationId: OperationId;
+  /** For a command, its envelope's expiry; for a pass, the end of its retention. */
   readonly expiresAt: Timestamp;
-  /** BLAKE2b-256 of the recorded command's signed-input framing (`C3`). */
+  /** The `C3` digest of the recorded input (`operationDigest`). */
   readonly digest: Uint8Array;
   /** The sequence of the record the operation produced; its receipt is re-rendered from it. */
   readonly sequence: number;
@@ -115,6 +125,24 @@ export interface LedgerExport {
   /** The checkpoint at the last record; `null` exactly when there are no records. */
   readonly checkpoint: Checkpoint | null;
   readonly snapshot: LedgerSnapshot;
+}
+
+/**
+ * The `C3` operation digest of a recorded input (FORMAT.md §5.2):
+ *
+ * - a signed command: `BLAKE2b-256(signed-input framing)`;
+ * - a signed access pass: `BLAKE2b-256(signed-pass framing ‖ presentedAt u64)`,
+ *   little-endian, so the same pass presented at another time differs.
+ *
+ * The framings are the profile's (`C2`), as a record carries them (§2.2). Throws
+ * `TypeError` for a pass without `presentedAt`, which has no digest.
+ */
+export function operationDigest(input: LogInput, presentedAt: Timestamp | null): Uint8Array {
+  if (!("pass" in input)) return blake2b256(encodeSignedCommand(input));
+  if (presentedAt === null) throw new TypeError("a pass operation's digest covers its presentedAt");
+  return blake2b256(
+    new Writer().raw(encodeSignedAccessPass(input)).u64(presentedAt, "presentedAt").finish(),
+  );
 }
 
 // --- Item bodies -------------------------------------------------------------
@@ -401,8 +429,8 @@ function sortedUnique<T>(list: readonly T[], key: (value: T) => string, what: st
  *   the snapshot; every credential's registration deriving an account through
  *   the profile; a cancellation holder for exactly the tickets of `Cancelled`
  *   events; every consumed pass's ticket in the snapshot; every operation naming
- *   a record that carries a command with that operation id and expiry, whose
- *   signed-input digest is the operation's.
+ *   a record that carries a command with that operation id and expiry, or a pass
+ *   with that pass id, whose `C3` digest is the operation's.
  *
  * It does not re-run the ledger's rules over the snapshot: import verifies by
  * observable state instead (plan §5.5).
@@ -575,15 +603,18 @@ async function read(
   }
   for (const operation of operations) {
     const record = decoded[operation.sequence];
-    const input = record?.input;
-    if (input === undefined || !("command" in input)) {
-      throw new Malformed(`operation ${operation.operationId}: no command record at its sequence`);
+    if (record === undefined) {
+      throw new Malformed(`operation ${operation.operationId}: no record at its sequence`);
     }
-    if (
-      input.command.operationId !== operation.operationId ||
-      input.command.expiresAt !== operation.expiresAt ||
-      !equalBytes(blake2b256(encodeSignedCommand(input)), operation.digest)
-    ) {
+    const { input, presentedAt } = record;
+    // A pass's expiry is the end of its retention, a service parameter the
+    // record does not carry, so only a command's is checked against its record.
+    const named =
+      "pass" in input
+        ? (input.pass.id as string) === operation.operationId && presentedAt !== null
+        : input.command.operationId === operation.operationId &&
+          input.command.expiresAt === operation.expiresAt;
+    if (!named || !equalBytes(operationDigest(input, presentedAt), operation.digest)) {
       throw new Malformed(`operation ${operation.operationId}: disagrees with its record`);
     }
   }
