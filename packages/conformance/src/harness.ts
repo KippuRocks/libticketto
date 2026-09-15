@@ -50,23 +50,18 @@ export interface TestControls {
   /**
    * How long after a pass's `notAfter` the backend still records it, in
    * milliseconds (`AD-13`; `features/008-ledger-rules/plan.md` §5.6).
-   *
-   * Optional until every registered backend provides it; a test that needs it
-   * fails naming it when it is missing.
    */
-  readonly maxRecordingLag?: number;
+  readonly maxRecordingLag: number;
   /**
    * How far ahead of the backend's clock a pass's `presentedAt` may be, in
-   * milliseconds; beyond it the pass fails with `ERR-PassExpired`. Optional,
-   * as `maxRecordingLag` is.
+   * milliseconds; beyond it the pass fails with `ERR-PassExpired`.
    */
-  readonly maxClockSkew?: number;
+  readonly maxClockSkew: number;
   /**
    * The longest window, `notAfter − notBefore`, a pass may carry, in
-   * milliseconds; a longer one fails with `ERR-PassExpired`. Optional, as
-   * `maxRecordingLag` is.
+   * milliseconds; a longer one fails with `ERR-PassExpired`.
    */
-  readonly maxPassWindow?: number;
+  readonly maxPassWindow: number;
 }
 
 /** A backend in test mode. */

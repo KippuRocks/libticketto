@@ -63,7 +63,8 @@ service cannot be reached.
 `@ticketto/binding-offchain/testing` connects to a service in test mode
 (`TICKETTO_TEST_MODE=1`, `C4.md` Appendix A) with `connectTestOffchainBackend`: the
 port plus the conformance suite's `TestControls` — a clock over
-`/v0/testing/clock` and seeded `randomBytes`. The clock is synchronous, as the
+`/v0/testing/clock`, seeded `randomBytes`, and the gate parameters `maxRecordingLag`,
+`maxClockSkew` and `maxPassWindow`, read from `/v0/testing/config` when connecting (A.3). The clock is synchronous, as the
 suite expects: `now()` answers at once, and every request the port makes waits
 until the clock changes before it have reached the service. A change the service
 refuses fails the next request with `TestModeError`. For tests only.

@@ -18,6 +18,7 @@ import {
 } from "@ticketto/conformance";
 import {
   DEFAULT_MAX_CLOCK_SKEW,
+  DEFAULT_MAX_PASS_WINDOW,
   DEFAULT_MAX_RECORDING_LAG,
   type Registry,
 } from "@ticketto/ledger-rules";
@@ -89,6 +90,7 @@ function testBackend(store: MemoryStore, clock: ControlledClock): TestBackend {
     randomBytes: seededRandomBytes(0),
     maxRecordingLag: DEFAULT_MAX_RECORDING_LAG,
     maxClockSkew: DEFAULT_MAX_CLOCK_SKEW,
+    maxPassWindow: DEFAULT_MAX_PASS_WINDOW,
   };
 }
 
