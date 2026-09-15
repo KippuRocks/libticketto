@@ -40,6 +40,7 @@ import type { Capabilities, Registry } from "./capabilities.js";
 import { createEvent } from "./commands/create-event.js";
 import { issueTicket } from "./commands/issue-ticket.js";
 import { registerCredential } from "./commands/register-credential.js";
+import { setEventCapacity } from "./commands/set-event-capacity.js";
 import { setEventStatus } from "./commands/set-event-status.js";
 import { transferTicket } from "./commands/transfer-ticket.js";
 import { addZone, removeZone } from "./commands/zones.js";
@@ -240,7 +241,7 @@ function notImplemented(kind: CommandKind, task: string): CommandHandler<Command
 export const handlers: CommandHandlers = {
   createEvent,
   setEventStatus,
-  setEventCapacity: notImplemented("setEventCapacity", "T-008-05"),
+  setEventCapacity,
   addZone,
   removeZone,
   issueTicket,
