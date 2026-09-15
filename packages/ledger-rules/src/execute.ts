@@ -26,7 +26,6 @@ import { blake2b256, encodeSignedCommand } from "@ticketto/profile-v0";
 import type {
   AccountId,
   Command,
-  CommandKind,
   EventId,
   Profile,
   Receipt,
@@ -40,6 +39,8 @@ import type { Capabilities, Registry } from "./capabilities.js";
 import { createEvent } from "./commands/create-event.js";
 import { issueTicket } from "./commands/issue-ticket.js";
 import { registerCredential } from "./commands/register-credential.js";
+import { removeRestriction } from "./commands/remove-restriction.js";
+import { setEventCapacity } from "./commands/set-event-capacity.js";
 import { setEventStatus } from "./commands/set-event-status.js";
 import { transferTicket } from "./commands/transfer-ticket.js";
 import { addZone, removeZone } from "./commands/zones.js";
@@ -230,22 +231,16 @@ export function createExecute(handlers: CommandHandlers, config: RulesConfig = {
   };
 }
 
-function notImplemented(kind: CommandKind, task: string): CommandHandler<Command> {
-  return async () => {
-    throw new Error(`${kind} is not implemented yet (${task})`);
-  };
-}
-
 /** The V0 command handlers. */
 export const handlers: CommandHandlers = {
   createEvent,
   setEventStatus,
-  setEventCapacity: notImplemented("setEventCapacity", "T-008-05"),
+  setEventCapacity,
   addZone,
   removeZone,
   issueTicket,
   transferTicket,
-  removeRestriction: notImplemented("removeRestriction", "T-008-12"),
+  removeRestriction,
   registerCredential,
 };
 

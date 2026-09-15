@@ -4,7 +4,8 @@ The ledger's rules — commands, invariants and errors — implemented once over
 
 Contract `C3`. Owned by `F-008`.
 
-**Status:** the `C3` capability interfaces are declared (`T-008-01`); `execute`
+**Status:** every V0 command, the access pass and every V0 query have their
+rules. The `C3` capability interfaces are declared (`T-008-01`), and `execute`
 runs the checks every signed command passes (`T-008-02`, `T-008-13`).
 
 | Command | Handler |
@@ -17,7 +18,8 @@ runs the checks every signed command passes (`T-008-02`, `T-008-13`).
 | `submitAccessPass` | Implemented (`T-008-10`) |
 | `transferTicket` | Implemented, with the lazy cancellation snapshot (`T-008-08`) |
 | `setEventStatus` | Implemented (`T-008-04`) |
-| Every other command | Not yet — each throws until its task lands |
+| `setEventCapacity` | Implemented (`T-008-05`) |
+| `removeRestriction` | Implemented (`T-008-12`) |
 
 | | |
 |---|---|
