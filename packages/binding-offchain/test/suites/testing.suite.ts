@@ -97,6 +97,50 @@ export const testingSuite: Suite = (t) => {
       );
     });
 
+    t.it("the gate parameters are the service's rules limits, read when connecting", async () => {
+      const { service, backend } = await connect({
+        testConfig: {
+          maxRecordingLag: 120_000,
+          maxClockSkew: 2_500,
+          maxPassWindow: 90_000,
+          maxOperationLifetime: 3_600_000,
+        },
+      });
+      assertEqual(
+        {
+          maxRecordingLag: backend.maxRecordingLag,
+          maxClockSkew: backend.maxClockSkew,
+          maxPassWindow: backend.maxPassWindow,
+        },
+        { maxRecordingLag: 120_000, maxClockSkew: 2_500, maxPassWindow: 90_000 },
+      );
+      assert(
+        service.seen.some((s) => s.path === "/v0/testing/config"),
+        "read from the service",
+      );
+    });
+
+    t.it("a test-mode config without a limit is refused when connecting", async () => {
+      for (const testConfig of [
+        { maxClockSkew: 1, maxPassWindow: 1, maxOperationLifetime: 1 },
+        { maxRecordingLag: 1, maxClockSkew: 1, maxOperationLifetime: 1 },
+        { maxRecordingLag: -1, maxClockSkew: 1, maxPassWindow: 1, maxOperationLifetime: 1 },
+        { maxRecordingLag: "300000", maxClockSkew: 1, maxPassWindow: 1, maxOperationLifetime: 1 },
+      ]) {
+        const service = new FakeService({ assurance: ASSURANCE, clock: START, testConfig });
+        await assertRejects(
+          () =>
+            connectTestOffchainBackend({
+              url: BASE_URL,
+              fetch: service.fetch,
+              timers: new InstantTimers(),
+              timeoutMargin: TIMEOUT_MARGIN,
+            }),
+          "TestModeError",
+        );
+      }
+    });
+
     t.it("randomBytes is seeded: the same seed gives the same sequence", async () => {
       const a = await connect({}, 7);
       const b = await connect({}, 7);

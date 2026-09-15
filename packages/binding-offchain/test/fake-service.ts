@@ -50,8 +50,10 @@ export interface FakeServiceOptions {
   readonly streams?: boolean;
   /** Answers `POST /v0/query`: the SDK's `Result`, as C4 carries it. */
   readonly query?: (query: Record<string, unknown>) => unknown;
-  /** The test-mode clock's start; without it, `/v0/testing/clock` does not exist (C4.md Appendix A). */
+  /** The test-mode clock's start; without it, `/v0/testing/*` does not exist (C4.md Appendix A). */
   readonly clock?: number;
+  /** What `GET /v0/testing/config` answers in test mode (C4.md A.3). */
+  readonly testConfig?: unknown;
   /** The assurance declaration `GET /v0/assurance` answers. */
   readonly assurance?: Record<string, string>;
   /** Pending answers each submission gets before it is recorded. */
@@ -206,6 +208,18 @@ export class FakeService {
       return response(200, { assurance: this.options.assurance ?? {} });
     }
     if (path === "/v0/testing/clock") return this.testClock(init);
+    if (path === "/v0/testing/config") {
+      if (this.now === undefined) return response(404, { error: { code: "not-found" } });
+      return response(
+        200,
+        this.options.testConfig ?? {
+          maxRecordingLag: 300_000,
+          maxClockSkew: 10_000,
+          maxPassWindow: 300_000,
+          maxOperationLifetime: 86_400_000,
+        },
+      );
+    }
     return this.poll(path);
   }
 

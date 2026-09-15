@@ -32,9 +32,24 @@ export interface OffchainTestClock {
   advance(ms: number): void;
 }
 
-/** The port over a service in test mode, with its clock and seeded randomness. */
+/** The port over a service in test mode, with its clock, seeded randomness and gate parameters. */
 export interface TestOffchainBackend extends Backend {
   readonly clock: OffchainTestClock;
+  /**
+   * How long after a pass's `notAfter` the service still records it, in
+   * milliseconds, as its rules are configured (C4.md A.3; `F-008` §5.6).
+   */
+  readonly maxRecordingLag: number;
+  /**
+   * How far ahead of the service's clock a pass's `presentedAt` may lie, in
+   * milliseconds, as its rules are configured (C4.md A.3; `F-008` §5.2).
+   */
+  readonly maxClockSkew: number;
+  /**
+   * The longest window, `notAfter − notBefore`, a pass may carry, in
+   * milliseconds, as the service's rules are configured (C4.md A.3; `F-008` §5.2).
+   */
+  readonly maxPassWindow: number;
   /**
    * Random bytes from a seeded source, for operation and pass ids. Backends made
    * with the same seed yield the same sequence. Not cryptographically secure.
@@ -123,9 +138,54 @@ async function clockAnswer(
   return now;
 }
 
+/** The limits the service's rules run with (C4.md A.3), in milliseconds. */
+interface RulesLimits {
+  readonly maxRecordingLag: number;
+  readonly maxClockSkew: number;
+  readonly maxPassWindow: number;
+  readonly maxOperationLifetime: number;
+}
+
+/** `GET /v0/testing/config` (C4.md A.3). */
+async function rulesLimits(fetch: FetchLike, url: string): Promise<RulesLimits> {
+  const response = await fetch(`${url}/v0/testing/config`, { method: "GET", headers: {} });
+  const text = await response.text();
+  if (response.status === 404) {
+    throw new TestModeError("the service is not in test mode: /v0/testing/config does not exist");
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    parsed = undefined;
+  }
+  const body = (parsed ?? {}) as Record<string, unknown>;
+  const limit = (name: keyof RulesLimits): number => {
+    const value = body[name];
+    if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+      throw new TestModeError(
+        `the service's test-mode config has no ${name}: ${response.status} ${text}`,
+      );
+    }
+    return value;
+  };
+  if (response.status !== 200) {
+    throw new TestModeError(
+      `the service did not answer its test-mode config: ${response.status} ${text}`,
+    );
+  }
+  return {
+    maxRecordingLag: limit("maxRecordingLag"),
+    maxClockSkew: limit("maxClockSkew"),
+    maxPassWindow: limit("maxPassWindow"),
+    maxOperationLifetime: limit("maxOperationLifetime"),
+  };
+}
+
 /**
  * Connects to a service in test mode (`TICKETTO_TEST_MODE=1`): the port, with
- * the service's settable clock and seeded randomness. `ERR-LedgerUnavailable`
+ * the service's settable clock, seeded randomness, and the gate parameters its
+ * rules are configured with (C4.md A.3). `ERR-LedgerUnavailable`
  * when the service cannot be reached; `TestModeError` when it is not in test mode.
  */
 export async function connectTestOffchainBackend(
@@ -138,6 +198,7 @@ export async function connectTestOffchainBackend(
   const url = options.url.replace(/\/+$/, "");
   const fetch = options.fetch ?? platformFetch();
   let current = await clockAnswer(fetch, url);
+  const limits = await rulesLimits(fetch, url);
   // Every clock change, chained in order; a refused one stays rejected.
   let landed: Promise<void> = Promise.resolve();
   landed.catch(() => {});
@@ -229,6 +290,9 @@ export async function connectTestOffchainBackend(
     assurance: inner.assurance,
     clock,
     randomBytes: seededRandomBytes(options.seed),
+    maxRecordingLag: limits.maxRecordingLag,
+    maxClockSkew: limits.maxClockSkew,
+    maxPassWindow: limits.maxPassWindow,
   };
   return { ok: true, value: backend };
 }

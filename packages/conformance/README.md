@@ -41,8 +41,9 @@ the CI matrix by defining a `conformance` script that runs that file, for exampl
 - **`TestControls`** is what every backend must offer in test mode, and nowhere else: a settable
   `clock` (`now`, `set`, `advance`) that the backend's rules read, and `randomBytes`, a seeded
   source the SDK uses for operation ids; and the gate parameters its rules use, `maxRecordingLag`,
-  `maxClockSkew` and `maxPassWindow` (ms), so pass-window boundaries are tested exactly. They are optional until every
-  registered backend provides them; a test that needs one fails naming it. A service offers them behind a test-mode flag that
+  `maxClockSkew` and `maxPassWindow` (ms), so pass-window boundaries are tested exactly. Every backend
+  provides all three: `backend-memory` from its rules configuration, `binding-offchain` from the
+  service's test-mode config (`C4.md` A.3). A service offers them behind a test-mode flag that
   production refuses to start with.
 - **`signers`**, from the profile under test: an organiser, at least three holders, a second
   device for the first holder's account, a stranger no world registers, and a sponsor. Every

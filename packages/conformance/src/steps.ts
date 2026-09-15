@@ -30,7 +30,7 @@ import type {
 } from "@ticketto/sdk";
 import { expect } from "vitest";
 import { expectOk } from "./expect.js";
-import { HarnessError, OPERATION_LIFETIME, type World } from "./world.js";
+import { OPERATION_LIFETIME, type World } from "./world.js";
 
 /** The zones `createEventWith` makes unless told otherwise: zone 0 seated, zone 1 unseated. */
 export function standardZones(world: World): Zone[] {
@@ -204,14 +204,10 @@ export async function attendancesOf(world: World, ticket: TicketId): Promise<Cou
   return (await ticketOf(world, ticket)).attendances;
 }
 
-/** A gate parameter of the backend's test controls (§5.2b); fails the test, naming it, when missing. */
+/** A gate parameter of the backend's test controls (§5.2b). */
 export function gateParameter(
   world: World,
   name: "maxRecordingLag" | "maxClockSkew" | "maxPassWindow",
 ): number {
-  const value = world.backend[name];
-  if (value === undefined) {
-    throw new HarnessError(`the backend's test controls do not provide ${name} (TestControls)`);
-  }
-  return value;
+  return world.backend[name];
 }
