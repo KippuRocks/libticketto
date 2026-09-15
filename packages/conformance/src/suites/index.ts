@@ -3,6 +3,9 @@
 // (features/004-conformance/plan.md §5.2).
 
 import type { Suite } from "../suite.js";
+import concurrentAcE32 from "./concurrency/AC-E3.2.js";
+import concurrentInv4 from "./concurrency/INV-4.js";
+import concurrentInv6 from "./concurrency/INV-6.js";
 import errCannotAttend from "./ERR-CannotAttend.js";
 import errCapacityBelowIssuance from "./ERR-CapacityBelowIssuance.js";
 import errCapacityExceeded from "./ERR-CapacityExceeded.js";
@@ -94,4 +97,8 @@ export const V0_SUITES: readonly Suite[] = [
   errPassReplayed,
   errCannotAttend,
   errTicketExpired,
+  // The concurrency variant (T-004-08, §5.4): parallel submissions through the port.
+  concurrentInv4,
+  concurrentAcE32,
+  concurrentInv6,
 ];

@@ -25,14 +25,20 @@ export type {
 } from "./harness.js";
 export { SCOPE_V0, type Scope, type ScopedId, SPEC_IDS, scopeProblems } from "./scope.v0.js";
 export {
+  type ConformanceTest,
+  collectTests,
   MILESTONES,
   type Milestone,
   type RunOptions,
   runSuites,
+  runsThrough,
+  runTest,
   type Suite,
   type SuiteTest,
   suite,
+  type TestOptions,
 } from "./suite.js";
+export { V0_SUITES } from "./suites/index.js";
 export { createWorld, HarnessError, OPERATION_LIFETIME, register, type World } from "./world.js";
 
 export const packageName = "@ticketto/conformance";
