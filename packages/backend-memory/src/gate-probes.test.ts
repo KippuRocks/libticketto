@@ -1,7 +1,8 @@
 // T-005-09: probes that need the gate rules (AC-B1.4, REQ-SDK-7, REQ-MG-3;
 // features/005-backend-memory/tasks.md). AC-B1.4 by advancing the /testing
-// clock; and, after an export and import round trip, cancellation holders read
-// back through getCancellationHolder.
+// clock; and, after an export and import round trip, the state no query shows:
+// consumed passes, probed by resubmission, and cancellation holders, read back
+// through getCancellationHolder.
 
 import { importVerified } from "@ticketto/log";
 import { createProfileV0, producePass } from "@ticketto/profile-v0";
@@ -177,7 +178,37 @@ function deployment(clock: ControlledClock): Deployment {
   return { clock, store, backend, ticketto: clientOver(backend, clock) };
 }
 
-describe("export and import carry cancellation holders", () => {
+describe("export and import carry the state no query shows", () => {
+  it("REQ-MG-3: an exported pass resubmitted after import is ERR-PassReplayed, or its original receipt when identical", async () => {
+    const clock = createControlledClock();
+    const source = deployment(clock);
+    const {
+      tickets: [ticket],
+    } = await ticketsFor(source.ticketto, [{ kind: "Unlimited", until: null }]);
+    const pass = await passFor(ticket as TicketId, clock.now(), 0x21);
+    const presentedAt = clock.now();
+    const original = await settled(source.ticketto.submitAccessPass(pass, { presentedAt }));
+
+    const target = deployment(clock);
+    const imported = await importVerified(target.backend, source.backend.migration.export(), {
+      publication: publication.registration,
+    });
+    expect(imported).toMatchObject({ ok: true });
+
+    // Identical — the same signed pass and the same presentedAt — within notAfter plus the lag.
+    clock.advance(MINUTE / 2);
+    expect(await target.ticketto.submitAccessPass(pass, { presentedAt })).toEqual({
+      ok: true,
+      value: original,
+    });
+    // The same pass presented again, as a second gate scanning it would: consumed.
+    expect(codeOf(await target.ticketto.submitAccessPass(pass, { presentedAt: clock.now() }))).toBe(
+      "ERR-PassReplayed",
+    );
+    const read = await target.ticketto.getTicket(ticket as TicketId);
+    expect(read.ok && read.value.attendances).toBe(1);
+  });
+
   it("REQ-MG-3: cancellation holders survive export and import, read through getCancellationHolder", async () => {
     const clock = createControlledClock();
     const source = deployment(clock);
