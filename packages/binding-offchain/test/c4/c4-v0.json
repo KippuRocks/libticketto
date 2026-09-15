@@ -2,8 +2,8 @@
   "protocol": "C4",
   "version": "v0",
   "source": {
-    "libticketto": "87756691516b1c5289baabb9746498c69ff075ed",
-    "kippuApi": "a5d9bdf27d5a267b6b58eb8334cd1134ba07851a"
+    "libticketto": "f1f7510c122db63ba63ff202ac57f68eef640dbc",
+    "kippuApi": "871790625a71877d3a0f07424780f21221be36f8"
   },
   "rpId": "kippu.example",
   "parties": [
