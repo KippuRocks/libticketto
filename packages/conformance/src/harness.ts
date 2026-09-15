@@ -61,6 +61,12 @@ export interface TestControls {
    * as `maxRecordingLag` is.
    */
   readonly maxClockSkew?: number;
+  /**
+   * The longest window, `notAfter − notBefore`, a pass may carry, in
+   * milliseconds; a longer one fails with `ERR-PassExpired`. Optional, as
+   * `maxRecordingLag` is.
+   */
+  readonly maxPassWindow?: number;
 }
 
 /** A backend in test mode. */
