@@ -3,7 +3,14 @@ import { describe, expect, it } from "vitest";
 import { type FakeBackend, fakeBackend } from "../test/fake-backend.js";
 import { profileV0Fixtures } from "./fixtures/profile-v0.js";
 import type { ConformanceTarget } from "./harness.js";
-import { milestoneError, runSuites, suite, titleError } from "./suite.js";
+import {
+  collectTests,
+  milestoneError,
+  runSuites,
+  runsThrough,
+  suite,
+  titleError,
+} from "./suite.js";
 import { OPERATION_LIFETIME } from "./world.js";
 
 // T-004-01: the harness runs a trivial suite against a fake backend. The fake
@@ -104,6 +111,22 @@ describe("suite titles", () => {
     expect(titleError("INV-4", "INV-4: issuance stops at capacity")).toBeUndefined();
     expect(titleError("INV-4", "issuance stops at capacity")).toMatch(/must be titled/);
     expect(titleError("INV-4", "INV-40: something else")).toMatch(/must be titled/);
+  });
+
+  it("collects a suite's tests, refusing a mistitled one, and runs a milestone through later ones", () => {
+    const body = async () => {};
+    const tests = collectTests([
+      suite("INV-6", (test) => test("INV-6: once", "M3", body, { timeout: 1 })),
+    ]);
+    expect(tests).toEqual([
+      { suite: "INV-6", title: "INV-6: once", milestone: "M3", body, options: { timeout: 1 } },
+    ]);
+    expect(() => collectTests([suite("INV-6", (test) => test("once", "M3", body))])).toThrow(
+      /must be titled/,
+    );
+    expect(runsThrough("M3", "M3")).toBe(true);
+    expect(runsThrough("M4", "M3")).toBe(false);
+    expect(runsThrough("M1", "M5")).toBe(true);
   });
 
   it("refuses an untagged test, or one tagged with no milestone", () => {

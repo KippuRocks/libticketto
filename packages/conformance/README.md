@@ -4,7 +4,7 @@ The shared conformance suite, written once against the SDK surface and run again
 
 Owned by `F-004`. Serves `REQ-SDK-7`, `REQ-CP-5` and `NFR-8`.
 
-**Status:** harness, `TestControls` contract, V0 signer fixtures, the V0 scope, the `REQ-SDK-6` assurance-declaration check, and the event lifecycle (`T-004-03`) identity and issuance (`T-004-04`), replay (`T-004-07`) and gate (`T-004-06`) suites.
+**Status:** harness, `TestControls` contract, V0 signer fixtures, the V0 scope, the `REQ-SDK-6` assurance-declaration check, and the event lifecycle (`T-004-03`) identity and issuance (`T-004-04`), replay (`T-004-07`) and gate (`T-004-06`) suites, and the concurrency variant (`T-004-08`).
 
 | | |
 |---|---|
@@ -52,6 +52,19 @@ the CI matrix by defining a `conformance` script that runs that file, for exampl
 
 Each test runs in a fresh `World`: the backend, the SDK over it on the backend's clock and
 randomness, and the organiser's and holders' credentials already registered.
+
+### Concurrency variant
+
+`src/suites/concurrency/` races submissions through the port (plan §5.4), each test over 1,000
+randomised runs drawn from the backend's seeded `randomBytes`, so a failing run replays:
+
+- `AC-E3.2` — two to six gates submit one pass, each at its own `presentedAt`: exactly one is
+  recorded, the rest are `ERR-PassReplayed`, and attendance rises by one.
+- `INV-6` — identical and distinct submissions of one pass race: one consumption, one receipt.
+- `INV-4` — issuance races at the capacity boundary: exactly capacity is issued, the rest are
+  `ERR-CapacityExceeded`.
+
+Submissions start in random order, each after a random number of microtask turns.
 
 ## Scope
 
